@@ -1,0 +1,28 @@
+{
+  "$type": "BS.InteractableHolder, Assembly-CSharp",
+  "id": "RevolverHolderTemplate",
+  "version": 3,
+  "tagFilter": 1,
+  "slots": [
+    7
+  ],
+  "locked": false,
+  "warnIfNotAllowed": false,
+  "warnIfInUse": false,
+  "warnIfLocked": false,
+  "grabFromHandle": false,
+  "allowTeleGrab": true,
+  "hideFromFpv": false,
+  "grabTeleport": 0,
+  "disableObjectProximityHighlighter": false,
+  "delegateToParentHolder": false,
+  "audioContainerPath": "SnapOther",
+  "disableTouch": false,
+  "highlighterView": 0,
+  "highlighterViewHandFreeOnly": false,
+  "highlighterPath": "Handle",
+  "highlighterShowAxisLine": false,
+  "highlighterShowAxisLineOnProximity": false,
+  "highlightDefaultTitle": "Chamber",
+  "highlightDefaultDesignation": ""
+}
