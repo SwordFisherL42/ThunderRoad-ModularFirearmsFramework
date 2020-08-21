@@ -1,8 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using BS;
+﻿using ThunderRoad;
 
-namespace FishersFirearmsModular
+namespace ModularFirearms
 {
     public class ItemModuleFirearmRevolver : ItemModule
     {
@@ -21,10 +19,9 @@ namespace FishersFirearmsModular
         public string muzzlePositionRef = "Muzzle";
         public string flashRef = "Flash";
         public string animatorRef = "Animations";
-        public string soundsRef = "Sounds";
-        public string[] soundNames = { "Ready", "Fire", "Empty", "Reload" };
-        public string smokeRef;
+        public string[] soundNames = {"FireSound", "EmptySound", "ReloadSound" };
         public string gunGripID = "Haptics";
+        public float throwMult = 3.0f;
 
         // Animation name references
         public float animationSpeed;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using BS;
+using ThunderRoad;
 
-namespace FishersFirearmsModular
+namespace ModularFirearms
 {
     // Based on `Infinite Quiver` code by spudjb
     class ItemAmmoResupply : MonoBehaviour

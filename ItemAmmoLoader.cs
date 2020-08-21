@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using BS;
+using ThunderRoad;
 
-namespace FishersFirearmsModular
+namespace ModularFirearms
 {
     // Modular quick loader class. When an object with this module is inserted, all quiver projectiles are respawned based on `module.bulletCount`
     class ItemAmmoLoader : MonoBehaviour
