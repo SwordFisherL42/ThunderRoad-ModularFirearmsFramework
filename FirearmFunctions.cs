@@ -9,13 +9,30 @@ namespace ModularFirearms
 {
     public class FirearmFunctions
     {
+        public enum FireMode
+        {
+            Misfire = 0,
+            Single = 1,
+            Burst = 2,
+            Auto = 3
+        }
+
+        public static FireMode CycleFireMode(FireMode currentSelection)
+        {
+            int selectionIndex = (int) currentSelection;
+            selectionIndex++;
+            Array fireModeEnums = Enum.GetValues(typeof(FireMode));
+            if (selectionIndex >= fireModeEnums.Length) return (FireMode)fireModeEnums.GetValue(0);
+            return (FireMode)fireModeEnums.GetValue(selectionIndex);
+        }
+
         public static void Animate(Animator animator, string animationName)
         {
             if ((animator == null) || String.IsNullOrEmpty(animationName)) return;
             animator.Play(animationName);
         }
 
-        public static void ApplyRecoil(Rigidbody itemRB, float[] recoilForces, float recoilMult, bool leftHandHaptic, bool rightHandHaptic, float hapticForce)
+        public static void ApplyRecoil(Rigidbody itemRB, float[] recoilForces, float recoilMult=1.0f, bool leftHandHaptic=false, bool rightHandHaptic = false, float hapticForce=1.0f)
         {
             if (rightHandHaptic) PlayerControl.handRight.HapticShort(hapticForce);
             if (leftHandHaptic) PlayerControl.handLeft.HapticShort(hapticForce);
@@ -27,7 +44,7 @@ namespace ModularFirearms
                 UnityEngine.Random.Range(recoilForces[4], recoilForces[5]) * recoilMult));
         }
 
-        public static void ShootProjectile(Item shooterItem, string projectileID, Transform muzzlePoint, string imbueSpell=null, float bulletForce=1.0f, float throwMult=1.0f)
+        public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell=null, float forceMult=1.0f, float throwMult=1.0f)
         {
             var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
             if (projectileData == null)
@@ -44,10 +61,10 @@ namespace ModularFirearms
                 ItemProjectileSimple projectileController = projectile.gameObject.GetComponent<ItemProjectileSimple>();
                 if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
                 // Match the Position, Rotation, & Speed of the spawner item
-                projectile.transform.position = muzzlePoint.position;
-                projectile.transform.rotation = Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
+                projectile.transform.position = spawnPoint.position;
+                projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
                 projectile.rb.velocity = shooterItem.rb.velocity;
-                projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * bulletForce);
+                projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
                 projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
             }
         }
