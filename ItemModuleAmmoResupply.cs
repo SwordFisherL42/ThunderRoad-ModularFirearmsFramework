@@ -1,6 +1,6 @@
-﻿using BS;
+﻿using ThunderRoad;
 
-namespace FishersFirearmsModular
+namespace ModularFirearms
 {
     public class ItemModuleAmmoResupply : ItemModule
     {

@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
-using BS;
+using ThunderRoad;
 
-namespace FishersFirearmsModular
+namespace ModularFirearms
 {
     // Modular ammunition class, self-tracks if it is consumed (`ready to fire` state).
-    class ItemAmmo : MonoBehaviour
+    public class ItemAmmo : MonoBehaviour
     {
         protected Item item;
         protected ItemModuleAmmo module;
@@ -18,6 +18,7 @@ namespace FishersFirearmsModular
             module = item.data.GetModule<ItemModuleAmmo>();
             if (module.handleRef != null) ammoHandle = item.definition.GetCustomReference(module.handleRef).GetComponent<Handle>();
             bulletMesh = item.definition.GetCustomReference(module.bulletMeshID).GetComponent<MeshRenderer>();
+            Refill();
         }
 
         public int GetAmmoType()
@@ -29,21 +30,14 @@ namespace FishersFirearmsModular
         {
             SetMeshState(bulletMesh);
             isLoaded = false;
-            if (ammoHandle != null)
-            {
-                ammoHandle.data.allowedTeleGrab = Handle.AllowedGrab.ObjectGrabbed;
-            }
-            return;
+            if (ammoHandle != null) ammoHandle.data.allowTelekinesis = false;
         }
 
         public void Refill()
         {
             SetMeshState(bulletMesh, true);
             isLoaded = true;
-            if (ammoHandle != null)
-            {
-                ammoHandle.data.allowedTeleGrab = Handle.AllowedGrab.Dropped;
-            }
+            if (ammoHandle != null) ammoHandle.data.allowTelekinesis = true;
             return;
         }
 

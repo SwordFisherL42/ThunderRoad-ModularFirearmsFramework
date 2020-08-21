@@ -1,11 +1,12 @@
-﻿using BS;
+﻿using ThunderRoad;
 
-namespace FishersFirearmsModular
+namespace ModularFirearms
 {
     public class ItemModuleAmmoLoader : ItemModule
     {
         public string bulletMeshID = "bulletMesh";
         public int bulletCount = 5;
+
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
