@@ -5,7 +5,6 @@ namespace ModularFirearms
     public class ItemModuleProjectileSimple : ItemModule
     {
         public float lifetime = 1.5f;
-        public float flyDelay = 1.0f;
         public bool allowFlyTime = true;
 
         public override void OnItemLoaded(Item item)
