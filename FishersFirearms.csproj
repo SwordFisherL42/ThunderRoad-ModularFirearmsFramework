@@ -104,9 +104,9 @@
     <Compile Include="ItemModuleFirearmBase.cs" />
     <Compile Include="ItemModuleFirearmRevolver.cs" />
     <Compile Include="ItemModuleMagazine.cs" />
-    <Compile Include="ItemModuleProjectileSimple.cs" />
+    <Compile Include="ItemModuleSimpleProjectile.cs" />
     <Compile Include="ItemModuleSlide.cs" />
-    <Compile Include="ItemProjectileSimple.cs" />
+    <Compile Include="ItemSimpleProjectile.cs" />
     <Compile Include="ItemSlide.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

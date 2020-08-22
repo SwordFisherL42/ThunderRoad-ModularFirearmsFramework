@@ -31,10 +31,11 @@ namespace ModularFirearms
             else return (FireMode) fireModeEnums.GetValue(0);
         }
 
-        public static void Animate(Animator animator, string animationName)
+        public static bool Animate(Animator animator, string animationName)
         {
-            if ((animator == null) || String.IsNullOrEmpty(animationName)) return;
+            if ((animator == null) || String.IsNullOrEmpty(animationName)) return false;
             animator.Play(animationName);
+            return true;
         }
 
         public static void ApplyRecoil(Rigidbody itemRB, float[] recoilForces, float recoilMult=1.0f, bool leftHandHaptic=false, bool rightHandHaptic = false, float hapticForce=1.0f)
@@ -65,7 +66,7 @@ namespace ModularFirearms
                 if (!String.IsNullOrEmpty(imbueSpell))
                 {
                     // Set imbue charge on projectile using ItemProjectileSimple subclass
-                    ItemProjectileSimple projectileController = projectile.gameObject.GetComponent<ItemProjectileSimple>();
+                    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
                     if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
                 }
                 // Match the Position, Rotation, & Speed of the spawner item

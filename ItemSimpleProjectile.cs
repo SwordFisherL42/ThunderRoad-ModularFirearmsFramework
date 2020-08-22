@@ -4,16 +4,16 @@ using System;
 
 namespace ModularFirearms
 {
-    public class ItemProjectileSimple : MonoBehaviour
+    public class ItemSimpleProjectile : MonoBehaviour
     {
         protected Item item;
-        protected ItemModuleProjectileSimple module;
+        protected ItemModuleSimpleProjectile module;
         protected string queuedSpell;
 
         protected void Awake()
         {
             item = this.GetComponent<Item>();
-            module = item.data.GetModule<ItemModuleProjectileSimple>();
+            module = item.data.GetModule<ItemModuleSimpleProjectile>();
         }
 
         protected void Start()

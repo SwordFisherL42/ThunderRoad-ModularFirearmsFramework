@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using ThunderRoad;
-using FireMode = ModularFirearms.FirearmFunctions.FireMode;
+using static ModularFirearms.FirearmFunctions;
 
 namespace ModularFirearms
 {
