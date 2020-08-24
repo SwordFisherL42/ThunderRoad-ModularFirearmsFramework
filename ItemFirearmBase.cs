@@ -40,7 +40,8 @@ namespace ModularFirearms
         private FireMode fireModeSelection;
         private int counter;
         protected int ammoCount;
-        
+        public bool isFiring;
+
         protected void Awake()
         {
             item = this.GetComponent<Item>();
@@ -97,6 +98,11 @@ namespace ModularFirearms
             if (childSlide != null) childSlide.DestoryThisSlide();
         }
 
+        public void SetFiringFlag(bool status)
+        {
+            isFiring = status;
+        }
+
         public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
         {
             // Trigger Action
@@ -104,7 +110,7 @@ namespace ModularFirearms
             {
                 // Begin Firing
                 triggerPressed = true;
-                StartCoroutine(FirearmFunctions.GeneralFire(TrackedFire, TriggerIsPressed, fireModeSelection, module.fireRate, module.burstNumber, emptySound));
+                if (!isFiring) StartCoroutine(FirearmFunctions.GeneralFire(TrackedFire, TriggerIsPressed, fireModeSelection, module.fireRate, module.burstNumber, emptySound, SetFiringFlag));
             }
             if (action == Interactable.Action.UseStop || action == Interactable.Action.Ungrab)
             {
@@ -319,7 +325,7 @@ namespace ModularFirearms
             {
                 insertedMagazine = pistolGripHolder.holdObjects[0].GetComponent<ItemMagazine>();
                 if (insertedMagazine != null)
-                { 
+                {
                     counter = insertedMagazine.GetAmmoCount();
                 }
             }

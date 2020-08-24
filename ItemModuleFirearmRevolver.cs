@@ -19,7 +19,7 @@ namespace ModularFirearms
         public string muzzlePositionRef = "Muzzle";
         public string flashRef = "Flash";
         public string animatorRef = "Animations";
-        public string[] soundNames = {"FireSound", "EmptySound", "ReloadSound" };
+        public string[] soundNames = {"FireSound", "EmptySound", "ReloadSound", "SpinSound", "LatchSound"};
         public string gunGripID = "Haptics";
         public float throwMult = 3.0f;
 

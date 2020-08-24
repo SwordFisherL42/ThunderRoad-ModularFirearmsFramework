@@ -30,6 +30,8 @@ namespace ModularFirearms
         protected AudioSource shotSound;
         protected AudioSource emptySound;
         protected AudioSource reloadSound;
+        protected AudioSource spinSound;
+        protected AudioSource latchSound;
         // Logic Vars
         private string insertedSpellID;
         protected bool gunGripHeldLeft;
@@ -52,6 +54,8 @@ namespace ModularFirearms
             if (module.soundNames[0] != null) shotSound = item.definition.GetCustomReference(module.soundNames[0]).GetComponent<AudioSource>();
             if (module.soundNames[1] != null) emptySound = item.definition.GetCustomReference(module.soundNames[1]).GetComponent<AudioSource>();
             if (module.soundNames[2] != null) reloadSound = item.definition.GetCustomReference(module.soundNames[2]).GetComponent<AudioSource>();
+            if (module.soundNames[3] != null) spinSound = item.definition.GetCustomReference(module.soundNames[3]).GetComponent<AudioSource>();
+            if (module.soundNames[4] != null) latchSound = item.definition.GetCustomReference(module.soundNames[4]).GetComponent<AudioSource>();
             if (module.gunGripID != null) gunGrip = item.definition.GetCustomReference(module.gunGripID).GetComponent<Handle>();
             // Setup item events
             item.OnHeldActionEvent += OnHeldAction;
@@ -76,7 +80,7 @@ namespace ModularFirearms
             isOpen = false;
 
             reloadSound.clip = holder.data.audioContainer.sounds[0];
-            
+
         }
 
         private void FixedUpdate()
@@ -105,7 +109,7 @@ namespace ModularFirearms
                     int loaderCount = addedLoader.CountBullets();
                     interactiveObject.Despawn();
                     reloadSound.Play();
-                    if (itemQuiver.holder.definition.slots.Count >= loaderCount)
+                    if (loaderCount >= itemQuiver.holder.definition.slots.Count)
                     {
                         itemQuiver.SpawnAllProjectiles();
                     }
@@ -213,6 +217,7 @@ namespace ModularFirearms
             itemQuiver.holder.data.disableTouch = false;
             prevAnimSpeed = animations.speed;
             animations.speed = animations.speed * 2;
+            if (latchSound != null) latchSound.Play();
             FirearmFunctions.Animate(animations, module.openingAnim);
             animations.speed = prevAnimSpeed;
         }
@@ -221,6 +226,7 @@ namespace ModularFirearms
         {
             itemQuiver.holder.data.disableTouch = true;
             isOpen = false;
+            if (spinSound != null) spinSound.Play();
             StartCoroutine(SpinToRandom());
         }
 
