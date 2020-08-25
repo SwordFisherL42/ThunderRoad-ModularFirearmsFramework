@@ -32,10 +32,6 @@ namespace ModularFirearms
     public class FirearmFunctions
     {
         /// <summary>
-        /// Used to determine if the GeneralFire CoRoutine is already running
-        /// </summary>
-        public static bool generalFireCrRunning = false;
-        /// <summary>
         /// Defines which behaviour should be produced at runtime
         /// </summary>
         public enum FireMode
@@ -59,7 +55,7 @@ namespace ModularFirearms
         }
 
         /// <summary>
-        /// Useful for accessing FireMode enums by index
+        /// A static array useful for accessing FireMode enums by index
         /// </summary>
         public static Array fireModeEnums = Enum.GetValues(typeof(FireMode));
 
@@ -183,6 +179,23 @@ namespace ModularFirearms
             }
             catch { return null; }
             return null;
+        }
+
+        /// <summary>
+        /// Determines the accuracy of an NPC, based on brain settings
+        /// </summary>
+        /// <param name="NPCBrain"></param>
+        /// <param name="initial"></param>
+        /// <param name="npcDistanceToFire"></param>
+        /// <returns></returns>
+        public static Vector3 NpcAimingAngle(BrainHuman NPCBrain, Vector3 initial, float npcDistanceToFire = 10.0f)
+        {
+            if (NPCBrain == null) return initial;
+            var inaccuracyMult = 0.2f * (NPCBrain.aimSpreadCone / npcDistanceToFire);
+            return new Vector3(
+                        initial.x + (UnityEngine.Random.Range(-inaccuracyMult, inaccuracyMult)),
+                        initial.y + (UnityEngine.Random.Range(-inaccuracyMult, inaccuracyMult)),
+                        initial.z);
         }
 
         /// <summary>
