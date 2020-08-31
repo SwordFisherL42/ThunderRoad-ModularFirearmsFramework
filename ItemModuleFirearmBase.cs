@@ -23,7 +23,8 @@ namespace ModularFirearms
         public string flashRef = "Flash";
         public string mainHandleRef = "GunGrip";
         public string[] soundNames = { "fireSound", "emptySound", "pullSound", "rackSound" };
-        
+        public string animationRef;
+
         public string smokeRef;
         public string soundsRef;
 

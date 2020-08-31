@@ -32,6 +32,12 @@ namespace ModularFirearms
     public class FirearmFunctions
     {
         /// <summary>
+        /// Provide static points for 2D cartesian blend tree, to be used for firemode selection states.
+        /// Indicies match the corresponding FireMode enum, i.e. Misfire, Single, Burst, Auto
+        /// </summary>
+        public static float[,] blendTreePositions = new float[4, 2] { { 0.0f, 0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f } };
+
+        /// <summary>
         /// Defines which behaviour should be produced at runtime
         /// </summary>
         public enum FireMode
@@ -60,6 +66,11 @@ namespace ModularFirearms
         public static Array fireModeEnums = Enum.GetValues(typeof(FireMode));
 
         /// <summary>
+        /// A static array useful for accessing ForceMode enums by index
+        /// </summary>
+        public static Array forceModeEnums = Enum.GetValues(typeof(ForceMode));
+
+        /// <summary>
         /// Take a given FireMode and return an increment/loop to the next enum value
         /// </summary>
         /// <param name="currentSelection"></param>
@@ -86,7 +97,7 @@ namespace ModularFirearms
         }
 
         /// <summary>
-        /// 
+        /// Apply positional recoil to a rigid body. Optionally, apply haptic force to the player controllers.
         /// </summary>
         /// <param name="itemRB"></param>
         /// <param name="recoilForces"></param>
@@ -104,6 +115,70 @@ namespace ModularFirearms
                 UnityEngine.Random.Range(recoilForces[0], recoilForces[1]) * recoilMult,
                 UnityEngine.Random.Range(recoilForces[2], recoilForces[3]) * recoilMult,
                 UnityEngine.Random.Range(recoilForces[4], recoilForces[5]) * recoilMult));
+        }
+
+        /// <summary>
+        /// Use the scene collections of Items and Creatures to apply a normalized force to all rigid bodies within range.
+        /// Additionally, apply logic for killing Creatures in range.
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="force"></param>
+        /// <param name="blastRadius"></param>
+        /// <param name="liftMult"></param>
+        /// <param name="forceMode"></param>
+        public static void HitscanExplosion(Vector3 origin, float force, float blastRadius, float liftMult, ForceMode forceMode = ForceMode.Impulse)
+        {
+
+            foreach (Item item in Item.list)
+            {
+                if (Math.Abs(Vector3.Distance(item.transform.position, origin)) <= blastRadius)
+                {
+                    //Debug.Log("[F-L42-HitscanExplosion] Hit Item: " + item.name);
+                    item.rb.AddExplosionForce(force * item.rb.mass, origin, blastRadius, liftMult, forceMode);
+                    item.rb.AddForce(Vector3.up * liftMult * item.rb.mass, forceMode);
+                }
+            }
+
+            foreach (Creature creature in Creature.list)
+            {
+                if (creature == Creature.player) continue;
+                if (Math.Abs(Vector3.Distance(creature.transform.position, origin)) <= blastRadius)
+                {
+                    //Debug.Log("[F-L42-HitscanExplosion] Hit Creature: " + creature.name);
+                    if (!creature.health.isKilled)
+                    {
+                        creature.ragdoll.SetState(Creature.State.Dead);
+                        creature.health.Kill();
+                    }
+                    creature.locomotion.rb.AddExplosionForce(force * creature.locomotion.rb.mass, origin, blastRadius, liftMult, forceMode);
+                    creature.locomotion.rb.AddForce(Vector3.up * liftMult * creature.locomotion.rb.mass, forceMode);
+                    foreach (RagdollPart part in creature.ragdoll.parts)
+                    {
+                        part.rb.AddExplosionForce(force * part.rb.mass, origin, blastRadius, liftMult, forceMode);
+                        part.rb.AddForce(Vector3.up * liftMult *part.rb.mass, forceMode);
+                    }
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Sets floats on an Animator, assuming these floats correspong to 2D cartesian coordinates on a blend tree attached to that animator.
+        /// See reference for 'blendTreePositions' for more details. 
+        /// </summary>
+        /// <param name="animator"></param>
+        /// <param name="selection"></param>
+        /// <param name="paramFloat1"></param>
+        /// <param name="paramFloat2"></param>
+        public static void SetFireSelectionAnimator(Animator animator, FireMode selection, string paramFloat1="x", string paramFloat2 = "y")
+        {
+            if (animator == null) return;
+            try
+            {
+                animator.SetFloat(paramFloat1, blendTreePositions[(int)selection, 0]);
+                animator.SetFloat(paramFloat2, blendTreePositions[(int)selection, 1]);
+            }
+            catch { Debug.LogError("[FL42-FirearmFunctions][SetSwitchAnimation] Exception in setting Animator floats 'x' and 'y'"); }
         }
 
         /// <summary>
@@ -128,7 +203,8 @@ namespace ModularFirearms
             {
                 Item projectile = projectileData.Spawn(pooled);
                 if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
-                shooterItem.IgnoreObjectCollision(projectile);
+                projectile.IgnoreObjectCollision(shooterItem);
+                projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
                 if (!String.IsNullOrEmpty(imbueSpell))
                 {
                     // Set imbue charge on projectile using ItemProjectileSimple subclass
@@ -285,5 +361,6 @@ namespace ModularFirearms
             WeaponIsFiring?.Invoke(false);
             yield return null;
         }
+
     }
 }

@@ -25,6 +25,7 @@ namespace ModularFirearms
         protected AudioSource reloadSound;
         protected AudioSource pullbackSound;
         protected AudioSource rackforwardSound;
+        protected Animator Animations;
         //Interaction settings
         public bool gunGripHeldLeft;
         public bool gunGripHeldRight;
@@ -57,6 +58,7 @@ namespace ModularFirearms
             if (!String.IsNullOrEmpty(module.soundNames[3])) rackforwardSound = item.definition.GetCustomReference(module.soundNames[3]).GetComponent<AudioSource>();
             if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.definition.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
             if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.definition.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
+            if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.definition.GetCustomReference(module.animationRef).GetComponent<Animator>();
 
             if (gunGrip != null)
             {
@@ -90,6 +92,7 @@ namespace ModularFirearms
 
             childSlide = item.definition.GetCustomReference(module.childSlideRef).GetComponent<ItemSlide>();
             if (childSlide == null) Debug.LogError("[Fisher-Firearms] ERROR! CHILD SLIDE WAS NULL");
+            SetFireSelectionAnimator(Animations, fireModeSelection);
             return;
         }
 
@@ -106,16 +109,19 @@ namespace ModularFirearms
         public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
         {
             // Trigger Action
-            if (action == Interactable.Action.UseStart)
+            if (handle.Equals(gunGrip))
             {
-                // Begin Firing
-                triggerPressed = true;
-                if (!isFiring) StartCoroutine(FirearmFunctions.GeneralFire(TrackedFire, TriggerIsPressed, fireModeSelection, module.fireRate, module.burstNumber, emptySound, SetFiringFlag));
-            }
-            if (action == Interactable.Action.UseStop || action == Interactable.Action.Ungrab)
-            {
-                // End Firing
-                triggerPressed = false;
+                if (action == Interactable.Action.UseStart)
+                {
+                    // Begin Firing
+                    triggerPressed = true;
+                    if (!isFiring) StartCoroutine(FirearmFunctions.GeneralFire(TrackedFire, TriggerIsPressed, fireModeSelection, module.fireRate, module.burstNumber, emptySound, SetFiringFlag));
+                }
+                if (action == Interactable.Action.UseStop || action == Interactable.Action.Ungrab)
+                {
+                    // End Firing
+                    triggerPressed = false;
+                }
             }
 
             // "Spell-Menu" Action
@@ -130,6 +136,7 @@ namespace ModularFirearms
                     {
                         if (emptySound != null) emptySound.Play();
                         fireModeSelection = FirearmFunctions.CycleFireMode(fireModeSelection);
+                        SetFireSelectionAnimator(Animations, fireModeSelection);
                     }
                     else
                     {
