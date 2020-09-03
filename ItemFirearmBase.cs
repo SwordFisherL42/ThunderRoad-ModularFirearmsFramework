@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
@@ -39,6 +40,7 @@ namespace ModularFirearms
         protected bool triggerPressed;
         //FireMode Selection and Ammo Tracking
         private FireMode fireModeSelection;
+        private List<int> allowedFireModes;
         private int counter;
         protected int ammoCount;
         public bool isFiring;
@@ -71,7 +73,10 @@ namespace ModularFirearms
             pistolGripHolder.UnSnapped += new ObjectHolder.HolderDelegate(this.OnMagazineRemoved);
 
             fireModeSelection = (FireMode)FirearmFunctions.fireModeEnums.GetValue(module.fireMode);
-
+            if (module.allowedFireModes != null)
+            {
+                allowedFireModes = new List<int>(module.allowedFireModes);
+            }
         }
 
         protected void Start()
@@ -135,7 +140,7 @@ namespace ModularFirearms
                     if (module.allowCycleFireMode)
                     {
                         if (emptySound != null) emptySound.Play();
-                        fireModeSelection = FirearmFunctions.CycleFireMode(fireModeSelection);
+                        fireModeSelection = FirearmFunctions.CycleFireMode(fireModeSelection, allowedFireModes);
                         SetFireSelectionAnimator(Animations, fireModeSelection);
                     }
                     else

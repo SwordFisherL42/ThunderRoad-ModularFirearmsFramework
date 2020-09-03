@@ -29,6 +29,7 @@ namespace ModularFirearms
         public string soundsRef;
 
         public int fireMode = 1;
+        public int[] allowedFireModes;
         public int fireRate = 600;
         public int burstNumber = 3;
         public bool allowCycleFireMode = false;

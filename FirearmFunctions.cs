@@ -2,6 +2,8 @@
 using ThunderRoad;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ModularFirearms
 {
@@ -75,12 +77,26 @@ namespace ModularFirearms
         /// </summary>
         /// <param name="currentSelection"></param>
         /// <returns></returns>
-        public static FireMode CycleFireMode(FireMode currentSelection)
+        public static FireMode CycleFireMode(FireMode currentSelection, List<int> allowedFireModes = null)
         {
             int selectionIndex = (int) currentSelection;
             selectionIndex++;
-            if (selectionIndex < fireModeEnums.Length) return (FireMode) fireModeEnums.GetValue(selectionIndex);
-            else return (FireMode) fireModeEnums.GetValue(0);
+            if (allowedFireModes != null)
+            {
+                foreach (var _ in Enumerable.Range(0, fireModeEnums.Length))
+                {
+                    if (allowedFireModes.Contains(selectionIndex)) return (FireMode)fireModeEnums.GetValue(selectionIndex);
+                    selectionIndex++;
+                    if (selectionIndex >= fireModeEnums.Length) selectionIndex = 0;
+                }
+                return currentSelection;
+            }
+            else
+            {
+                if (selectionIndex < fireModeEnums.Length) return (FireMode)fireModeEnums.GetValue(selectionIndex);
+                else return (FireMode)fireModeEnums.GetValue(0);
+            }
+
         }
 
         /// <summary>
