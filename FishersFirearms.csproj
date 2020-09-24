@@ -28,7 +28,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\ModularFirearms.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'FullBuild|AnyCPU'">
     <OutputPath>bin\FullBuild\</OutputPath>
@@ -95,11 +96,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChildSlide.cs" />
     <Compile Include="FirearmFunctions.cs" />
     <Compile Include="ItemAmmo.cs" />
     <Compile Include="ItemAmmoLoader.cs" />
     <Compile Include="ItemAmmoResupply.cs" />
     <Compile Include="ItemFirearmBase.cs" />
+    <Compile Include="ItemFirearmBaseSlide.cs" />
     <Compile Include="ItemFirearmRevolver.cs" />
     <Compile Include="ItemFirearmSimple.cs" />
     <Compile Include="ItemMagazine.cs" />

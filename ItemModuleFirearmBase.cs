@@ -4,27 +4,46 @@ namespace ModularFirearms
 {
     public class ItemModuleFirearmBase : ItemModule
     {
-        //Manual Interaction settings
-        public bool allowGrabMagazineFromGun = false;
+
+        //merged refs unity
+
+        public string configJointRef = "Joint";
+        public string slideObjectRef = "SlideObject";
+        public string mainHandleRef = "GunGrip";
+        public string chamberBulletRef = "ChamberBullet";
+        public string muzzlePositionRef = "Muzzle";
+        public string shellEjectionRef = "Shell";
+        public string flashRef = "Flash";
+        
+        public string[] soundNames = { "fireSound", "emptySound", "pullSound", "rackSound" };
+        public string rackTriggerRef = "RackTrigger";
+        public string slideTriggerRef = "SlideTrigger";
+        
+
+        public string animationRef;
+
+        //Child Slide
+        public int weaponType = 1;
+        public string slideRbObject;
+        public float slideForwardForce = 50.0f;
+        public float slideBlowbackForce = 30.0f;
+        
+
+        //public string slideHandleRef = "slideHandle";
+        
 
         //JSON definition references
         public string projectileID;
         public string shellID;
         public string ammoID;
         public string acceptedMagazineID;
+        public bool allowGrabMagazineFromGun = false;
 
-        public string rackTriggerRef = "RackTrigger";
-        public string slideTriggerRef = "SlideTrigger";
-        public string childSlideRef = "ChildSlide";
 
         //Firearm custom references from Unity Item Definition
-        public string muzzlePositionRef = "Muzzle";
-        public string shellEjectionRef = "Shell";
-        public string flashRef = "Flash";
-        public string mainHandleRef = "GunGrip";
-        public string[] soundNames = { "fireSound", "emptySound", "pullSound", "rackSound" };
-        public string animationRef;
 
+
+        public string childSlideRef = "ChildSlide";
         public string smokeRef;
         public string soundsRef;
 
@@ -43,7 +62,8 @@ namespace ModularFirearms
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
-            item.gameObject.AddComponent<ItemFirearmBase>();
+            if (weaponType == 1) { item.gameObject.AddComponent<ItemFirearmBase>(); }
+            else if (weaponType == 2) { item.gameObject.AddComponent<ItemFirearmBaseSlide>(); }
         }
     }
 }
