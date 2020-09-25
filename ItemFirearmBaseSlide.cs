@@ -8,21 +8,25 @@ namespace ModularFirearms
 {
     public class ItemFirearmBaseSlide : MonoBehaviour
     {
+        public ConfigurableJoint connectedJoint;
+        public bool gunGripHeldLeft;
+        public bool gunGripHeldRight;
+        public bool isFiring;
+
         private ChildSlide childSlide;
         private GameObject slideObject;
+
         protected Handle gunGrip;
         protected Handle slideHandle;
 
         //ThunderRoad Object References
         protected Item item;
-
         protected ItemModuleFirearmBase module;
-        
-        //protected ItemSlide childSlide;
+
         protected ItemMagazine insertedMagazine;
         protected ObjectHolder pistolGripHolder;
+
         //Unity Object References
-        protected ConfigurableJoint slideJoint;
         protected Transform muzzlePoint;
         protected Transform shellEjectionPoint;
         protected ParticleSystem muzzleFlash;
@@ -33,8 +37,7 @@ namespace ModularFirearms
         protected AudioSource rackforwardSound;
         protected Animator Animations;
         //Interaction settings
-        public bool gunGripHeldLeft;
-        public bool gunGripHeldRight;
+
         protected bool rightHapticFlag = false;
         protected bool leftHapticFlag = false;
         protected bool isRacked = true;
@@ -48,7 +51,7 @@ namespace ModularFirearms
         private List<int> allowedFireModes;
         private int counter;
         protected int ammoCount;
-        public bool isFiring;
+
 
         protected void Awake()
         {
@@ -83,9 +86,8 @@ namespace ModularFirearms
             pistolGripHolder.Snapped += new ObjectHolder.HolderDelegate(this.OnMagazineInserted);
             pistolGripHolder.UnSnapped += new ObjectHolder.HolderDelegate(this.OnMagazineRemoved);
 
-            childSlide = new ChildSlide(item, module);
-            childSlide.InitializeSlide(slideObject);
-
+            // Create configurable joint between the base RB and ChildSlide RB
+            InitializeConfigurableJoint();
         }
 
         protected void Start()
@@ -110,6 +112,27 @@ namespace ModularFirearms
 
             SetFireSelectionAnimator(Animations, fireModeSelection);
             return;
+        }
+
+        private void InitializeConfigurableJoint()
+        {
+            connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
+            connectedJoint.anchor = Vector3.zero;
+            connectedJoint.axis = Vector3.right;
+            connectedJoint.autoConfigureConnectedAnchor = false;
+            connectedJoint.connectedAnchor = new Vector3(0, 0, module.slideOffsetZ);
+            connectedJoint.secondaryAxis = Vector3.up;
+            connectedJoint.zMotion = ConfigurableJointMotion.Limited; 
+            connectedJoint.linearLimit = new SoftJointLimit { limit = module.slideOffsetZ, bounciness = 0.0f, contactDistance = 0.0f };
+            connectedJoint.projectionMode = JointProjectionMode.None;
+            connectedJoint.projectionDistance = 0.1f;
+            connectedJoint.projectionAngle = 30.0f;
+            connectedJoint.massScale = 1.0f;
+            connectedJoint.connectedMassScale = module.slideMassOffset;
+
+            childSlide = new ChildSlide(item, module);
+            childSlide.InitializeSlide(slideObject);
+
         }
 
         protected void LateUpdate()

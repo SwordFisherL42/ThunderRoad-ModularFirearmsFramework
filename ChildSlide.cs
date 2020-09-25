@@ -17,39 +17,41 @@ namespace ModularFirearms
         protected float slideForwardForce;
         protected float slideBlowbackForce;
 
+        protected float lockedAnchorOffset;
+        protected float lockedBackAnchorOffset;
+
+        protected ConfigurableJoint connectedJoint;
+
         public ChildSlide(Item Parent, ItemModuleFirearmBase ParentModule)
         {
             parentItem = Parent;
             parentModule = ParentModule;
             slideForwardForce = parentModule.slideForwardForce;
             slideBlowbackForce = parentModule.slideBlowbackForce;
+            lockedAnchorOffset = parentModule.slideNeutralLockOffset;
+            lockedBackAnchorOffset = parentModule.slideOffsetZ * 2.0f; //parentModule.slideRearLockOffset;
         }
 
-        // Object References to be found from Parent
         protected GameObject chamberBullet;
-
-        protected ConfigurableJoint connectedJoint;
-        protected ConstantForce slideForce;
         protected Handle slideHandle;
+        // Objects to generate
+        protected ConstantForce slideForce;
 
         // State Machine Parameters
         protected Vector3 originalAnchor;
-        protected float lockedAnchorOffset = 0.0f;
-        protected float lockedBackAnchorOffset = 0.05f;
         protected bool isHeld;
         protected float directionModifer = 1.0f;
         protected bool isLockedBack;
         
-
-
         // BS/Unity Core Functions //
         public void InitializeSlide(GameObject slideObject)
         {
-            rb = slideObject.GetComponent<Rigidbody>();
-            slideForce = slideObject.GetComponent<ConstantForce>();
             slideHandle = slideObject.GetComponent<Handle>();
+            connectedJoint = parentItem.gameObject.GetComponent<ConfigurableJoint>();
+            rb = slideObject.AddComponent<Rigidbody>();
+            slideForce = slideObject.AddComponent<ConstantForce>();
+            connectedJoint.connectedBody = rb;
 
-            if (!String.IsNullOrEmpty(parentModule.configJointRef)) connectedJoint = parentItem.definition.GetCustomReference(parentModule.configJointRef).GetComponent<ConfigurableJoint>();
             if (!String.IsNullOrEmpty(parentModule.chamberBulletRef)) chamberBullet = parentItem.definition.GetCustomReference(parentModule.chamberBulletRef).gameObject;
             Debug.Log("[Fisher-Firearms] Child Slide Initialized !!!");
             //item = this.GetComponent<Item>();
