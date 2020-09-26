@@ -4,10 +4,11 @@ namespace ModularFirearms
 {
     public class ItemModuleFirearmBase : ItemModule
     {
-        public float slideOffsetZ = 0.025f;
+        //public float slideOffsetZ = 0.025f;
         public float slideNeutralLockOffset = 0.0f;
-        public float slideRearLockOffset = 0.05f;
         public float slideMassOffset = 3.0f;
+        public float slideTravelDistance = 0.05f;
+        //public float travelLimit = 0.05f;
         //merged refs unity
 
         //public string configJointRef = "Joint";

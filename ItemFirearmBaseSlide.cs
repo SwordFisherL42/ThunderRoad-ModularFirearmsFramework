@@ -116,27 +116,60 @@ namespace ModularFirearms
 
         private void InitializeConfigurableJoint()
         {
+            slideObject.AddComponent<ConstantForce>();
+            Rigidbody slideRB;
+            slideRB = slideObject.GetComponent<Rigidbody>();
+            if (slideRB == null)
+            {
+                slideRB = slideObject.AddComponent<Rigidbody>();
+                Debug.Log("CREATED RIGIDBODY ON SlideObject...");
+            }
+            slideRB.mass = 1.0f;
+            slideRB.drag = 0.0f;
+            slideRB.angularDrag = 0.05f;
+            slideRB.useGravity = true;
+            slideRB.isKinematic = false;
+            slideRB.interpolation = RigidbodyInterpolation.None;
+            slideRB.collisionDetectionMode = CollisionDetectionMode.Discrete;
+
+            
+            Debug.Log("Getting Config Joint...");
             connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
-            connectedJoint.anchor = Vector3.zero;
+            Debug.Log("FOUND Config Joint...");
+            connectedJoint.connectedBody = slideRB;
+            //connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
+            connectedJoint.anchor = new Vector3(0, 0, -1.0f * module.slideTravelDistance);
             connectedJoint.axis = Vector3.right;
             connectedJoint.autoConfigureConnectedAnchor = false;
-            connectedJoint.connectedAnchor = new Vector3(0, 0, module.slideOffsetZ);
+            connectedJoint.connectedAnchor = Vector3.zero;
+            //connectedJoint.anchor = new Vector3(0, 0, 0); //new Vector3(0, 0, 1.0f * module.slideOffsetZ);
             connectedJoint.secondaryAxis = Vector3.up;
-            connectedJoint.zMotion = ConfigurableJointMotion.Limited; 
-            connectedJoint.linearLimit = new SoftJointLimit { limit = module.slideOffsetZ, bounciness = 0.0f, contactDistance = 0.0f };
-            connectedJoint.projectionMode = JointProjectionMode.None;
-            connectedJoint.projectionDistance = 0.1f;
-            connectedJoint.projectionAngle = 30.0f;
+            connectedJoint.xMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.yMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
+            connectedJoint.angularXMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.angularYMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.angularZMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.linearLimit = new SoftJointLimit { limit = module.slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
+            //connectedJoint.projectionMode = JointProjectionMode.None;
+            //connectedJoint.projectionDistance = 0.1f;
+            //connectedJoint.projectionAngle = 30.0f;
             connectedJoint.massScale = 1.0f;
             connectedJoint.connectedMassScale = module.slideMassOffset;
+            Debug.Log("DONE Config Joint SETUP...");
+
 
             childSlide = new ChildSlide(item, module);
             childSlide.InitializeSlide(slideObject);
 
+            
         }
 
         protected void LateUpdate()
         {
+            //connectedJoint.anchor = new Vector3(0, 0, -1.0f * module.slideTravelDistance);
+            if (childSlide != null) childSlide.ForceJointConfig();
+            else return;
             if (childSlide.initialCheck) return;
             try
             {
@@ -144,6 +177,7 @@ namespace ModularFirearms
                 {
                     childSlide.UnlockSlide();
                     childSlide.initialCheck = true;
+                    Debug.Log("[Fisher-Firearms] Initial Check unlocks slide.");
                 }
             }
             catch { Debug.Log("[Fisher-Firearms] Slide EXCEPTION"); }
@@ -176,7 +210,7 @@ namespace ModularFirearms
             {
                 if (action == Interactable.Action.Ungrab)
                 {
-                    //Debug.Log("[Fisher-Firearms] Slide Ungrab!");
+                    Debug.Log("[Fisher-Firearms] Slide Ungrab!");
                     childSlide.SetHeld(false);
                 }
             }
@@ -214,6 +248,7 @@ namespace ModularFirearms
             }
             if (handle.Equals(slideHandle))
             {
+                Debug.Log("[Fisher-Firearms] Slide Grabbed!");
                 childSlide.SetHeld(true);
                 if (childSlide.IsLocked())
                 {
@@ -234,6 +269,7 @@ namespace ModularFirearms
             if (handle.Equals(slideHandle))
             {
                 childSlide.SetHeld(false);
+                Debug.Log("[Fisher-Firearms] Slide Ungrabbed!");
             }
         }
 
@@ -292,7 +328,7 @@ namespace ModularFirearms
         {
             // State-Machine logic for slide mechanics //
             if (!hit.isTrigger) return;
-            Debug.Log("[Fisher-Firearms] Entered on ItemSlide component " + hit.name);
+            //Debug.Log("[Fisher-Firearms] Entered on ItemSlide component " + hit.name);
             if (hit.name.Contains("SlideFront"))
             {
                 Debug.Log("[Fisher-Firearms] Entered Rack position");
@@ -308,7 +344,7 @@ namespace ModularFirearms
                     ConsumeOneFromMagazine();
                     childSlide.ChamberRoundVisible(true);
                     waitingForChamber = false;
-                    Debug.Log("[Fisher-Firearms] Chamber Round Visible!");
+                    //Debug.Log("[Fisher-Firearms] Chamber Round Visible!");
                     return;
                 }
                 return;
