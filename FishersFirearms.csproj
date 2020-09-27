@@ -102,7 +102,7 @@
     <Compile Include="ItemAmmoLoader.cs" />
     <Compile Include="ItemAmmoResupply.cs" />
     <Compile Include="ItemFirearmBase.cs" />
-    <Compile Include="ItemFirearmBaseSlide.cs" />
+    <Compile Include="SemiAutoFirearmGenerator.cs" />
     <Compile Include="ItemFirearmRevolver.cs" />
     <Compile Include="ItemFirearmSimple.cs" />
     <Compile Include="ItemMagazine.cs" />
@@ -121,6 +121,7 @@
     <Compile Include="ItemSimpleExplosive.cs" />
     <Compile Include="ItemSimpleProjectile.cs" />
     <Compile Include="ItemSlide.cs" />
+    <Compile Include="SemiAutoModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

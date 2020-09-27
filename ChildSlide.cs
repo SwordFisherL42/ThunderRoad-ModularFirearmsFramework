@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
 using UnityEngine;
 using ThunderRoad;
 
@@ -13,7 +13,7 @@ namespace ModularFirearms
         public Rigidbody rb;
         public bool initialCheck = false;
         protected Item parentItem;
-        protected ItemModuleFirearmBase parentModule;
+        protected SemiAutoModule parentModule;
         protected float slideForwardForce;
         protected float slideBlowbackForce;
 
@@ -22,14 +22,14 @@ namespace ModularFirearms
 
         protected ConfigurableJoint connectedJoint;
 
-        public ChildSlide(Item Parent, ItemModuleFirearmBase ParentModule)
+        public ChildSlide(Item Parent, SemiAutoModule ParentModule)
         {
             parentItem = Parent;
             parentModule = ParentModule;
             slideForwardForce = parentModule.slideForwardForce;
             slideBlowbackForce = parentModule.slideBlowbackForce;
             lockedAnchorOffset = parentModule.slideNeutralLockOffset;
-            lockedBackAnchorOffset = -2.0f * parentModule.slideTravelDistance; //parentModule.slideRearLockOffset;
+            lockedBackAnchorOffset = -1.0f * parentModule.slideTravelDistance;
         }
 
         private GameObject chamberBullet;
@@ -50,49 +50,29 @@ namespace ModularFirearms
         // BS/Unity Core Functions //
         public void InitializeSlide(GameObject slideObject)
         {
+            rb = slideObject.GetComponent<Rigidbody>();
             slideHandle = slideObject.GetComponent<Handle>();
             slideForce = slideObject.GetComponent<ConstantForce>();
-            rb = slideObject.GetComponent<Rigidbody>();
             connectedJoint = parentItem.gameObject.GetComponent<ConfigurableJoint>();
             if (!String.IsNullOrEmpty(parentModule.chamberBulletRef)) chamberBullet = parentItem.definition.GetCustomReference(parentModule.chamberBulletRef).gameObject;
             Debug.Log("[Fisher-Firearms] Child Slide Initialized !!!");
-            DumpJoint();
-            //rb.mass = 1.0f;
-            //rb.drag = 0.0f;
-            //rb.angularDrag = 0.05f;
-            //rb.useGravity = true;
-            //rb.isKinematic = false;
-            //rb.interpolation = RigidbodyInterpolation.None;
-            //rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
-            //connectedJoint.connectedBody = rb;
-            //item = this.GetComponent<Item>();
-            //item.OnHeldActionEvent += OnHeldAction;
-            //item.OnGrabEvent += OnGrabEvent;
-            //item.OnUngrabEvent += OnUngrabEvent;
-            //module = item.data.GetModule<ItemModuleSlide>();
-            //slideJoint = item.definition.GetCustomReference(module.slideJointRef).GetComponent<ConfigurableJoint>();
-            //slideForce = item.transform.GetComponent<ConstantForce>();
-            //slideHandle = item.definition.GetCustomReference(module.slideHandleRef).GetComponent<Handle>();
-            //chamberShell = item.definition.GetCustomReference(module.chamberShellRef).GetComponent<MeshRenderer>();
-            //chamberBullet = item.definition.GetCustomReference(module.chamberBulletRef).GetComponent<MeshRenderer>();
+            //DumpJoint();
         }
 
         public void SetupSlide()
         {
             Debug.Log("[Fisher-Firearms] Slide Locked on start!");
-            originalAnchor = new Vector3(0, 0, -1.0f * parentModule.slideTravelDistance);
+            originalAnchor = new Vector3(0, 0, -0.5f * parentModule.slideTravelDistance);
             lockedBackAnchor = new Vector3(0, 0, lockedBackAnchorOffset);
             lockedNeutralAnchor = new Vector3(0, 0, lockedAnchorOffset);
             currentAnchor = originalAnchor;
             connectedJoint.anchor = currentAnchor;
-            //Debug.Log("[Fisher-Firearms] originalAnchor" + originalAnchor);
             ChamberRoundVisible();
             LockSlide();
             Debug.Log("[Fisher-Firearms] Child Slide Setup !!!");
-            DumpJoint();
+            //DumpJoint();
             return;
         }
-
 
         // State Functions //
         public void LockSlide()
@@ -109,17 +89,28 @@ namespace ModularFirearms
                 currentAnchor = lockedNeutralAnchor;
                 connectedJoint.anchor = currentAnchor;
             }
-            //Debug.Log("[Fisher-Firearms] Locked anchor" + originalAnchor);
             DisableTouch();
-            DumpJoint();
+            //DumpJoint();
         }
 
-        public void ForceJointConfig()
+        // Set defaults when Unity engine is being a stupid little bastard.
+        public void FixCustomComponents()
         {
             if (connectedJoint.anchor.z != currentAnchor.z)
             {
-                connectedJoint.anchor = new Vector3(0, 0, -1.0f * parentModule.slideTravelDistance);
+                connectedJoint.anchor = new Vector3(0, 0, currentAnchor.z);
             }
+
+            //if (rb.isKinematic)
+            //{
+            //    rb.mass = 1.0f;
+            //    rb.drag = 0.0f;
+            //    rb.angularDrag = 0.05f;
+            //    rb.useGravity = true;
+            //    rb.isKinematic = false;
+            //    rb.interpolation = RigidbodyInterpolation.None;
+            //    rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+            //}
         }
 
         public void DumpJoint()
@@ -130,13 +121,25 @@ namespace ModularFirearms
             Debug.Log("connectedJoint.linearLimit.limit " + connectedJoint.linearLimit.limit.ToString());
             Debug.Log("connectedJoint.autoConfigureConnectedAnchor " + connectedJoint.autoConfigureConnectedAnchor.ToString());
         }
+
+        public void DumpRB()
+        {
+            Debug.Log("rb.mass " + rb.mass.ToString());
+            Debug.Log("rb.drag " + rb.drag.ToString());
+            Debug.Log("rb.angularDrag " + rb.angularDrag.ToString());
+            Debug.Log("rb.isKinematic " + rb.isKinematic.ToString());
+            Debug.Log("rb.useGravity " + rb.useGravity.ToString());
+            Debug.Log("rb.detectCollisions " + rb.detectCollisions.ToString());
+            Debug.Log("rb.collisionDetectionMode " + rb.collisionDetectionMode.ToString());
+        }
+
         public void UnlockSlide()
         {
             SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce));
             connectedJoint.zMotion = ConfigurableJointMotion.Limited;
             currentAnchor = originalAnchor;
             connectedJoint.anchor = currentAnchor;
-            DumpJoint();
+            //DumpJoint();
             EnableTouch();
         }
 
@@ -148,7 +151,7 @@ namespace ModularFirearms
             connectedJoint.zMotion = ConfigurableJointMotion.Limited;
             currentAnchor = originalAnchor;
             connectedJoint.anchor = currentAnchor;
-            DumpJoint();
+            //DumpJoint();
         }
 
         public void LockedBackState()
@@ -159,7 +162,7 @@ namespace ModularFirearms
             connectedJoint.zMotion = ConfigurableJointMotion.Limited;
             currentAnchor = originalAnchor;
             connectedJoint.anchor = currentAnchor;
-            DumpJoint();
+            //DumpJoint();
         }
 
         public void LastShot()

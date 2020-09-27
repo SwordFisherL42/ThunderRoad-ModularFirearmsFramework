@@ -67,7 +67,7 @@ namespace ModularFirearms
         {
             base.OnItemLoaded(item);
             if (weaponType == 1) { item.gameObject.AddComponent<ItemFirearmBase>(); }
-            else if (weaponType == 2) { item.gameObject.AddComponent<ItemFirearmBaseSlide>(); }
+            else if (weaponType == 2) { item.gameObject.AddComponent<SemiAutoFirearmGenerator>(); }
         }
     }
 }
