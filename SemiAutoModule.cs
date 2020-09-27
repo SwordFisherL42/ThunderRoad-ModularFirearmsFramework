@@ -28,7 +28,7 @@ namespace ModularFirearms
         public float slideTravelDistance = 0.05f;
         // Slide defaults, don't edit these except for edge cases or special behaviours
         public float slideNeutralLockOffset = 0.0f;
-        public float slideMassOffset = 3.0f;
+        public float slideMassOffset = 1.0f;
         public float slideForwardForce = 50.0f;
         public float slideBlowbackForce = 30.0f;
 

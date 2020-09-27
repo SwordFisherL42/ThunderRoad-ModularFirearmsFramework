@@ -23,6 +23,7 @@ namespace ModularFirearms
         private GameObject slideCenterPosition;
         protected Handle gunGrip;
         protected Handle slideHandle;
+        private ConstantForce slideForce;
 
         //ThunderRoad Object References
         protected Item item;
@@ -30,6 +31,7 @@ namespace ModularFirearms
 
         private ItemMagazine insertedMagazine;
         protected ObjectHolder pistolGripHolder;
+        private Rigidbody slideRB;
 
         //Unity Object References
         protected Transform muzzlePoint;
@@ -84,13 +86,15 @@ namespace ModularFirearms
             item.OnHeldActionEvent += OnHeldAction;
             item.OnGrabEvent += OnAnyHandleGrabbed;
             item.OnUngrabEvent += OnAnyHandleUngrabbed;
-
+            item.OnSnapEvent += OnFirearmSnapped;
+            item.OnUnSnapEvent += OnFirearmUnSnapped;
             pistolGripHolder = item.GetComponentInChildren<ObjectHolder>();
             pistolGripHolder.Snapped += new ObjectHolder.HolderDelegate(this.OnMagazineInserted);
             pistolGripHolder.UnSnapped += new ObjectHolder.HolderDelegate(this.OnMagazineRemoved);
 
 
         }
+
 
         protected void Start()
         {
@@ -151,7 +155,7 @@ namespace ModularFirearms
             //    Debug.Log("CREATED RIGIDBODY ON SlideObject...");
             //}
 
-            Rigidbody slideRB = slideObject.GetComponent<Rigidbody>();
+            slideRB = slideObject.GetComponent<Rigidbody>();
             Debug.Log("[Fisher-Firearms] Accessed RIGIDBODY on Slide Object...");
             slideRB.mass = 1.0f;
             slideRB.drag = 0.0f;
@@ -165,7 +169,7 @@ namespace ModularFirearms
             slideCapsuleStabilizer.radius = 0.02f;
             Debug.Log("[Fisher-Firearms] Created Stabilizing Collider on Slide Object");
 
-            slideObject.AddComponent<ConstantForce>();
+            slideForce = slideObject.AddComponent<ConstantForce>();
             Debug.Log("[Fisher-Firearms] Created ConstantForce on Slide Object");
 
             slideObject.AddComponent<ColliderGroup>();
@@ -258,6 +262,58 @@ namespace ModularFirearms
             }
         }
 
+        public void OnFirearmSnapped(ObjectHolder holder)
+        {
+            try {
+                slideObject.SetActive(false);
+                slideCenterPosition.SetActive(false);
+                slideForce.enabled = false;
+
+                connectedJoint.connectedBody = item.rb;
+                connectedJoint.anchor = Vector3.zero;
+                connectedJoint.axis = Vector3.right;
+                connectedJoint.autoConfigureConnectedAnchor = false;
+                connectedJoint.connectedAnchor = Vector3.zero;
+                connectedJoint.secondaryAxis = Vector3.up;
+                connectedJoint.xMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.yMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.zMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.angularXMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.angularYMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.angularZMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.linearLimit = new SoftJointLimit { limit = 0.0f, bounciness = 0.0f, contactDistance = 0.0f };
+                connectedJoint.massScale = 1.0f;
+                connectedJoint.connectedMassScale = module.slideMassOffset;
+            }
+            catch { }
+        }
+
+        public void OnFirearmUnSnapped(ObjectHolder holder)
+        {
+            try
+            {
+                slideObject.SetActive(true);
+                slideCenterPosition.SetActive(true);
+                slideForce.enabled = true;
+                connectedJoint.connectedBody = slideRB;
+                connectedJoint.anchor = new Vector3(0, 0, -0.5f * module.slideTravelDistance);
+                connectedJoint.axis = Vector3.right;
+                connectedJoint.autoConfigureConnectedAnchor = false;
+                connectedJoint.connectedAnchor = Vector3.zero;
+                connectedJoint.secondaryAxis = Vector3.up;
+                connectedJoint.xMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.yMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.zMotion = ConfigurableJointMotion.Limited;
+                connectedJoint.angularXMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.angularYMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.angularZMotion = ConfigurableJointMotion.Locked;
+                connectedJoint.linearLimit = new SoftJointLimit { limit = 0.5f * module.slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
+                connectedJoint.massScale = 1.0f;
+                connectedJoint.connectedMassScale = module.slideMassOffset;
+            }
+            catch { }
+        }
+        
         public void OnAnyHandleGrabbed(Handle handle, Interactor interactor)
         {
             if (handle.Equals(gunGrip))
