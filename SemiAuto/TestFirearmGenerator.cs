@@ -114,23 +114,23 @@ namespace ModularFirearms.SemiAuto
             /// 5) Spawn and Snap in the inital magazine
             /// 6) (optional) Set the firemode selection switch to the correct position
             /// 
-            tc = new GameObject(activationTrigger);
+            //tc = new GameObject(activationTrigger);
             //tc.transform.parent = slideObject.transform;
             //tc.transform.localPosition = new Vector3(slideObject.transform.localPosition.x + 0.2f, slideObject.transform.localPosition.y, slideObject.transform.localPosition.z);
             //tc.transform.rotation = slideObject.transform.rotation;
-            MeshFilter mf = tc.AddComponent<MeshFilter>();
-            MeshRenderer mr = tc.AddComponent<MeshRenderer>();
-            SphereCollider sc = tc.AddComponent<SphereCollider>();
-            sc.radius = slideHandle.definition.touchRadius;
-            sc.isTrigger = false;
-            mf.mesh = item.definition.GetCustomReference("cube2").GetComponent<MeshFilter>().mesh;
-            mr.material = item.definition.GetCustomReference("cube2").GetComponent<MeshRenderer>().material;
+            //MeshFilter mf = tc.AddComponent<MeshFilter>();
+            //MeshRenderer mr = tc.AddComponent<MeshRenderer>();
+            //SphereCollider sc = tc.AddComponent<SphereCollider>();
+            //sc.radius = slideHandle.definition.touchRadius;
+            //sc.isTrigger = false;
+            //mf.mesh = item.definition.GetCustomReference("cube2").GetComponent<MeshFilter>().mesh;
+            //mr.material = item.definition.GetCustomReference("cube2").GetComponent<MeshRenderer>().material;
             InitializeConfigurableJoint(STABILIZER_COLLIDER_RADIUS);
 
             slideController = new SemiAutoSlide(item, module);
             slideController.InitializeSlide(slideObject);
 
-            CreateTriggerCollider(CC_RADIUS, CC_HEIGHT_RX);
+            //CreateTriggerCollider(CC_RADIUS, CC_HEIGHT_RX);
 
             if (slideController == null) Debug.LogError("[Fisher-Firearms] ERROR! CHILD SLIDE CONTROLLER WAS NULL");
             else slideController.SetupSlide();
@@ -153,37 +153,37 @@ namespace ModularFirearms.SemiAuto
             return;
         }
 
-        private void CreateTriggerCollider(float colliderRadius, float colliderHeight)
-        {
-            Debug.Log("[Fisher-Firearms] Creating Triggers Colliders...");
-            GameObject RearTriggerObj = new GameObject("RearTrigger");
+        //private void CreateTriggerCollider(float colliderRadius, float colliderHeight)
+        //{
+        //    Debug.Log("[Fisher-Firearms] Creating Triggers Colliders...");
+        //    GameObject RearTriggerObj = new GameObject("RearTrigger");
 
-            MeshFilter mf = RearTriggerObj.AddComponent<MeshFilter>();
-            MeshRenderer mr = RearTriggerObj.AddComponent<MeshRenderer>();
-            mf.mesh = item.definition.GetCustomReference("cube").GetComponent<MeshFilter>().mesh;
-            mr.material = item.definition.GetCustomReference("cube").GetComponent<MeshRenderer>().material;
+        //    MeshFilter mf = RearTriggerObj.AddComponent<MeshFilter>();
+        //    MeshRenderer mr = RearTriggerObj.AddComponent<MeshRenderer>();
+        //    mf.mesh = item.definition.GetCustomReference("cube").GetComponent<MeshFilter>().mesh;
+        //    mr.material = item.definition.GetCustomReference("cube").GetComponent<MeshRenderer>().material;
 
-            RearTriggerObj.transform.parent = item.gameObject.transform.root;
-            RearTriggerObj.transform.rotation = item.gameObject.transform.root.rotation;
-            RearTriggerObj.transform.localPosition = new Vector3(slideObject.transform.localPosition.x + 0.2f, slideObject.transform.localPosition.y, slideObject.transform.localPosition.z);
-            tc.transform.parent = null;
-            tc.transform.position = RearTriggerObj.transform.position;
-            tc.transform.rotation = RearTriggerObj.transform.rotation;
-            tc.transform.parent = slideObject.transform;
-            //RearTriggerObj.transform.rotation = item.gameObject.transform.rotation;
-            //RearTriggerObj.transform.position = new Vector3(slideHandle.definition.touchCenter.x + slideHandle.gameObject.transform.position.x,
-            //    slideHandle.definition.touchCenter.y + slideHandle.gameObject.transform.position.y,
-            //    slideHandle.definition.touchCenter.z + slideHandle.gameObject.transform.position.z - slideHandle.definition.touchRadius - module.slideTravelDistance);
-            RearTrigger = RearTriggerObj.AddComponent<CapsuleCollider>();
-            //RearTrigger.center = new Vector3(slideHandle.definition.touchCenter.x,
-            //    slideHandle.definition.touchCenter.y,
-            //    slideHandle.definition.touchCenter.z - slideHandle.definition.touchRadius - module.slideTravelDistance);
-            RearTrigger.isTrigger = true;
-            RearTrigger.radius = colliderRadius;
-            RearTrigger.height = colliderHeight;
-            RearTrigger.direction = 0;
-            Debug.Log("[Fisher-Firearms] Triggers Colliders COMPLETE!");
-        }
+        //    RearTriggerObj.transform.parent = item.gameObject.transform.root;
+        //    RearTriggerObj.transform.rotation = item.gameObject.transform.root.rotation;
+        //    RearTriggerObj.transform.localPosition = new Vector3(slideObject.transform.localPosition.x + 0.2f, slideObject.transform.localPosition.y, slideObject.transform.localPosition.z);
+        //    tc.transform.parent = null;
+        //    tc.transform.position = RearTriggerObj.transform.position;
+        //    tc.transform.rotation = RearTriggerObj.transform.rotation;
+        //    tc.transform.parent = slideObject.transform;
+        //    //RearTriggerObj.transform.rotation = item.gameObject.transform.rotation;
+        //    //RearTriggerObj.transform.position = new Vector3(slideHandle.definition.touchCenter.x + slideHandle.gameObject.transform.position.x,
+        //    //    slideHandle.definition.touchCenter.y + slideHandle.gameObject.transform.position.y,
+        //    //    slideHandle.definition.touchCenter.z + slideHandle.gameObject.transform.position.z - slideHandle.definition.touchRadius - module.slideTravelDistance);
+        //    RearTrigger = RearTriggerObj.AddComponent<CapsuleCollider>();
+        //    //RearTrigger.center = new Vector3(slideHandle.definition.touchCenter.x,
+        //    //    slideHandle.definition.touchCenter.y,
+        //    //    slideHandle.definition.touchCenter.z - slideHandle.definition.touchRadius - module.slideTravelDistance);
+        //    RearTrigger.isTrigger = true;
+        //    RearTrigger.radius = colliderRadius;
+        //    RearTrigger.height = colliderHeight;
+        //    RearTrigger.direction = 0;
+        //    Debug.Log("[Fisher-Firearms] Triggers Colliders COMPLETE!");
+        //}
 
         private void InitializeConfigurableJoint(float stabilizerRadius)
         {
@@ -246,30 +246,38 @@ namespace ModularFirearms.SemiAuto
         //}
         protected void LateUpdate()
         {
-            Debug.Log("[Fisher-Slide] LateUpdate slideObject position values: " + slideObject.transform.localPosition.ToString());
+            //Debug.Log("[Fisher-Slide] LateUpdate slideObject position values: " + slideObject.transform.localPosition.ToString());
             if ((slideObject.transform.localPosition.z <= PULL_THRESHOLD) && !isPulledBack)
             {
-                Debug.Log("[Fisher-Firearms] Entered PulledBack position");
-                Debug.Log("[Fisher-Slide] PULL_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
-                if (pullbackSound != null) pullbackSound.Play();
-                isPulledBack = true;
-                isRacked = false;
-                playSoundOnNext = true;
-                if (!roundChambered)
+                if (slideController != null)
                 {
-                    if (CountAmmoFromMagazine() > 0)
+                    if (slideController.IsHeld())
                     {
-                        chamberRoundOnNext = true;
+                        Debug.Log("[Fisher-Firearms] Entered PulledBack position");
+                        Debug.Log("[Fisher-Slide] PULL_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
+                        if (pullbackSound != null) pullbackSound.Play();
+                        isPulledBack = true;
+                        isRacked = false;
+                        playSoundOnNext = true;
+                        if (!roundChambered)
+                        {
+                            if (CountAmmoFromMagazine() > 0)
+                            {
+                                chamberRoundOnNext = true;
+                            }
+                        }
+                        else
+                        {
+                            FirearmFunctions.ShootProjectile(item, module.ammoID, shellEjectionPoint, null, module.shellEjectionForce);
+                        }
+                        slideController.ChamberRoundVisible(false);
                     }
                 }
-                else
-                {
-                    FirearmFunctions.ShootProjectile(item, module.ammoID, shellEjectionPoint, null, module.shellEjectionForce);
-                }
-                slideController.ChamberRoundVisible(false);
+
             }
             if ((slideObject.transform.localPosition.z >= RACK_THRESHOLD) && !isRacked)
             {
+
                 Debug.Log("[Fisher-Firearms] Entered Rack position");
                 Debug.Log("[Fisher-Slide] RACK_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
                 isRacked = true;
