@@ -96,13 +96,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChildSlide.cs" />
+    <Compile Include="Common\AmmoModule.cs" />
+    <Compile Include="Common\MagazineGenerator.cs" />
+    <Compile Include="Common\MagazineModule.cs" />
+    <Compile Include="Common\ModularAmmo.cs" />
+    <Compile Include="Common\ProjectileModule.cs" />
+    <Compile Include="SemiAuto\TestFirearmGenerator.cs" />
+    <Compile Include="SemiAuto\SemiAutoSlide.cs" />
     <Compile Include="FirearmFunctions.cs" />
     <Compile Include="ItemAmmo.cs" />
     <Compile Include="ItemAmmoLoader.cs" />
     <Compile Include="ItemAmmoResupply.cs" />
     <Compile Include="ItemFirearmBase.cs" />
-    <Compile Include="SemiAutoFirearmGenerator.cs" />
+    <Compile Include="SemiAuto\SemiAutoFirearmGenerator.cs" />
     <Compile Include="ItemFirearmRevolver.cs" />
     <Compile Include="ItemFirearmSimple.cs" />
     <Compile Include="ItemMagazine.cs" />
@@ -121,8 +127,11 @@
     <Compile Include="ItemSimpleExplosive.cs" />
     <Compile Include="ItemSimpleProjectile.cs" />
     <Compile Include="ItemSlide.cs" />
-    <Compile Include="SemiAutoModule.cs" />
+    <Compile Include="SemiAuto\SemiAutoModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Shotgun\ShotgunGenerator.cs" />
+    <Compile Include="Shotgun\ShotgunModule.cs" />
+    <Compile Include="Shotgun\ShotgunSlide.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

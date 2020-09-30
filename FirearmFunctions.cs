@@ -39,6 +39,8 @@ namespace ModularFirearms
         /// </summary>
         public static float[,] blendTreePositions = new float[4, 2] { { 0.0f, 0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f } };
 
+        public static string projectileColliderReference = "BodyCollider";
+
         /// <summary>
         /// Defines which behaviour should be produced at runtime
         /// </summary>
@@ -207,7 +209,7 @@ namespace ModularFirearms
         /// <param name="forceMult"></param>
         /// <param name="throwMult"></param>
         /// <param name="pooled"></param>
-        public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell=null, float forceMult=1.0f, float throwMult=1.0f, bool pooled=false)
+        public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell=null, float forceMult=1.0f, float throwMult=1.0f, bool pooled=false, Collider IgnoreArg1 = null)
         {
             var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
             if (projectileData == null)
@@ -221,6 +223,45 @@ namespace ModularFirearms
                 if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
                 projectile.IgnoreObjectCollision(shooterItem);
                 projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
+                if (IgnoreArg1 != null)
+                {
+                    try { Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>()); }
+                    catch { }
+                }
+                if (!String.IsNullOrEmpty(imbueSpell))
+                {
+                    // Set imbue charge on projectile using ItemProjectileSimple subclass
+                    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
+                    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
+                }
+                // Match the Position, Rotation, & Speed of the spawner item
+                projectile.transform.position = spawnPoint.position;
+                projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
+                projectile.rb.velocity = shooterItem.rb.velocity;
+                projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
+                projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
+            }
+        }
+
+        public static void ShotgunBlast(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell= null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
+        {
+            var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
+            if (projectileData == null)
+            {
+                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
+                return;
+            }
+            else
+            {
+                Item projectile = projectileData.Spawn(pooled);
+                if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
+                projectile.IgnoreObjectCollision(shooterItem);
+                projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
+                if (IgnoreArg1 != null)
+                {
+                    try { Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>()); }
+                    catch { }
+                }
                 if (!String.IsNullOrEmpty(imbueSpell))
                 {
                     // Set imbue charge on projectile using ItemProjectileSimple subclass

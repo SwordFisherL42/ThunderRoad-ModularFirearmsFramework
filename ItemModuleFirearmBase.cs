@@ -66,8 +66,8 @@ namespace ModularFirearms
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
+            item.gameObject.AddComponent<ItemFirearmBase>();
             if (weaponType == 1) { item.gameObject.AddComponent<ItemFirearmBase>(); }
-            else if (weaponType == 2) { item.gameObject.AddComponent<SemiAutoFirearmGenerator>(); }
         }
     }
 }

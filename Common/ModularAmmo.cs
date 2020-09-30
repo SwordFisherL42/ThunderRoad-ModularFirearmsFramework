@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
 using ThunderRoad;
 
-namespace ModularFirearms
+namespace ModularFirearms.Common
 {
-    // Modular ammunition class, self-tracks if it is consumed (`ready to fire` state).
-    public class ItemAmmo : MonoBehaviour
+    public class ModularAmmo : MonoBehaviour
     {
         protected Item item;
-        protected ItemModuleAmmo module;
+        protected AmmoModule module;
         protected MeshRenderer bulletMesh;
         protected Handle ammoHandle;
         public bool isLoaded = true;
@@ -15,7 +14,7 @@ namespace ModularFirearms
         protected void Awake()
         {
             item = this.GetComponent<Item>();
-            module = item.data.GetModule<ItemModuleAmmo>();
+            module = item.data.GetModule<AmmoModule>();
             if (module.handleRef != null) ammoHandle = item.definition.GetCustomReference(module.handleRef).GetComponent<Handle>();
             if (module.bulletMeshID != null) bulletMesh = item.definition.GetCustomReference(module.bulletMeshID).GetComponent<MeshRenderer>();
             Refill();
@@ -24,6 +23,16 @@ namespace ModularFirearms
         public int GetAmmoType()
         {
             return module.ammoType;
+        }
+
+        public string GetAmmoID()
+        {
+            return item.data.id;
+        }
+
+        public int GetAmmoCount()
+        {
+            return module.numberOfRounds;
         }
 
         public void Consume()
@@ -44,9 +53,7 @@ namespace ModularFirearms
         protected void SetMeshState(MeshRenderer ammoMesh, bool newState = false)
         {
             if (ammoMesh != null) { ammoMesh.enabled = newState; }
-            
             return;
         }
-
     }
 }

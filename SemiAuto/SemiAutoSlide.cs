@@ -6,12 +6,13 @@
 using UnityEngine;
 using ThunderRoad;
 
-namespace ModularFirearms
+namespace ModularFirearms.SemiAuto
 {
-    public class ChildSlide 
+    public class SemiAutoSlide 
     {
         public Rigidbody rb;
         public bool initialCheck = false;
+
         protected Item parentItem;
         protected SemiAutoModule parentModule;
         protected float slideForwardForce;
@@ -22,7 +23,7 @@ namespace ModularFirearms
 
         protected ConfigurableJoint connectedJoint;
 
-        public ChildSlide(Item Parent, SemiAutoModule ParentModule)
+        public SemiAutoSlide(Item Parent, SemiAutoModule ParentModule)
         {
             parentItem = Parent;
             parentModule = ParentModule;
@@ -186,12 +187,6 @@ namespace ModularFirearms
         }
 
         // Base Functions //
-        //public void DestoryThisSlide()
-        //{
-
-        //    //item.Despawn();
-        //}
-
         public void DisableTouch()
         {
             slideHandle.SetTouch(false);
@@ -204,7 +199,8 @@ namespace ModularFirearms
 
         public void ChamberRoundVisible(bool isVisible = false)
         {
-            chamberBullet.SetActive(isVisible);
+            if (chamberBullet != null) { chamberBullet.SetActive(isVisible); }
+            
             return;
         }
 
@@ -229,50 +225,3 @@ namespace ModularFirearms
 
     }
 }
-
-
-//protected void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
-//{
-//    if (action == Interactable.Action.Ungrab)
-//    {
-//        //Debug.Log("[Fisher-Firearms] Slide Ungrab!");
-//        isHeld = false;
-//    }
-//}
-
-//public void IgnoreCollisionWithProjectile(Item Projectile)
-//{
-//    item.IgnoreObjectCollision(Projectile);
-//    return;
-//}
-
-//public void OnUngrabEvent(Handle handle, Interactor interactor, bool throwing)
-//{
-//    //Debug.Log("[Fisher-Firearms] Slide UnGrab!");
-//    isHeld = false;
-//}
-
-//public void OnGrabEvent(Handle handle, Interactor interactor)
-//{
-//    //Debug.Log("[Fisher-Firearms] Slide Grab!");
-//    isHeld = true;
-//    if (isLockedBack)
-//    {
-//        ForwardState();
-//    }
-//}
-
-//protected void Update()
-//{
-//    if (initialCheck) return;
-//    try
-//    {
-//        if (GetParentObj().GetComponent<ItemFirearmBase>().gunGripHeldRight || GetParentObj().GetComponent<ItemFirearmBase>().gunGripHeldLeft)
-//        {
-//            UnlockSlide();
-//            initialCheck = true;
-//        }
-//    }
-//    catch { Debug.Log("[Fisher-Firearms] Slide EXCEPTION"); }
-
-//}
