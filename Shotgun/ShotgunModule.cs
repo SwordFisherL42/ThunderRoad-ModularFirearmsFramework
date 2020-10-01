@@ -4,6 +4,7 @@ namespace ModularFirearms.Shotgun
 {
     public class ShotgunModule : ItemModule
     {
+        // OBSOLETE - USE FOR REFERENCE ONLY //
 
         //Firearm custom references from Unity Item Definition
         public string mainHandleRef;

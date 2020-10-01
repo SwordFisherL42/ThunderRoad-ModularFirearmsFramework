@@ -41,6 +41,45 @@ namespace ModularFirearms
 
         public static string projectileColliderReference = "BodyCollider";
 
+        public enum WeaponType
+        {
+            TestWeapon = 0,
+            SemiAuto = 1,
+            Shotgun = 2,
+            BoltAction = 3,
+            Revolver = 4,
+            Sniper = 5,
+            Energy = 6
+        }
+
+        public enum AmmoType
+        {
+            Generic = 0,
+            Magazine = 1,
+            AmmoLoader = 2,
+            SemiAuto = 3,
+            ShotgunShell = 4,
+            Revolver = 5,
+            Battery = 6,
+            Sniper = 7
+        }
+
+        public enum ProjectileType
+        {
+            Pierce = 1,
+            Explosive = 2,
+            Energy = 3,
+            Blunt = 4,
+            HitScan = 5,
+            Sniper = 6
+        }
+
+        public static Array weaponTypeEnums = Enum.GetValues(typeof(WeaponType));
+
+        public static Array ammoTypeEnums = Enum.GetValues(typeof(AmmoType));
+
+        public static Array projectileTypeEnums = Enum.GetValues(typeof(ProjectileType));
+
         /// <summary>
         /// Defines which behaviour should be produced at runtime
         /// </summary>
@@ -417,6 +456,13 @@ namespace ModularFirearms
             }
             WeaponIsFiring?.Invoke(false);
             yield return null;
+        }
+
+
+        public static void DumpRigidbodyToLog(Rigidbody rb)
+        {
+            Debug.LogWarning("[Fisher-Firearms][RB-DUMP] " + rb.name + ": " + rb.ToString());
+            Debug.LogWarning("[Fisher-Firearms][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
         }
 
     }

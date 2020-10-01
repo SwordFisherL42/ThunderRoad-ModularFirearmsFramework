@@ -403,7 +403,7 @@ namespace ModularFirearms.Shotgun
         {
             try
             {
-                Common.ModularAmmo insertedAmmo = interactiveObject.GetComponent<Common.ModularAmmo>();
+                Common.InteractiveAmmo insertedAmmo = interactiveObject.GetComponent<Common.InteractiveAmmo>();
                 shellReceiver.UnSnap(interactiveObject);
                 if (insertedAmmo != null)
                 {

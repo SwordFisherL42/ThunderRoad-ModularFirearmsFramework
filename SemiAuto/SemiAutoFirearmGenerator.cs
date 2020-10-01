@@ -10,20 +10,19 @@ namespace ModularFirearms.SemiAuto
     {
         /// ThunderRoad Object References ///
         protected Item item;
-        protected SemiAutoModule module;
+        protected Common.FirearmModule module;
         protected ObjectHolder magazineHolder;
         protected ItemMagazine insertedMagazine;
 
         /// Trigger-Zone parameters ///
-        private readonly float CC_RADIUS = 0.02f;
-        private readonly float CC_HEIGHT_RX = 0.075f;
-        private readonly float STABILIZER_COLLIDER_RADIUS = 0.02f;
-        private CapsuleCollider RearTrigger;
+        private float PULL_THRESHOLD;
+        private float RACK_THRESHOLD;
         private SphereCollider slideCapsuleStabilizer;
 
         /// Slide Interaction ///
         protected Handle slideHandle;
-        private SemiAutoSlide slideController;
+        //private SemiAutoSlide slideController;
+        private Common.ChildRigidbodyController slideController;
         private GameObject slideObject;
         private GameObject slideCenterPosition;
         private ConstantForce slideForce;
@@ -35,7 +34,7 @@ namespace ModularFirearms.SemiAuto
         protected Transform muzzlePoint;
         protected Transform shellEjectionPoint;
         protected ParticleSystem muzzleFlash;
-        protected ParticleSystem muzzleSmoke; 
+        protected ParticleSystem muzzleSmoke;
         protected AudioSource fireSound;
         protected AudioSource emptySound;
         protected AudioSource reloadSound;
@@ -53,7 +52,6 @@ namespace ModularFirearms.SemiAuto
         private bool chamberRoundOnNext = false;
         private bool roundChambered = false;
         private bool playSoundOnNext = false;
-
         /// FireMode Selection and Ammo Tracking //
         private FireMode fireModeSelection;
         private List<int> allowedFireModes;
@@ -61,7 +59,7 @@ namespace ModularFirearms.SemiAuto
         protected void Awake()
         {
             item = this.GetComponent<Item>();
-            module = item.data.GetModule<SemiAutoModule>();
+            module = item.data.GetModule<Common.FirearmModule>();
 
             /// Set all Object References ///
             if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.definition.GetCustomReference(module.muzzlePositionRef);
@@ -81,6 +79,9 @@ namespace ModularFirearms.SemiAuto
             else Debug.LogError("[Fisher-Firearms][ERROR] No Reference to Slide Center Position(\"slideCenterRef\") in JSON! Weapon will not work as intended...");
             if (slideObject != null) slideHandle = slideObject.GetComponent<Handle>();
 
+            RACK_THRESHOLD = -0.1f * module.slideTravelDistance; //module.slideRackThreshold;
+            PULL_THRESHOLD = -0.5f * module.slideTravelDistance;
+
             fireModeSelection = (FireMode)FirearmFunctions.fireModeEnums.GetValue(module.fireMode);
 
             if (module.allowedFireModes != null)
@@ -92,30 +93,44 @@ namespace ModularFirearms.SemiAuto
             item.OnHeldActionEvent += OnHeldAction;
             item.OnGrabEvent += OnAnyHandleGrabbed;
             item.OnUngrabEvent += OnAnyHandleUngrabbed;
+
             item.OnSnapEvent += OnFirearmSnapped;
             item.OnUnSnapEvent += OnFirearmUnSnapped;
+
             magazineHolder = item.GetComponentInChildren<ObjectHolder>();
             magazineHolder.Snapped += new ObjectHolder.HolderDelegate(this.OnMagazineInserted);
             magazineHolder.UnSnapped += new ObjectHolder.HolderDelegate(this.OnMagazineRemoved);
+
         }
 
         protected void Start()
         {
             /// 1) Create and Initialize configurable joint between the base and slide
             /// 2) Create and Initialize the slide controller object
-            /// 3) Create the zone colliders which determine slide position
-            /// 4) Setup the slide controller into the default state
-            /// 5) Spawn and Snap in the inital magazine
-            /// 6) (optional) Set the firemode selection switch to the correct position
-            InitializeConfigurableJoint(STABILIZER_COLLIDER_RADIUS);
+            /// 3) Setup the slide controller into the default state
+            /// 4) Spawn and Snap in the inital magazine
+            /// 5) (optional) Set the firemode selection switch to the correct position
+            InitializeConfigurableJoint(module.slideStabilizerRadius);
 
-            slideController = new SemiAutoSlide(item, module);
+            slideController = new Common.ChildRigidbodyController(item, module);
             slideController.InitializeSlide(slideObject);
-
-            CreateTriggerCollider(CC_RADIUS, CC_HEIGHT_RX);
 
             if (slideController == null) Debug.LogError("[Fisher-Firearms] ERROR! CHILD SLIDE CONTROLLER WAS NULL");
             else slideController.SetupSlide();
+
+
+            //Creature.player.body.creature.locomotion.capsuleCollider
+            Creature.player.ragdoll.IgnoreCollision(slideCapsuleStabilizer, true);
+            Physics.IgnoreCollision(Creature.player.locomotion.capsuleCollider, slideCapsuleStabilizer);
+            item.IgnoreRagdollCollision(Creature.player.ragdoll);
+
+            foreach (RagdollPart rp in Creature.player.ragdoll.parts)
+            {
+                foreach (RagdollPart.ColliderInfo c in rp.colliders)
+                {
+                    Physics.IgnoreCollision(c.collider, slideCapsuleStabilizer);
+                }
+            }
 
             var magazineData = Catalog.GetData<ItemPhysic>(module.acceptedMagazineID, true);
             if (magazineData == null)
@@ -125,8 +140,7 @@ namespace ModularFirearms.SemiAuto
             }
             else
             {
-                Item startMagazine = magazineData.Spawn(true);
-                magazineHolder.Snap(startMagazine);
+                magazineHolder.Snap(magazineData.Spawn(true));
             }
             magazineHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
 
@@ -135,36 +149,18 @@ namespace ModularFirearms.SemiAuto
             return;
         }
 
-        private void CreateTriggerCollider(float colliderRadius, float colliderHeight)
-        {
-            Debug.Log("[Fisher-Firearms] Creating Triggers Colliders...");
-            GameObject RearTriggerObj = new GameObject("RearTrigger");
-            RearTriggerObj.transform.parent = item.gameObject.transform;
-            RearTriggerObj.transform.position = new Vector3(slideHandle.definition.touchCenter.x + slideHandle.gameObject.transform.position.x,
-                slideHandle.definition.touchCenter.y + slideHandle.gameObject.transform.position.y,
-                slideHandle.definition.touchCenter.z + slideHandle.gameObject.transform.position.z - slideHandle.definition.touchRadius - module.slideTravelDistance);
-            RearTrigger = RearTriggerObj.AddComponent<CapsuleCollider>();
-            RearTrigger.center = Vector3.zero;
-            RearTrigger.isTrigger = true;
-            RearTrigger.radius = colliderRadius;
-            RearTrigger.height = colliderHeight;
-            RearTrigger.direction = 0;
-            Debug.Log("[Fisher-Firearms] Triggers Colliders COMPLETE!");
-        }
-
         private void InitializeConfigurableJoint(float stabilizerRadius)
         {
-            // TODO: Figure out why adding RB from code doesnt work
-            //Rigidbody slideRB;
-            //slideRB = slideObject.GetComponent<Rigidbody>();
-            //if (slideRB == null)
-            //{
-            //    slideRB = slideObject.AddComponent<Rigidbody>();
-            //    Debug.Log("CREATED RIGIDBODY ON SlideObject...");
-            //}
-
             slideRB = slideObject.GetComponent<Rigidbody>();
-            Debug.Log("[Fisher-Firearms] Accessed RIGIDBODY on Slide Object...");
+            if (slideRB == null)
+            {
+                // TODO: Figure out why adding RB from code doesnt work
+                slideRB = slideObject.AddComponent<Rigidbody>();
+                Debug.Log("[Fisher-Firearms][Config-Joint-Init] CREATED Rigidbody ON SlideObject...");
+
+            }
+            else { Debug.Log("[Fisher-Firearms][Config-Joint-Init] ACCESSED Rigidbody on Slide Object..."); }
+
             slideRB.mass = 1.0f;
             slideRB.drag = 0.0f;
             slideRB.angularDrag = 0.05f;
@@ -172,24 +168,29 @@ namespace ModularFirearms.SemiAuto
             slideRB.isKinematic = false;
             slideRB.interpolation = RigidbodyInterpolation.None;
             slideRB.collisionDetectionMode = CollisionDetectionMode.Discrete;
-            
+
             slideCapsuleStabilizer = slideCenterPosition.AddComponent<SphereCollider>();
             slideCapsuleStabilizer.radius = stabilizerRadius;
-            Debug.Log("[Fisher-Firearms] Created Stabilizing Collider on Slide Object");
+            slideCapsuleStabilizer.gameObject.layer = 21;
+            Physics.IgnoreLayerCollision(21, 12);
+            Physics.IgnoreLayerCollision(21, 15);
+            Physics.IgnoreLayerCollision(21, 22);
+            Physics.IgnoreLayerCollision(21, 23);
+            Debug.Log("[Fisher-Firearms][Config-Joint-Init] Created Stabilizing Collider on Slide Object");
 
             slideForce = slideObject.AddComponent<ConstantForce>();
-            Debug.Log("[Fisher-Firearms] Created ConstantForce on Slide Object");
+            Debug.Log("[Fisher-Firearms][Config-Joint-Init] Created ConstantForce on Slide Object");
 
-            slideObject.AddComponent<ColliderGroup>();
-            Debug.Log("[Fisher-Firearms] Created ColliderGroup on Slide Object");
+            //slideObject.AddComponent<ColliderGroup>();
+            //Debug.Log("[Fisher-Firearms][Config-Joint-Init] Created ColliderGroup on Slide Object");
 
-            Debug.Log("[Fisher-Firearms] Creating Config Joint and Setting Joint Values...");
+            Debug.Log("[Fisher-Firearms][Config-Joint-Init] Creating Config Joint and Setting Joint Values...");
             connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
             connectedJoint.connectedBody = slideRB;
             connectedJoint.anchor = new Vector3(0, 0, -0.5f * module.slideTravelDistance);
             connectedJoint.axis = Vector3.right;
             connectedJoint.autoConfigureConnectedAnchor = false;
-            connectedJoint.connectedAnchor = Vector3.zero;
+            connectedJoint.connectedAnchor = Vector3.zero;//new Vector3(0.04f, -0.1f, -0.22f);
             connectedJoint.secondaryAxis = Vector3.up;
             connectedJoint.xMotion = ConfigurableJointMotion.Locked;
             connectedJoint.yMotion = ConfigurableJointMotion.Locked;
@@ -200,7 +201,70 @@ namespace ModularFirearms.SemiAuto
             connectedJoint.linearLimit = new SoftJointLimit { limit = 0.5f * module.slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
             connectedJoint.massScale = 1.0f;
             connectedJoint.connectedMassScale = module.slideMassOffset;
-            Debug.Log("[Fisher-Firearms] Created Configurable Joint ...");
+            Debug.Log("[Fisher-Firearms][Config-Joint-Init] Created Configurable Joint !");
+            DumpRigidbodyToLog(slideRB);
+        }
+
+        protected void FixedUpdate()
+        {
+            //Debug.Log("[Fisher-Slide] LateUpdate slideObject position values: " + slideObject.transform.localPosition.ToString());
+            if ((slideObject.transform.localPosition.z <= PULL_THRESHOLD) && !isPulledBack)
+            {
+                if (slideController != null)
+                {
+                    if (slideController.IsHeld())
+                    {
+
+                        Debug.Log("[Fisher-Firearms] Entered PulledBack position");
+                        Debug.Log("[Fisher-Slide] PULL_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
+                        if (pullbackSound != null) pullbackSound.Play();
+                        isPulledBack = true;
+                        isRacked = false;
+                        playSoundOnNext = true;
+                        if (!roundChambered)
+                        {
+                            if (CountAmmoFromMagazine() > 0)
+                            {
+                                chamberRoundOnNext = true;
+                            }
+                        }
+                        else
+                        {
+                            FirearmFunctions.ShootProjectile(item, module.ammoID, shellEjectionPoint, null, module.shellEjectionForce);
+                        }
+                        slideController.ChamberRoundVisible(false);
+                    }
+                }
+
+            }
+            if ((slideObject.transform.localPosition.z > (PULL_THRESHOLD - RACK_THRESHOLD)) && isPulledBack)
+            {
+                Debug.Log("[Fisher-Firearms] Showing Ammo...");
+                if (CountAmmoFromMagazine() > 0) { slideController.ChamberRoundVisible(true); Debug.Log("[Fisher-Firearms] Round Visible!"); }
+            }
+            if ((slideObject.transform.localPosition.z >= RACK_THRESHOLD) && !isRacked)
+            {
+
+                Debug.Log("[Fisher-Firearms] Entered Rack position");
+                Debug.Log("[Fisher-Slide] RACK_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
+                isRacked = true;
+                isPulledBack = false;
+                if (playSoundOnNext)
+                {
+                    if (rackforwardSound != null) rackforwardSound.Play();
+                    playSoundOnNext = false;
+                }
+
+                if (chamberRoundOnNext)
+                {
+                    if (!ConsumeOneFromMagazine()) return;
+                    slideController.ChamberRoundVisible(true);
+                    chamberRoundOnNext = false;
+                    roundChambered = true;
+                    //return;
+                }
+                //return;
+            }
         }
 
         protected void LateUpdate()
@@ -215,6 +279,7 @@ namespace ModularFirearms.SemiAuto
                     slideController.UnlockSlide();
                     slideController.initialCheck = true;
                     Debug.Log("[Fisher-Firearms] Initial Check unlocks slide.");
+                    Debug.Log("[Fisher-Slide] inital slideObject position values: " + slideObject.transform.localPosition.ToString());
                 }
             }
             catch { Debug.Log("[Fisher-Firearms] Slide EXCEPTION"); }
@@ -255,6 +320,7 @@ namespace ModularFirearms.SemiAuto
             // "Spell-Menu" Action
             if (action == Interactable.Action.AlternateUseStart)
             {
+                Debug.Log("[Fisher-Slide] slideObject position values: " + slideObject.transform.localPosition.ToString());
                 if (SlideToggleLock()) return;
                 if (insertedMagazine == null || CountAmmoFromMagazine() > 0)
                 {
@@ -272,12 +338,13 @@ namespace ModularFirearms.SemiAuto
 
         public void OnFirearmSnapped(ObjectHolder holder)
         {
-            try {
+            try
+            {
                 slideObject.SetActive(false);
                 slideCenterPosition.SetActive(false);
                 slideForce.enabled = false;
 
-                connectedJoint.connectedBody = item.rb;
+                connectedJoint.connectedBody = null;
                 connectedJoint.anchor = Vector3.zero;
                 connectedJoint.axis = Vector3.right;
                 connectedJoint.autoConfigureConnectedAnchor = false;
@@ -321,7 +388,13 @@ namespace ModularFirearms.SemiAuto
             }
             catch { }
         }
-        
+
+        private void OnCollisionEnter(Collision hit)
+        {
+            Debug.Log(gameObject.name + " just hit " + hit.gameObject.name);
+            
+        }
+
         public void OnAnyHandleGrabbed(Handle handle, Interactor interactor)
         {
             if (handle.Equals(gunGrip))
@@ -341,7 +414,7 @@ namespace ModularFirearms.SemiAuto
                     SlideToggleLock();
                     //slideController.ForwardState();
                 }
-                slideController.DumpRB();
+                DumpRigidbodyToLog(slideController.rb);
             }
 
         }
@@ -415,66 +488,6 @@ namespace ModularFirearms.SemiAuto
             }
         }
 
-        protected void OnTriggerExit(Collider hit)
-        {
-            //// State-Machine logic for slide mechanics //
-            
-            if (!hit.isTrigger) return;
-            //Debug.Log("[Fisher-Firearms] trigger hit: " + hit.name);
-            //Debug.Log("[Fisher-Firearms] slideObject name: " + slideObject.name);
-            if (!slideController.IsHeld()) { Debug.Log("[Fisher-Firearms] CHILD SLIDE NOT HELD "); return; }
-            else if (hit.name.Contains(slideObject.name))
-            {
-                Debug.Log("[Fisher-Firearms] Entered PulledBack position");
-                if (pullbackSound != null) pullbackSound.Play();
-                isPulledBack = true;
-                isRacked = false;
-                playSoundOnNext = true;
-                if (!roundChambered)
-                {
-                    if (CountAmmoFromMagazine() > 0)
-                    {
-                        chamberRoundOnNext = true;
-                    }
-                }
-                else
-                {
-                    FirearmFunctions.ShootProjectile(item, module.ammoID, shellEjectionPoint, null, module.shellEjectionForce);
-                }
-                slideController.ChamberRoundVisible(false);
-
-            }
-            
-        }
-
-        protected void OnTriggerEnter(Collider hit)
-        {
-            if (!hit.isTrigger) return;
-            //Debug.Log("[Fisher-Firearms] trigger hit: " + hit.name);
-            //Debug.Log("[Fisher-Firearms] slideObject name: " + slideObject.name);
-            if (hit.name.Contains(slideObject.name))
-            {
-                Debug.Log("[Fisher-Firearms] Entered Rack position");
-                isRacked = true;
-                isPulledBack = false;
-                if (playSoundOnNext)
-                {
-                    if (rackforwardSound != null) rackforwardSound.Play();
-                    playSoundOnNext = false;
-                }
-                
-                if (chamberRoundOnNext)
-                {
-                    if (!ConsumeOneFromMagazine()) return;
-                    slideController.ChamberRoundVisible(true);
-                    chamberRoundOnNext = false;
-                    roundChambered = true;
-                    return;
-                }
-                return;
-            }
-        }
-
         public void PreFireEffects()
         {
             if (muzzleFlash != null) muzzleFlash.Play();
@@ -523,19 +536,25 @@ namespace ModularFirearms.SemiAuto
         {
             if (slideController != null)
             {
+
                 // If the slide is locked back and there is a loaded magazine inserted, load the next round
-                if (slideController.IsLocked() && CountAmmoFromMagazine() > 0)
+                if (slideController.IsLocked())
                 {
-                    if (ConsumeOneFromMagazine()) roundChambered = true;
+                    if (CountAmmoFromMagazine() <= 0) return false;
+                    if (ConsumeOneFromMagazine())
+                    {
+                        roundChambered = true;
+                        slideController.ChamberRoundVisible(true);
+                    }
                     slideController.ForwardState();
                     if (rackforwardSound != null) rackforwardSound.Play();
                     return true;
                 }
                 // If the slide is held back by the player and not yet locked, lock it
-                else if (slideController.IsHeld() && isPulledBack && !slideController.IsLocked())
+                else if (slideController.IsHeld() && isPulledBack)
                 {
                     slideController.LockedBackState();
-                    if (emptySound !=null ) emptySound.Play();
+                    if (emptySound != null) emptySound.Play();
                     return true;
                 }
                 else return false;

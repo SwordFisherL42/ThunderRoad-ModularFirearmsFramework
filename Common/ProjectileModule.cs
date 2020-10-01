@@ -1,12 +1,13 @@
 ﻿using ThunderRoad;
-
+using static ModularFirearms.FirearmFunctions;
 
 namespace ModularFirearms.Common
 {
     public class ProjectileModule : ItemModule
     {
+
         public float lifetime = 2.0f;
-        public int projectileType = 1; // 1-> Pierce, 2->Explosive, 3->Energy, 4->Blunt/Buck
+        public int projectileType = 1;
 
         //Type 1 params
         public bool allowFlyTime = true;
@@ -24,14 +25,16 @@ namespace ModularFirearms.Common
         //Default vars, can be overriden for special cases
         public int forceMode = 1;
 
+        public ProjectileType GetSelectedType() { return (ProjectileType)FirearmFunctions.weaponTypeEnums.GetValue(projectileType); }
+
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
-            if (projectileType == 1)
-            {
-                item.gameObject.AddComponent<ItemSimpleProjectile>();
-            }
-            else if (projectileType == 2) { item.gameObject.AddComponent<ItemSimpleExplosive>(); }
+
+            ProjectileType selectedType = GetSelectedType();
+
+            if (selectedType.Equals(ProjectileType.Pierce)) { item.gameObject.AddComponent<ItemSimpleProjectile>();}
+            else if (selectedType.Equals(ProjectileType.Explosive)) { item.gameObject.AddComponent<ItemSimpleExplosive>(); }
             else { item.gameObject.AddComponent<ItemSimpleProjectile>(); }
 
         }

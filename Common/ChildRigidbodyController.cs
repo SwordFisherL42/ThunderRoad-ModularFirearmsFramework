@@ -6,26 +6,23 @@
 using UnityEngine;
 using ThunderRoad;
 
-namespace ModularFirearms.SemiAuto
+namespace ModularFirearms.Common
 {
-    // OBSOLETE - USE FOR REFERENCE ONLY //
-
-    public class SemiAutoSlide 
+    public class ChildRigidbodyController
     {
         public Rigidbody rb;
         public bool initialCheck = false;
 
         protected Item parentItem;
-        protected SemiAutoModule parentModule;
-        protected float slideForwardForce;
-        protected float slideBlowbackForce;
+        protected FirearmModule parentModule;
+        
+        private readonly float slideForwardForce;
+        private readonly float slideBlowbackForce;
 
-        protected float lockedAnchorOffset;
-        protected float lockedBackAnchorOffset;
+        private readonly float lockedAnchorOffset;
+        private readonly float lockedBackAnchorOffset;
 
-        protected ConfigurableJoint connectedJoint;
-
-        public SemiAutoSlide(Item Parent, SemiAutoModule ParentModule)
+        public ChildRigidbodyController(Item Parent, FirearmModule ParentModule)
         {
             parentItem = Parent;
             parentModule = ParentModule;
@@ -35,21 +32,22 @@ namespace ModularFirearms.SemiAuto
             lockedBackAnchorOffset = -1.0f * parentModule.slideTravelDistance;
         }
 
-        private GameObject chamberBullet;
         private Handle slideHandle;
         private ConstantForce slideForce;
+        private ConfigurableJoint connectedJoint;
+        private GameObject chamberBullet;
 
         // State Machine Parameters
+        private Vector3 currentAnchor;
         private Vector3 originalAnchor;
         private Vector3 lockedBackAnchor;
         private Vector3 lockedNeutralAnchor;
 
-        private Vector3 currentAnchor;
-
         private bool isHeld;
         private float directionModifer = 1.0f;
         private bool isLockedBack;
-        
+
+
         // BS/Unity Core Functions //
         public void InitializeSlide(GameObject slideObject)
         {
@@ -61,25 +59,28 @@ namespace ModularFirearms.SemiAuto
                 connectedJoint = parentItem.gameObject.GetComponent<ConfigurableJoint>();
                 if (!String.IsNullOrEmpty(parentModule.chamberBulletRef)) chamberBullet = parentItem.definition.GetCustomReference(parentModule.chamberBulletRef).gameObject;
             }
-            catch { Debug.LogError("[Fisher-Firearms][EXCEPTION] Unable to Initialize ChildBody Controller ! "); }
+            catch { Debug.LogError("[Fisher-Firearms][EXCEPTION] Unable to Initialize CRC ! "); }
         }
 
         public void SetupSlide()
         {
-            Debug.Log("[Fisher-Firearms] Slide Locked on start!");
+            Debug.Log("[Fisher-Firearms] Setting Up CRC...");
             originalAnchor = new Vector3(0, 0, -0.5f * parentModule.slideTravelDistance);
             lockedBackAnchor = new Vector3(0, 0, lockedBackAnchorOffset);
             lockedNeutralAnchor = new Vector3(0, 0, lockedAnchorOffset);
             currentAnchor = originalAnchor;
             connectedJoint.anchor = currentAnchor;
-            ChamberRoundVisible();
+            ChamberRoundVisible(false);
             LockSlide();
-            Debug.Log("[Fisher-Firearms] Child Slide Setup !!!");
-            //DumpJoint();
-            return;
+            Debug.Log("[Fisher-Firearms] CRC Setup Complete !!!");
         }
 
         // State Functions //
+        /// <summary>
+        /// Used for locking the child body when the weapon is released.
+        /// Stops forces on the Rigidbody, locks the Configurable Joint and sets the anchor position based on current state,
+        /// and finally disables touch interaction.
+        /// </summary>
         public void LockSlide()
         {
             SetRelativeSlideForce(new Vector3(0, 0, 0));
@@ -95,10 +96,113 @@ namespace ModularFirearms.SemiAuto
                 connectedJoint.anchor = currentAnchor;
             }
             DisableTouch();
-            //DumpJoint();
         }
 
-        // Set defaults when Unity engine is being a stupid little bastard.
+        /// <summary>
+        /// Used for enabling the dynamic slide mechanics when the weapon is grabbed.
+        /// Re-Enables touch, Resets the Configurable joint and the relative forward-force based on machine state.
+        /// </summary>
+        public void UnlockSlide()
+        {
+            EnableTouch();
+            SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce));
+            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
+            currentAnchor = originalAnchor;
+            connectedJoint.anchor = currentAnchor;
+        }
+
+        /// <summary>
+        /// Sets the Child Object to its default position, with Configurable Joint limits for manipulation
+        /// Sets the State parameters, joint settings and forces for `ForwardState`
+        /// </summary>
+        public void ForwardState()
+        {
+            isLockedBack = false;
+            directionModifer = 1.0f;
+            SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce));
+            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
+            currentAnchor = originalAnchor;
+            connectedJoint.anchor = currentAnchor;
+        }
+
+        /// <summary>
+        /// Sets the Child Object to its default position, with Configurable Joint limits for manipulation
+        /// Sets the State parameters, joint settings and forces for `ForwardState`
+        /// </summary>
+        public void LockedBackState()
+        {
+            isLockedBack = true;
+            directionModifer = -1.0f;
+            SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce));
+            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
+            currentAnchor = originalAnchor;
+            connectedJoint.anchor = currentAnchor;
+        }
+
+        /// <summary>
+        /// Apply an Impulse force in the reverse direction.
+        /// Decrease the forward force, add a relative force in the -ve Z direction,
+        /// and optionally leave the forward spring disabled if this is the last shot
+        /// </summary>
+        /// <param name="lastShot"></param>
+        public void BlowBack(bool lastShot = false)
+        {
+            SetRelativeSlideForce(new Vector3(0, 0, slideForwardForce * 0.1f)); //Set forward spring to 10%
+            rb.AddRelativeForce(Vector3.forward * -1.0f * slideBlowbackForce, ForceMode.Impulse); // Apply reverse force momentarily 
+            if (!lastShot) SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce)); // Restore previous forward spring
+            ChamberRoundVisible(false);
+            return;
+        }
+
+        public void LastShot()
+        {
+            BlowBack(true);
+            LockedBackState();
+            return;
+        }
+
+        // Interaction Helper Functions //
+        public void SetHeld(bool status) { isHeld = status; }
+
+        public bool IsHeld()
+        {
+            return isHeld;
+        }
+
+        public bool IsLocked()
+        {
+            return isLockedBack;
+        }
+
+        // Base Functions //
+
+        public void DisableTouch()
+        {
+            slideHandle.SetTouch(false);
+        }
+
+        public void EnableTouch()
+        {
+            slideHandle.SetTouch(true);
+        }
+
+        public void ChamberRoundVisible(bool isVisible = false)
+        {
+            if (chamberBullet != null) { chamberBullet.SetActive(isVisible); }
+
+            return;
+        }
+
+        public void SetRelativeSlideForce(Vector3 newSlideForce)
+        {
+            slideForce.relativeForce = newSlideForce;
+            return;
+        }
+
+
+
+        // Debugging Functions ...
+        // Set defaults when Unity engine resets our values aribtrarily..
         public void FixCustomComponents()
         {
             if (connectedJoint.anchor.z != currentAnchor.z)
@@ -138,92 +242,7 @@ namespace ModularFirearms.SemiAuto
             Debug.Log("rb.collisionDetectionMode " + rb.collisionDetectionMode.ToString());
         }
 
-        public void UnlockSlide()
-        {
-            SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce));
-            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
-            currentAnchor = originalAnchor;
-            connectedJoint.anchor = currentAnchor;
-            //DumpJoint();
-            EnableTouch();
-        }
-
-        public void ForwardState()
-        {
-            isLockedBack = false;
-            directionModifer = 1.0f;
-            SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce));
-            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
-            currentAnchor = originalAnchor;
-            connectedJoint.anchor = currentAnchor;
-            //DumpJoint();
-        }
-
-        public void LockedBackState()
-        {
-            isLockedBack = true;
-            directionModifer = -1.0f;
-            SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce));
-            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
-            currentAnchor = originalAnchor;
-            connectedJoint.anchor = currentAnchor;
-            //DumpJoint();
-        }
-
-        public void LastShot()
-        {
-            BlowBack(true);
-            LockedBackState();
-            return;
-        }
-
-        // Interaction Helper Functions //
-        public void SetHeld(bool status) { isHeld = status; }
-
-        public bool IsHeld()
-        {
-            return isHeld;
-        }
-
-        public bool IsLocked()
-        {
-            return isLockedBack;
-        }
-
-        // Base Functions //
-        public void DisableTouch()
-        {
-            slideHandle.SetTouch(false);
-        }
-
-        public void EnableTouch()
-        {
-            slideHandle.SetTouch(true);
-        }
-
-        public void ChamberRoundVisible(bool isVisible = false)
-        {
-            if (chamberBullet != null) { chamberBullet.SetActive(isVisible); }
-            
-            return;
-        }
-
-        protected void SetRelativeSlideForce(Vector3 newSlideForce)
-        {
-            slideForce.relativeForce = newSlideForce;
-            return;
-        }
-
-        public void BlowBack(bool lastShot = false)
-        {
-            SetRelativeSlideForce(new Vector3(0, 0, slideForwardForce * 0.1f)); //Set forward spring to 10%
-            rb.AddRelativeForce(Vector3.forward * -1.0f * slideBlowbackForce, ForceMode.Impulse); // Apply reverse force momentarily 
-            if (!lastShot) SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce)); // Restore previous forward spring
-            ChamberRoundVisible(false);
-            return;
-        }
-
-        protected GameObject GetParentObj()
+        public GameObject GetConnectedObj()
         {
             return connectedJoint.gameObject;
         }

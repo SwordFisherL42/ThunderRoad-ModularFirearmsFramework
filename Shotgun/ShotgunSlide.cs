@@ -8,6 +8,8 @@ using ThunderRoad;
 
 namespace ModularFirearms.Shotgun
 {
+    // OBSOLETE - USE FOR REFERENCE ONLY //
+
     public class ShotgunSlide
     {
         public Rigidbody rb;

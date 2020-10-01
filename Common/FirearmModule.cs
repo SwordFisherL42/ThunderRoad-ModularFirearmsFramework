@@ -1,13 +1,13 @@
 ﻿using ThunderRoad;
+using static ModularFirearms.FirearmFunctions;
 
-namespace ModularFirearms.SemiAuto
+namespace ModularFirearms.Common
 {
-    public class SemiAutoModule : ItemModule
+    public class FirearmModule : ItemModule
     {
-        // OBSOLETE - USE FOR REFERENCE ONLY //
+        private WeaponType selectedType;
+        public int firearmCategory = 0;
 
-        //Firearm custom references from Unity Item Definition
-        public int weaponType = 1;
         public string mainHandleRef;
         public string slideHandleRef;
         public string slideCenterRef;
@@ -25,9 +25,12 @@ namespace ModularFirearms.SemiAuto
 
         public string animationRef;
 
-        // Distance the child slide/bolt can be pulled back
+        // Distance the child slide/bolt can be travel
         public float slideTravelDistance = 0.05f;
+
         // Slide defaults, don't edit these except for edge cases or special behaviours
+        public float slideStabilizerRadius = 0.02f;
+        public float slideRackThreshold = -0.01f;
         public float slideNeutralLockOffset = 0.0f;
         public float slideMassOffset = 1.0f;
         public float slideForwardForce = 50.0f;
@@ -54,8 +57,17 @@ namespace ModularFirearms.SemiAuto
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
-            if (weaponType == 1) item.gameObject.AddComponent<SemiAutoFirearmGenerator>();
-            if (weaponType == 2) item.gameObject.AddComponent<TestFirearmGenerator>();
+
+            selectedType = (WeaponType) FirearmFunctions.weaponTypeEnums.GetValue(firearmCategory);
+            if (selectedType.Equals(WeaponType.TestWeapon)) item.gameObject.AddComponent<SemiAuto.TestFirearmGenerator>();
+            else if (selectedType.Equals(WeaponType.SemiAuto)) item.gameObject.AddComponent<SemiAuto.SemiAutoFirearmGenerator>();
+            else if (selectedType.Equals(WeaponType.Shotgun)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
+            //else if (selectedType.Equals(WeaponType.BoltAction)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
+            //else if (selectedType.Equals(WeaponType.Revolver)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
+            //else if (selectedType.Equals(WeaponType.Sniper)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
+            //else if (selectedType.Equals(WeaponType.Sniper)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
         }
     }
+        
 }
+

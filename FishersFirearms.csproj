@@ -97,9 +97,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\AmmoModule.cs" />
+    <Compile Include="Common\ChildRigidbodyController.cs" />
+    <Compile Include="Common\FirearmModule.cs" />
     <Compile Include="Common\MagazineGenerator.cs" />
     <Compile Include="Common\MagazineModule.cs" />
-    <Compile Include="Common\ModularAmmo.cs" />
+    <Compile Include="Common\InteractiveAmmo.cs" />
     <Compile Include="Common\ProjectileModule.cs" />
     <Compile Include="SemiAuto\TestFirearmGenerator.cs" />
     <Compile Include="SemiAuto\SemiAutoSlide.cs" />

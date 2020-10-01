@@ -1,26 +1,37 @@
 ﻿using UnityEngine;
 using ThunderRoad;
+using static ModularFirearms.FirearmFunctions;
 
 namespace ModularFirearms.Common
 {
-    public class ModularAmmo : MonoBehaviour
+    public class InteractiveAmmo : MonoBehaviour
     {
         protected Item item;
         protected AmmoModule module;
-        protected MeshRenderer bulletMesh;
-        protected Handle ammoHandle;
+        private MeshRenderer bulletMesh;
+        private Handle ammoHandle;
+        private AmmoType thisAmmoType;
+        private int capacity;
         public bool isLoaded = true;
 
         protected void Awake()
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<AmmoModule>();
+            thisAmmoType = module.GetSelectedType();
+            capacity = module.numberOfRounds;
             if (module.handleRef != null) ammoHandle = item.definition.GetCustomReference(module.handleRef).GetComponent<Handle>();
             if (module.bulletMeshID != null) bulletMesh = item.definition.GetCustomReference(module.bulletMeshID).GetComponent<MeshRenderer>();
             Refill();
         }
 
-        public int GetAmmoType()
+
+        public AmmoType GetAmmoType()
+        {
+            return thisAmmoType;
+        }
+
+        public int GetAmmoTypeInt()
         {
             return module.ammoType;
         }
@@ -32,18 +43,20 @@ namespace ModularFirearms.Common
 
         public int GetAmmoCount()
         {
-            return module.numberOfRounds;
+            return capacity;
         }
 
-        public void Consume()
+        public void Consume(int i = 1)
         {
+            capacity -= i;
             SetMeshState(bulletMesh);
-            isLoaded = false;
+            if (capacity <= 0) isLoaded = false;
             if (ammoHandle != null) ammoHandle.data.allowTelekinesis = false;
         }
 
         public void Refill()
         {
+            capacity = module.numberOfRounds;
             SetMeshState(bulletMesh, true);
             isLoaded = true;
             if (ammoHandle != null) ammoHandle.data.allowTelekinesis = true;
