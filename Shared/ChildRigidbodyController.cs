@@ -6,7 +6,7 @@
 using UnityEngine;
 using ThunderRoad;
 
-namespace ModularFirearms.Common
+namespace ModularFirearms.Shared
 {
     public class ChildRigidbodyController
     {
@@ -76,6 +76,9 @@ namespace ModularFirearms.Common
         }
 
         // State Functions //
+
+
+
         /// <summary>
         /// Used for locking the child body when the weapon is released.
         /// Stops forces on the Rigidbody, locks the Configurable Joint and sets the anchor position based on current state,

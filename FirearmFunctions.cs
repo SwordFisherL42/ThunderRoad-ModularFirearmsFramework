@@ -264,9 +264,17 @@ namespace ModularFirearms
                 projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
                 if (IgnoreArg1 != null)
                 {
-                    try { Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>()); }
+                    try {
+                        projectile.IgnoreColliderCollision(IgnoreArg1);
+                        //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
+                    }
                     catch { }
                 }
+                //if (IgnoreArg2 != null)
+                //{
+                //    try { projectile.IgnoreColliderCollision(IgnoreArg2); }
+                //    catch { }
+                //}
                 if (!String.IsNullOrEmpty(imbueSpell))
                 {
                     // Set imbue charge on projectile using ItemProjectileSimple subclass

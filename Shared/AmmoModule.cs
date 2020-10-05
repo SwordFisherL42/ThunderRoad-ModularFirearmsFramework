@@ -2,7 +2,7 @@
 using static ModularFirearms.FirearmFunctions;
 
 
-namespace ModularFirearms.Common
+namespace ModularFirearms.Shared
 {
     public class AmmoModule : ItemModule
     {

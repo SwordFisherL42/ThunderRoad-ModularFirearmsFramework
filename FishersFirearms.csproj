@@ -96,13 +96,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\AmmoModule.cs" />
-    <Compile Include="Common\ChildRigidbodyController.cs" />
-    <Compile Include="Common\FirearmModule.cs" />
-    <Compile Include="Common\MagazineGenerator.cs" />
-    <Compile Include="Common\MagazineModule.cs" />
-    <Compile Include="Common\InteractiveAmmo.cs" />
-    <Compile Include="Common\ProjectileModule.cs" />
+    <Compile Include="Shared\AmmoModule.cs" />
+    <Compile Include="Shared\ChildRigidbodyController.cs" />
+    <Compile Include="Shared\FirearmModule.cs" />
+    <Compile Include="Shared\MagazineGenerator.cs" />
+    <Compile Include="Shared\MagazineModule.cs" />
+    <Compile Include="Shared\InteractiveAmmo.cs" />
+    <Compile Include="Shared\ProjectileModule.cs" />
     <Compile Include="SemiAuto\TestFirearmGenerator.cs" />
     <Compile Include="SemiAuto\SemiAutoSlide.cs" />
     <Compile Include="FirearmFunctions.cs" />

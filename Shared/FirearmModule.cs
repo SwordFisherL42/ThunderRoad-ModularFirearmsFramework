@@ -1,7 +1,7 @@
 ﻿using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
-namespace ModularFirearms.Common
+namespace ModularFirearms.Shared
 {
     public class FirearmModule : ItemModule
     {
@@ -24,6 +24,8 @@ namespace ModularFirearms.Common
         public string rackSoundRef;
 
         public string animationRef;
+        public string openAnimationRef;
+        public string closeAnimationRef;
 
         // Distance the child slide/bolt can be travel
         public float slideTravelDistance = 0.05f;
@@ -48,11 +50,14 @@ namespace ModularFirearms.Common
         public int burstNumber = 3;
         public bool allowCycleFireMode = false;
 
+        public int maxReceiverAmmo = 12;
+
         // Gameplay/Physics/Recoil params
         public float bulletForce = 10.0f;
         public float shellEjectionForce = 5.0f;
         public float hapticForce = 5.0f;
         public float throwMult = 3.0f;
+        public float[] recoilForces;
 
         public override void OnItemLoaded(Item item)
         {

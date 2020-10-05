@@ -1,7 +1,7 @@
 ﻿using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
-namespace ModularFirearms.Common
+namespace ModularFirearms.Shared
 {
     public class ProjectileModule : ItemModule
     {

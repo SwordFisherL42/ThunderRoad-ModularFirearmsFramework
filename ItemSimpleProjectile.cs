@@ -19,7 +19,7 @@ namespace ModularFirearms
         protected void Start()
         {
             if (module.allowFlyTime) item.rb.useGravity = false;
-            item.Despawn(module.lifetime);
+            if (module.lifetime > 0.0f)  item.Despawn(module.lifetime);
         }
 
         public void AddChargeToQueue(string SpellID)

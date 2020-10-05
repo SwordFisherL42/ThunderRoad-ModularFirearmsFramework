@@ -1,6 +1,6 @@
 ﻿using ThunderRoad;
 
-namespace ModularFirearms.Common
+namespace ModularFirearms.Shared
 {
     public class MagazineModule : ItemModule
     {

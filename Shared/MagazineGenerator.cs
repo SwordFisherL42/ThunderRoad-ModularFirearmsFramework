@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using ThunderRoad;
 
-namespace ModularFirearms.Common
+namespace ModularFirearms.Shared
 {
     public class MagazineGenerator : MonoBehaviour
     {

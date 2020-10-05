@@ -2,13 +2,13 @@
 using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
-namespace ModularFirearms.Common
+namespace ModularFirearms.Shared
 {
     public class InteractiveAmmo : MonoBehaviour
     {
         protected Item item;
         protected AmmoModule module;
-        private MeshRenderer bulletMesh;
+        private GameObject bulletMesh;
         private Handle ammoHandle;
         private AmmoType thisAmmoType;
         private int capacity;
@@ -21,7 +21,7 @@ namespace ModularFirearms.Common
             thisAmmoType = module.GetSelectedType();
             capacity = module.numberOfRounds;
             if (module.handleRef != null) ammoHandle = item.definition.GetCustomReference(module.handleRef).GetComponent<Handle>();
-            if (module.bulletMeshID != null) bulletMesh = item.definition.GetCustomReference(module.bulletMeshID).GetComponent<MeshRenderer>();
+            if (module.bulletMeshID != null) bulletMesh = item.definition.GetCustomReference(module.bulletMeshID).gameObject;
             Refill();
         }
 
@@ -63,9 +63,9 @@ namespace ModularFirearms.Common
             return;
         }
 
-        protected void SetMeshState(MeshRenderer ammoMesh, bool newState = false)
+        protected void SetMeshState(GameObject ammoMesh, bool newState = false)
         {
-            if (ammoMesh != null) { ammoMesh.enabled = newState; }
+            if (ammoMesh != null) { ammoMesh.SetActive(newState); }
             return;
         }
     }
