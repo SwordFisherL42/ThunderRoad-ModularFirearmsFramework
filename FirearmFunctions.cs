@@ -74,11 +74,20 @@ namespace ModularFirearms
             Sniper = 6
         }
 
+        public enum AttachmentType
+        {
+            Flashlight = 1,
+            Laser = 2,
+            GrenadeLauncher = 3,
+        }
+
         public static Array weaponTypeEnums = Enum.GetValues(typeof(WeaponType));
 
         public static Array ammoTypeEnums = Enum.GetValues(typeof(AmmoType));
 
         public static Array projectileTypeEnums = Enum.GetValues(typeof(ProjectileType));
+
+        public static Array attachmentTypeEnums = Enum.GetValues(typeof(AttachmentType));
 
         /// <summary>
         /// Defines which behaviour should be produced at runtime
@@ -248,7 +257,7 @@ namespace ModularFirearms
         /// <param name="forceMult"></param>
         /// <param name="throwMult"></param>
         /// <param name="pooled"></param>
-        public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell=null, float forceMult=1.0f, float throwMult=1.0f, bool pooled=false, Collider IgnoreArg1 = null)
+        public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell=null, float forceMult=1.0f, float throwMult=1.0f, bool pooled=false, Collider IgnoreArg1 = null, bool isBuckshot = false)
         {
             var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
             if (projectileData == null)
@@ -287,43 +296,69 @@ namespace ModularFirearms
                 projectile.rb.velocity = shooterItem.rb.velocity;
                 projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
                 projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
+
             }
         }
 
-        public static void ShotgunBlast(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell= null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
+        public static void ShotgunBlast(Transform spawnPoint, float distance, float force)
         {
-            var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
-            if (projectileData == null)
+
+            if (Physics.Raycast(spawnPoint.position, spawnPoint.forward, out RaycastHit hit, distance))
             {
-                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
-                return;
-            }
-            else
-            {
-                Item projectile = projectileData.Spawn(pooled);
-                if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
-                projectile.IgnoreObjectCollision(shooterItem);
-                projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
-                if (IgnoreArg1 != null)
+                Creature hitCreature = hit.collider.transform.root.GetComponentInParent<Creature>();
+                if (hitCreature != null)
                 {
-                    try { Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>()); }
+                    if (hitCreature == Creature.player) return;
+                    Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit creature!");
+                    hitCreature.locomotion.rb.AddExplosionForce(force, hit.point, 1.0f, 1.0f, ForceMode.VelocityChange);
+                    //hitCreature.ragdoll.SetState(Creature.State.Destabilized);
+                    foreach (RagdollPart part in hitCreature.ragdoll.parts)
+                    {
+                        part.rb.AddExplosionForce(force, hit.point, 1.0f, 1.0f, ForceMode.VelocityChange);
+                        part.rb.AddForce(spawnPoint.forward * force, ForceMode.Impulse);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit item");
+                        hit.collider.attachedRigidbody.AddExplosionForce(force, hit.point, 0.5f, 1.0f, ForceMode.VelocityChange);
+                        hit.collider.attachedRigidbody.AddForce(spawnPoint.forward * force, ForceMode.Impulse);
+                    }
                     catch { }
                 }
-                if (!String.IsNullOrEmpty(imbueSpell))
-                {
-                    // Set imbue charge on projectile using ItemProjectileSimple subclass
-                    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
-                    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                }
-                // Match the Position, Rotation, & Speed of the spawner item
-                projectile.transform.position = spawnPoint.position;
-                projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
-                projectile.rb.velocity = shooterItem.rb.velocity;
-                projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
-                projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
+
+
+                //RaycastHit[] itemsHit = Physics.SphereCastAll(spawnPoint.position, radius, spawnPoint.forward, distance);
+                //foreach (RaycastHit hit in itemsHit)
+                //{
+                //    Creature hitCreature = hit.collider.transform.root.GetComponentInParent<Creature>();
+                //    if (hitCreature != null)
+                //    {
+                //        if (hitCreature == Creature.player) continue;
+                //        Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit creature!");
+                //        hitCreature.locomotion.rb.AddExplosionForce(force, hit.point, 1.0f, 1.0f, ForceMode.VelocityChange);
+                //        hitCreature.ragdoll.SetState(Creature.State.Destabilized);
+                //        foreach (RagdollPart part in hitCreature.ragdoll.parts)
+                //        {
+                //            part.rb.AddExplosionForce(force, hit.point, 1.0f, 1.0f, ForceMode.VelocityChange);
+                //            part.rb.AddForce(spawnPoint.forward * force, ForceMode.VelocityChange);
+                //        }
+                //    }
+                //    else
+                //    {
+                //        try
+                //        {
+                //            Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit item");
+                //            hit.collider.attachedRigidbody.AddExplosionForce(force, hit.point, 0.5f, 1.0f, ForceMode.VelocityChange);
+                //            hit.collider.attachedRigidbody.AddForce(spawnPoint.forward * force, ForceMode.VelocityChange);
+                //        }
+                //        catch { }
+                //    }
+                //}
             }
         }
-
         /// <summary>
         /// Iterate through the Imbues on an Item and return the first charged SpellID found.
         /// </summary>

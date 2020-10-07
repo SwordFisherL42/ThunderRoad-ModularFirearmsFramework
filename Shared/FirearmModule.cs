@@ -26,7 +26,12 @@ namespace ModularFirearms.Shared
         public string animationRef;
         public string openAnimationRef;
         public string closeAnimationRef;
+        public string ammoCounterRef;
 
+        public float blastRadius = 1.0f;
+        public float blastRange = 5.0f;
+        public float blastForce = 500.0f;
+        public string rayCastPointRef;
         // Distance the child slide/bolt can be travel
         public float slideTravelDistance = 0.05f;
 

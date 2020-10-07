@@ -18,7 +18,6 @@ namespace ModularFirearms.Shared
             base.OnItemLoaded(item);
             item.gameObject.AddComponent<InteractiveAmmo>();
         }
-
         
     }
 }

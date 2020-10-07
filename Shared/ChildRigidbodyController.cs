@@ -77,6 +77,21 @@ namespace ModularFirearms.Shared
 
         // State Functions //
 
+        public void SetLockedState(bool forward = true)
+        {
+            SetRelativeSlideForce(new Vector3(0, 0, 0));
+            connectedJoint.zMotion = ConfigurableJointMotion.Locked;
+            if (forward)
+            {
+                currentAnchor = lockedNeutralAnchor;
+                connectedJoint.anchor = currentAnchor;
+            }
+            else
+            {
+                currentAnchor = lockedBackAnchor;
+                connectedJoint.anchor = currentAnchor;
+            }
+        }
 
 
         /// <summary>

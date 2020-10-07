@@ -32,6 +32,7 @@ namespace ModularFirearms.SemiAuto
         public ConfigurableJoint connectedJoint;
         protected Handle gunGrip;
         protected Transform muzzlePoint;
+        protected Transform rayCastPoint;
         protected Transform shellEjectionPoint;
         protected ParticleSystem muzzleFlash;
         protected ParticleSystem muzzleSmoke;
@@ -58,8 +59,7 @@ namespace ModularFirearms.SemiAuto
         /// FireMode Selection and Ammo Tracking //
         private int currentReceiverAmmo;
         private bool currentSlideState = false;
-        //private FireMode fireModeSelection;
-        //private List<int> allowedFireModes;
+
         private float num1;
         private float num2;
         private float num3;
@@ -72,6 +72,7 @@ namespace ModularFirearms.SemiAuto
 
             /// Set all Object References ///
             if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.definition.GetCustomReference(module.muzzlePositionRef);
+            if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.definition.GetCustomReference(module.muzzlePositionRef);
             if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.definition.GetCustomReference(module.shellEjectionRef);
             if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.definition.GetCustomReference(module.animationRef).GetComponent<Animator>();
             if (!String.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.definition.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
@@ -88,17 +89,12 @@ namespace ModularFirearms.SemiAuto
             else Debug.LogError("[Fisher-Firearms][ERROR] No Reference to Slide Center Position(\"slideCenterRef\") in JSON! Weapon will not work as intended...");
             if (slideObject != null) slideHandle = slideObject.GetComponent<Handle>();
 
+
+
             RACK_THRESHOLD = -0.1f * module.slideTravelDistance; //module.slideRackThreshold;
             PULL_THRESHOLD = -0.5f * module.slideTravelDistance;
 
             currentReceiverAmmo = module.maxReceiverAmmo;
-
-            //fireModeSelection = (FireMode)FirearmFunctions.fireModeEnums.GetValue(module.fireMode);
-
-            //if (module.allowedFireModes != null)
-            //{
-            //    allowedFireModes = new List<int>(module.allowedFireModes);
-            //}
 
             /// Item Events ///
             item.OnHeldActionEvent += OnHeldAction;
@@ -137,33 +133,6 @@ namespace ModularFirearms.SemiAuto
             shellReceiver.data.disableTouch = true;
             Debug.Log("[Fisher-Firearms] Setting the Slide Interactable to Limited...");
             //LimitSlideInteraction(currentSlideState);
-
-            //Creature.player.body.creature.locomotion.capsuleCollider
-            //Creature.player.ragdoll.IgnoreCollision(slideCapsuleStabilizer, true);
-            //Physics.IgnoreCollision(Creature.player.locomotion.capsuleCollider, slideCapsuleStabilizer);
-            //item.IgnoreRagdollCollision(Creature.player.ragdoll);
-
-            //foreach (RagdollPart rp in Creature.player.ragdoll.parts)
-            //{
-            //    foreach (RagdollPart.ColliderInfo c in rp.colliders)
-            //    {
-            //        Physics.IgnoreCollision(c.collider, slideCapsuleStabilizer);
-            //    }
-            //}
-
-            //var magazineData = Catalog.GetData<ItemPhysic>(module.acceptedMagazineID, true);
-            //if (magazineData == null)
-            //{
-            //    Debug.LogError("[Fisher-Firearms][ERROR] No Magazine named " + module.acceptedMagazineID.ToString());
-            //    return;
-            //}
-            //else
-            //{
-            //    shellReceiver.Snap(magazineData.Spawn(true));
-            //}
-            //shellReceiver.data.disableTouch = !module.allowGrabMagazineFromGun;
-
-            //SetFireSelectionAnimator(Animations, fireModeSelection);
 
             return;
         }
@@ -225,114 +194,40 @@ namespace ModularFirearms.SemiAuto
             DumpRigidbodyToLog(slideRB);
         }
 
-        //protected void FixedUpdate()
-        //{
-        //    //Debug.Log("[Fisher-Slide] LateUpdate slideObject position values: " + slideObject.transform.localPosition.ToString());
-        //    if ((slideObject.transform.localPosition.z <= PULL_THRESHOLD) && !isPulledBack)
-        //    {
-        //        if (slideController != null)
-        //        {
-        //            if (slideController.IsHeld())
-        //            {
-        //                Debug.Log("[Fisher-Firearms] Entered PulledBack position");
-        //                //Debug.Log("[Fisher-Slide] PULL_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
-        //                if (pullbackSound != null) pullbackSound.Play();
-        //                isPulledBack = true;
-        //                isRacked = false;
-        //                playSoundOnNext = true;
-        //                slideController.LockedBackState();
-        //                FirearmFunctions.Animate(Animations, module.openAnimationRef);
-        //                shellReceiver.data.disableTouch = false;
-        //                //if (shellReceiver.data.locked && (currentReceiverAmmo < module.maxReceiverAmmo))
-        //                //{
-        //                //    shellReceiver.data.locked = false;
-        //                //}
-
-        //                if (roundChambered)
-        //                {
-        //                    if (roundSpent) { FirearmFunctions.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce); }
-        //                    else { FirearmFunctions.ShootProjectile(item, module.ammoID, shellEjectionPoint, null, module.shellEjectionForce); }
-        //                    roundChambered = false;
-        //                    slideController.ChamberRoundVisible(false);
-        //                }
-        //                if (CountAmmoFromReceiver() > 0)
-        //                {
-        //                    chamberRoundOnNext = true;
-        //                }
-   
-        //            }
-        //        }
-
-        //    }
-        //    if ((slideObject.transform.localPosition.z > (PULL_THRESHOLD - RACK_THRESHOLD)) && isPulledBack)
-        //    {
-        //        Debug.Log("[Fisher-Firearms] Showing Ammo...");
-        //        if (CountAmmoFromReceiver() > 0) { slideController.ChamberRoundVisible(true); Debug.Log("[Fisher-Firearms] Round Visible!"); }
-        //    }
-        //    if ((slideObject.transform.localPosition.z >= RACK_THRESHOLD) && !isRacked)
-        //    {
-
-        //        Debug.Log("[Fisher-Firearms] Entered Rack position");
-        //        //Debug.Log("[Fisher-Slide] RACK_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
-        //        isRacked = true;
-        //        isPulledBack = false;
-        //        shellReceiver.data.disableTouch = true;
-        //        slideController.ForwardState();
-        //        FirearmFunctions.Animate(Animations, module.closeAnimationRef);
-        //        if (playSoundOnNext)
-        //        {
-        //            if (rackforwardSound != null) rackforwardSound.Play();
-        //            playSoundOnNext = false;
-        //        }
-
-        //        if (chamberRoundOnNext)
-        //        {
-        //            if (!ConsumeOneFromReceiver()) return;
-        //            slideController.ChamberRoundVisible(true);
-        //            chamberRoundOnNext = false;
-        //            roundChambered = true;
-        //            roundSpent = false;
-        //        }
-        //    }
-        //}
-
-        //public void LimitSlideInteraction(bool dual = true)
-        //{
-        //    if (dual)
-        //    {
-        //        slideHandle.data.positionDamperMultiplier = 0.0f;
-        //        slideHandle.data.positionSpringMultiplier = 0.1f;
-        //        slideHandle.data.rotationDamperMultiplier = 0.0f;
-        //        slideHandle.data.rotationSpringMultiplier = 0.0f;
-        //    }
-        //    else
-        //    {
-        //        slideHandle.data.positionDamperMultiplier = 1.0f;
-        //        slideHandle.data.positionSpringMultiplier = 1.0f;
-        //        slideHandle.data.rotationDamperMultiplier = 1.0f;
-        //        slideHandle.data.rotationSpringMultiplier = 1.0f;
-        //    }
-        //}
-
-
         public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
         {
             // Trigger Action
-            if (handle.Equals(slideHandle))
+            if (handle.name.Equals(slideHandle.name))
             {
-                if (action == Interactable.Action.UseStart)
+                if (action == Interactable.Action.Ungrab)
                 {
-                    currentSlideState = !currentSlideState;
-                    Debug.Log("[Fisher-Firearms] Switching to Alternate Slide Handle Interactable: " + currentSlideState);
-                    //LimitSlideInteraction(currentSlideState);
+                    Debug.Log("[Fisher-Firearms] Slide Ungrabbed!");
+                    if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = false;
+                    if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = false;
+                    slideController.SetHeld(false);
+                    DumpRigidbodyToLog(slideController.rb);
+                }
+                if (action == Interactable.Action.Grab)
+                {
+                    Debug.Log("[Fisher-Firearms] Slide Grabbed!");
+                    if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = true;
+                    if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = true;
+                    slideController.SetHeld(true);
+                    DumpRigidbodyToLog(slideController.rb);
                 }
             }
             if (handle.Equals(gunGrip))
             {
+                if (action == Interactable.Action.Grab)
+                {
+                    if ((gunGripHeldRight || gunGripHeldLeft) && (slideController != null)) slideController.UnlockSlide();
+                }
+
                 if (action == Interactable.Action.UseStart)
                 {
                     // Begin Firing
                     triggerPressed = true;
+                    slideController.LockSlide();
                     if (!TrackedFire())
                     {
                         if (emptySound != null)
@@ -347,41 +242,39 @@ namespace ModularFirearms.SemiAuto
                 {
                     // End Firing
                     triggerPressed = false;
+                    slideController.UnlockSlide();
                 }
-                // "Spell-Menu" Action
+                //"Spell-Menu" Action
                 //if (action == Interactable.Action.AlternateUseStart)
                 //{
-                //    // Debug.Log("[Fisher-Slide] slideObject position values: " + slideObject.transform.localPosition.ToString());
-                //    //if (SlideToggleLock()) return;
-                //    //if (insertedMagazine == null || CountAmmoFromReceiver() > 0)
-                //    //{
-                //    //    // if weapon has no magazine, or a magazine with ammo, cycle fire mode
-                //    //    if (module.allowCycleFireMode)
-                //    //    {
-                //    //        if (emptySound != null) emptySound.Play();
-                //    //        fireModeSelection = FirearmFunctions.CycleFireMode(fireModeSelection, allowedFireModes);
-                //    //        SetFireSelectionAnimator(Animations, fireModeSelection);
-                //    //    }
-                //    //}
-                //    //if (CountAmmoFromReceiver() <= 0) MagazineRelease();
+
                 //}
             }
         }
 
         public void OnAnyHandleGrabbed(Handle handle, Interactor interactor)
         {
+            Debug.Log("[Fisher-Firearms] Grab: " + handle.name);
             if (handle.Equals(gunGrip))
             {
                 Debug.Log("[Fisher-Firearms] GunGrip Grabbed!");
                 if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = true;
                 if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = true;
+                if ((gunGripHeldRight || gunGripHeldLeft) && (slideController != null))
+                {
+                    slideHandle.data.positionDamperMultiplier = num1;
+                    slideHandle.data.positionSpringMultiplier = num2;
+                    slideHandle.data.rotationDamperMultiplier = num3;
+                    slideHandle.data.rotationSpringMultiplier = num4;
+                    slideController.UnlockSlide();
+                }
                 //slideHandle.data.positionDamperMultiplier = num1;
                 //slideHandle.data.positionSpringMultiplier = num2;
                 //slideHandle.data.rotationDamperMultiplier = num3;
                 //slideHandle.data.rotationSpringMultiplier = num4;
                 //if ((gunGripHeldRight || gunGripHeldLeft) && (slideController != null)) slideController.UnlockSlide();
             }
-            if (handle.Equals(slideHandle))
+            if (handle.name.Equals(slideHandle.name))
             {
                 Debug.Log("[Fisher-Firearms] Slide Grabbed!");
                 if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = true;
@@ -400,14 +293,22 @@ namespace ModularFirearms.SemiAuto
 
         public void OnAnyHandleUngrabbed(Handle handle, Interactor interactor, bool throwing)
         {
+            Debug.Log("[Fisher-Firearms] Ungrab: " + handle.name);
             if (handle.Equals(gunGrip))
             {
                 Debug.Log("[Fisher-Firearms] GunGrip Ungrabbed!");
                 if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = false;
-                //if ((!gunGripHeldRight && !gunGripHeldLeft) && (slideController != null)) slideController.LockSlide();
+                if ((!gunGripHeldRight && !gunGripHeldLeft) && (slideController != null))
+                {
+                    slideHandle.data.positionDamperMultiplier = 1.0f;
+                    slideHandle.data.positionSpringMultiplier = 1.0f;
+                    slideHandle.data.rotationDamperMultiplier = 1.0f;
+                    slideHandle.data.rotationSpringMultiplier = 1.0f;
+                    slideController.LockSlide();
+                }
             }
-            if (handle.Equals(slideHandle))
+            if (handle.name.Equals(slideHandle.name))
             {
                 Debug.Log("[Fisher-Firearms] Slide Ungrabbed!");
                 if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = false;
@@ -416,58 +317,6 @@ namespace ModularFirearms.SemiAuto
                 DumpRigidbodyToLog(slideController.rb);
             }
         }
-
-        //public void OnFirearmSnapped(ObjectHolder holder)
-        //{
-        //    try
-        //    {
-        //        slideObject.SetActive(false);
-        //        slideCenterPosition.SetActive(false);
-        //        slideForce.enabled = false;
-        //        connectedJoint.connectedBody = null;
-        //        connectedJoint.anchor = Vector3.zero;
-        //        connectedJoint.axis = Vector3.right;
-        //        connectedJoint.autoConfigureConnectedAnchor = false;
-        //        connectedJoint.connectedAnchor = Vector3.zero;
-        //        connectedJoint.secondaryAxis = Vector3.up;
-        //        connectedJoint.xMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.yMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.zMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.angularXMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.angularYMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.angularZMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.linearLimit = new SoftJointLimit { limit = 0.0f, bounciness = 0.0f, contactDistance = 0.0f };
-        //        connectedJoint.massScale = 1.0f;
-        //        connectedJoint.connectedMassScale = module.slideMassOffset;
-        //    }
-        //    catch { }
-        //}
-
-        //public void OnFirearmUnSnapped(ObjectHolder holder)
-        //{
-        //    try
-        //    {
-        //        slideObject.SetActive(true);
-        //        slideCenterPosition.SetActive(true);
-        //        slideForce.enabled = true;
-        //        connectedJoint.connectedBody = slideRB;
-        //        connectedJoint.anchor = new Vector3(0, 0, -0.5f * module.slideTravelDistance);
-        //        connectedJoint.axis = Vector3.right;
-        //        connectedJoint.autoConfigureConnectedAnchor = false;
-        //        connectedJoint.connectedAnchor = Vector3.zero;
-        //        connectedJoint.secondaryAxis = Vector3.up;
-        //        connectedJoint.xMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.yMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.zMotion = ConfigurableJointMotion.Limited;
-        //        connectedJoint.angularXMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.angularYMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.angularZMotion = ConfigurableJointMotion.Locked;
-        //        connectedJoint.linearLimit = new SoftJointLimit { limit = 0.5f * module.slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
-        //        connectedJoint.massScale = 1.0f;
-        //        connectedJoint.connectedMassScale = module.slideMassOffset;
-        //    }
-        //    catch { }
-        //}
 
         protected void OnShellInserted(Item interactiveObject)
         {
@@ -517,7 +366,8 @@ namespace ModularFirearms.SemiAuto
         public bool Fire()
         {
             PreFireEffects();
-            FirearmFunctions.ShootProjectile(item, module.projectileID, muzzlePoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, 1.0f, false, slideCapsuleStabilizer);
+            FirearmFunctions.ShotgunBlast(rayCastPoint, module.blastRange, module.blastForce);
+            FirearmFunctions.ShootProjectile(item, module.projectileID, rayCastPoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, 1.0f, false, slideCapsuleStabilizer, true);
             //FirearmFunctions.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce);
             FirearmFunctions.ApplyRecoil(item.rb, module.recoilForces, 1.0f, gunGripHeldLeft || slideGripHeldLeft, gunGripHeldRight || slideGripHeldRight, module.hapticForce);
             return true;
@@ -534,20 +384,8 @@ namespace ModularFirearms.SemiAuto
             }
             if (!roundChambered || roundSpent) return false;
 
-            // Round cycle sequence
-            //roundChambered = false;
-            //slideController.ChamberRoundVisible(roundChambered);
-
             Fire();
             roundSpent = true;
-
-            //if (ConsumeOneFromReceiver())
-            //{
-            //    roundChambered = true;
-            //    slideController.ChamberRoundVisible(roundChambered);
-            //    slideController.BlowBack();
-            //}
-            //else slideController.LastShot();
 
             return true;
         }
@@ -555,42 +393,6 @@ namespace ModularFirearms.SemiAuto
         public void SetFiringFlag(bool status) { isFiring = status; }
 
         public bool TriggerIsPressed() { return triggerPressed; }
-
-        //public bool SlideToggleLock()
-        //{
-        //    if (slideController != null)
-        //    {
-
-        //        // If the slide is locked back and there is a loaded magazine inserted, load the next round
-        //        if (slideController.IsLocked())
-        //        {
-        //            if (CountAmmoFromReceiver() <= 0) return false;
-        //            if (ConsumeOneFromReceiver())
-        //            {
-        //                roundChambered = true;
-        //                slideController.ChamberRoundVisible(true);
-        //            }
-        //            slideController.ForwardState();
-        //            if (rackforwardSound != null) rackforwardSound.Play();
-        //            return true;
-        //        }
-        //        // If the slide is held back by the player and not yet locked, lock it
-        //        else if (slideController.IsHeld() && isPulledBack)
-        //        {
-        //            slideController.LockedBackState();
-        //            if (emptySound != null) emptySound.Play();
-        //            return true;
-        //        }
-        //        else return false;
-        //    }
-        //    else return false;
-        //}
-
-        //public void MagazineRelease()
-        //{
-        //    try { shellReceiver.UnSnapOne(); }
-        //    catch { Debug.LogWarning("[Fisher-Firearms] Unable to Eject the Magazine!"); }
-        //}
 
         public int CountAmmoFromReceiver()
         {
@@ -609,6 +411,31 @@ namespace ModularFirearms.SemiAuto
 
         protected void LateUpdate()
         {
+            //if (!gunGripHeldLeft && !gunGripHeldRight && (slideGripHeldLeft || slideGripHeldRight || slideController.IsHeld()))
+            //{
+            //    Debug.Log("[Fisher-Firearms] SINGLE HANDED SLIDE MODE ON ! ");
+            //    slideController.SetLockedState(currentSlideState);
+            //    slideHandle.data.positionDamperMultiplier = 1.0f;
+            //    slideHandle.data.positionSpringMultiplier = 1.0f;
+            //    slideHandle.data.rotationDamperMultiplier = 1.0f;
+            //    slideHandle.data.rotationSpringMultiplier = 1.0f;
+            //    //item.rb.mass = 0.1f;
+            //}
+            //else if (!gunGripHeldLeft && !gunGripHeldRight)
+            //{
+            //    slideController.LockSlide();
+            //    //item.rb.mass = 1.0f;
+            //}
+
+            //else if (gunGripHeldLeft || gunGripHeldRight)
+            //{
+            //    //Debug.Log("[Fisher-Firearms] SINGLE HANDED SLIDE MODE OFF ! ");
+            //    //item.rb.mass = 1.0f;A
+            //    slideHandle.data.positionDamperMultiplier = num1;
+            //    slideHandle.data.positionSpringMultiplier = num2;
+            //    slideHandle.data.rotationDamperMultiplier = num3;
+            //    slideHandle.data.rotationSpringMultiplier = num4;
+            //}
             //Debug.Log("[Fisher-Slide] LateUpdate slideObject position values: " + slideObject.transform.localPosition.ToString());
             if ((slideObject.transform.localPosition.z <= PULL_THRESHOLD) && !isPulledBack)
             {
@@ -617,6 +444,7 @@ namespace ModularFirearms.SemiAuto
                     if (slideController.IsHeld())
                     {
                         Debug.Log("[Fisher-Firearms] Entered PulledBack position");
+                        currentSlideState = false;
                         //Debug.Log("[Fisher-Slide] PULL_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
                         if (pullbackSound != null) pullbackSound.Play();
                         isPulledBack = true;
@@ -653,8 +481,8 @@ namespace ModularFirearms.SemiAuto
             }
             if ((slideObject.transform.localPosition.z >= RACK_THRESHOLD) && !isRacked)
             {
-
                 Debug.Log("[Fisher-Firearms] Entered Rack position");
+                currentSlideState = true;
                 //Debug.Log("[Fisher-Slide] RACK_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
                 isRacked = true;
                 isPulledBack = false;
@@ -677,36 +505,36 @@ namespace ModularFirearms.SemiAuto
                 }
             }
 
-            if ((!gunGripHeldLeft && !gunGripHeldRight))
-            {
-                triggerPressed = false;
+            //if ((!gunGripHeldLeft && !gunGripHeldRight))
+            //{
+            //    triggerPressed = false;
 
-                if ((slideGripHeldLeft || slideGripHeldRight))
-                {
-                    slideHandle.data.positionDamperMultiplier = 1.0f;
-                    slideHandle.data.positionSpringMultiplier = 1.0f;
-                    slideHandle.data.rotationDamperMultiplier = 1.0f;
-                    slideHandle.data.rotationSpringMultiplier = 1.0f;
-                    if (slideController != null)
-                    {
-                        slideController.SetRelativeSlideForce(new Vector3(0, 0, 0));
-                    }
-                }
-            }
+            //    if ((slideGripHeldLeft || slideGripHeldRight))
+            //    {
+            //        slideHandle.data.positionDamperMultiplier = 1.0f;
+            //        slideHandle.data.positionSpringMultiplier = 1.0f;
+            //        slideHandle.data.rotationDamperMultiplier = 1.0f;
+            //        slideHandle.data.rotationSpringMultiplier = 1.0f;
+            //        if (slideController != null)
+            //        {
+            //            slideController.SetRelativeSlideForce(new Vector3(0, 0, 0));
+            //        }
+            //    }
+            //}
 
-            if ((gunGripHeldLeft || gunGripHeldRight))
-            {
-                slideHandle.data.positionDamperMultiplier = num1;
-                slideHandle.data.positionSpringMultiplier = num2;
-                slideHandle.data.rotationDamperMultiplier = num3;
-                slideHandle.data.rotationSpringMultiplier = num4;
-                if (slideController != null) slideController.UnlockSlide();
-            }
+            //if ((gunGripHeldLeft || gunGripHeldRight))
+            //{
+            //    slideHandle.data.positionDamperMultiplier = num1;
+            //    slideHandle.data.positionSpringMultiplier = num2;
+            //    slideHandle.data.rotationDamperMultiplier = num3;
+            //    slideHandle.data.rotationSpringMultiplier = num4;
+            //    if (slideController != null) slideController.UnlockSlide();
+            //}
 
-            if (!gunGripHeldLeft && !gunGripHeldRight && !slideGripHeldLeft && !slideGripHeldRight)
-            {
-                slideController.LockSlide();
-            }
+            //if (!gunGripHeldLeft && !gunGripHeldRight && !slideGripHeldLeft && !slideGripHeldRight)
+            //{
+            //    slideController.LockSlide();
+            //}
 
             if (slideController != null) slideController.FixCustomComponents();
             else return;
@@ -725,12 +553,3 @@ namespace ModularFirearms.SemiAuto
         }
     }
 }
-
-
-
-
-//private void OnCollisionEnter(Collision hit)
-//{
-//    Debug.Log(gameObject.name + " just hit " + hit.gameObject.name);
-
-//}

@@ -97,8 +97,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Shared\AmmoModule.cs" />
+    <Compile Include="Shared\AttachmentModule.cs" />
     <Compile Include="Shared\ChildRigidbodyController.cs" />
     <Compile Include="Shared\FirearmModule.cs" />
+    <Compile Include="Shared\FlashlightController.cs" />
     <Compile Include="Shared\MagazineGenerator.cs" />
     <Compile Include="Shared\MagazineModule.cs" />
     <Compile Include="Shared\InteractiveAmmo.cs" />
@@ -110,7 +112,7 @@
     <Compile Include="ItemAmmoLoader.cs" />
     <Compile Include="ItemAmmoResupply.cs" />
     <Compile Include="ItemFirearmBase.cs" />
-    <Compile Include="SemiAuto\SemiAutoFirearmGenerator.cs" />
+    <Compile Include="Weapons\SemiAutoFirearmGenerator.cs" />
     <Compile Include="ItemFirearmRevolver.cs" />
     <Compile Include="ItemFirearmSimple.cs" />
     <Compile Include="ItemMagazine.cs" />
@@ -131,9 +133,10 @@
     <Compile Include="ItemSlide.cs" />
     <Compile Include="SemiAuto\SemiAutoModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Shotgun\ShotgunGenerator.cs" />
+    <Compile Include="Weapons\ShotgunGenerator.cs" />
     <Compile Include="Shotgun\ShotgunModule.cs" />
     <Compile Include="Shotgun\ShotgunSlide.cs" />
+    <Compile Include="TextureProcessor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
