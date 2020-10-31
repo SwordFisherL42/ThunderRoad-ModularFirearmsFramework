@@ -39,6 +39,8 @@ namespace ModularFirearms
         /// </summary>
         public static float[,] blendTreePositions = new float[4, 2] { { 0.0f, 0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f } };
 
+        public static Vector3[] buckshotOffsetPosiitions = new Vector3[5] { Vector3.zero, new Vector3(0.05f, 0.05f, 0.0f), new Vector3(-0.05f, -0.05f, 0.0f), new Vector3(0.05f, 0.05f, 0.5f), new Vector3(0.07f, 0.07f, 0.0f) };
+
         public static string projectileColliderReference = "BodyCollider";
 
         public enum WeaponType
@@ -300,9 +302,46 @@ namespace ModularFirearms
             }
         }
 
-        public static void ShotgunBlast(Transform spawnPoint, float distance, float force)
-        {
 
+        public static void ProjectileBurst(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell = null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
+        {
+            var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
+            if (projectileData == null)
+            {
+                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
+                return;
+            }
+            foreach (Vector3 offsetVec in buckshotOffsetPosiitions)
+            {
+                Vector3 spawnPos = spawnPoint.position + offsetVec;
+                Item projectile = projectileData.Spawn(pooled);
+                if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
+                projectile.IgnoreObjectCollision(shooterItem);
+                projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
+                if (IgnoreArg1 != null)
+                {
+                    try { projectile.IgnoreColliderCollision(IgnoreArg1); }
+                    catch { }
+                }
+                if (!String.IsNullOrEmpty(imbueSpell))
+                {
+                    // Set imbue charge on projectile using ItemProjectileSimple subclass
+                    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
+                    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
+                }
+                // Match the Position, Rotation, & Speed of the spawner item
+                projectile.transform.position = spawnPos;
+                projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
+                projectile.rb.velocity = shooterItem.rb.velocity;
+                projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
+                projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
+            }
+
+        }
+
+
+        public static void ShotgunBlast(Item shooterItem, string projectileID, Transform spawnPoint, float distance, float force, float forceProjectile, string imbueSpell = null, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
+        {
             if (Physics.Raycast(spawnPoint.position, spawnPoint.forward, out RaycastHit hit, distance))
             {
                 Creature hitCreature = hit.collider.transform.root.GetComponentInParent<Creature>();
@@ -327,38 +366,45 @@ namespace ModularFirearms
                         hit.collider.attachedRigidbody.AddForce(spawnPoint.forward * force, ForceMode.Impulse);
                     }
                     catch { }
+
                 }
 
-
-                //RaycastHit[] itemsHit = Physics.SphereCastAll(spawnPoint.position, radius, spawnPoint.forward, distance);
-                //foreach (RaycastHit hit in itemsHit)
-                //{
-                //    Creature hitCreature = hit.collider.transform.root.GetComponentInParent<Creature>();
-                //    if (hitCreature != null)
-                //    {
-                //        if (hitCreature == Creature.player) continue;
-                //        Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit creature!");
-                //        hitCreature.locomotion.rb.AddExplosionForce(force, hit.point, 1.0f, 1.0f, ForceMode.VelocityChange);
-                //        hitCreature.ragdoll.SetState(Creature.State.Destabilized);
-                //        foreach (RagdollPart part in hitCreature.ragdoll.parts)
-                //        {
-                //            part.rb.AddExplosionForce(force, hit.point, 1.0f, 1.0f, ForceMode.VelocityChange);
-                //            part.rb.AddForce(spawnPoint.forward * force, ForceMode.VelocityChange);
-                //        }
-                //    }
-                //    else
-                //    {
-                //        try
-                //        {
-                //            Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit item");
-                //            hit.collider.attachedRigidbody.AddExplosionForce(force, hit.point, 0.5f, 1.0f, ForceMode.VelocityChange);
-                //            hit.collider.attachedRigidbody.AddForce(spawnPoint.forward * force, ForceMode.VelocityChange);
-                //        }
-                //        catch { }
-                //    }
-                //}
             }
+
+            var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
+            if (projectileData == null)
+            {
+                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
+                return;
+            }
+            foreach (Vector3 offsetVec in buckshotOffsetPosiitions)
+            {
+                Vector3 spawnPos = spawnPoint.position + offsetVec;
+                Item projectile = projectileData.Spawn(pooled);
+                if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
+                projectile.IgnoreObjectCollision(shooterItem);
+                projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
+                if (IgnoreArg1 != null)
+                {
+                    try { projectile.IgnoreColliderCollision(IgnoreArg1); }
+                    catch { }
+                }
+                if (!String.IsNullOrEmpty(imbueSpell))
+                {
+                    // Set imbue charge on projectile using ItemProjectileSimple subclass
+                    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
+                    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
+                }
+                // Match the Position, Rotation, & Speed of the spawner item
+                projectile.transform.position = spawnPos;
+                projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
+                projectile.rb.velocity = shooterItem.rb.velocity;
+                projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceProjectile);
+                projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
+            }
+
         }
+
         /// <summary>
         /// Iterate through the Imbues on an Item and return the first charged SpellID found.
         /// </summary>

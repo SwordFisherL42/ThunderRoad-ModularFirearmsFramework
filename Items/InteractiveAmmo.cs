@@ -2,12 +2,12 @@
 using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
-namespace ModularFirearms.Shared
+namespace ModularFirearms.Items
 {
     public class InteractiveAmmo : MonoBehaviour
     {
         protected Item item;
-        protected AmmoModule module;
+        protected Shared.AmmoModule module;
         private GameObject bulletMesh;
         private Handle ammoHandle;
         private AmmoType thisAmmoType;
@@ -17,14 +17,13 @@ namespace ModularFirearms.Shared
         protected void Awake()
         {
             item = this.GetComponent<Item>();
-            module = item.data.GetModule<AmmoModule>();
+            module = item.data.GetModule<Shared.AmmoModule>();
             thisAmmoType = module.GetSelectedType();
-            capacity = module.numberOfRounds;
+            capacity = module.ammoCapacity;
             if (module.handleRef != null) ammoHandle = item.definition.GetCustomReference(module.handleRef).GetComponent<Handle>();
-            if (module.bulletMeshID != null) bulletMesh = item.definition.GetCustomReference(module.bulletMeshID).gameObject;
+            if (module.bulletMeshRef != null) bulletMesh = item.definition.GetCustomReference(module.bulletMeshRef).gameObject;
             Refill();
         }
-
 
         public AmmoType GetAmmoType()
         {
@@ -56,7 +55,7 @@ namespace ModularFirearms.Shared
 
         public void Refill()
         {
-            capacity = module.numberOfRounds;
+            capacity = module.ammoCapacity;
             SetMeshState(bulletMesh, true);
             isLoaded = true;
             if (ammoHandle != null) ammoHandle.data.allowTelekinesis = true;

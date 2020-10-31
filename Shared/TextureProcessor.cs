@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using ThunderRoad;
 
-namespace ModularFirearms
+namespace ModularFirearms.Shared
 {
     public class TextureProcessor
     {
