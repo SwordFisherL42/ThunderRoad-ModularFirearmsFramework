@@ -110,6 +110,7 @@
     <Compile Include="ItemAmmoLoader.cs" />
     <Compile Include="ItemAmmoResupply.cs" />
     <Compile Include="ItemFirearmBase.cs" />
+    <Compile Include="Weapons\AutomagGenerator.cs" />
     <Compile Include="Weapons\SemiAutoFirearmGenerator.cs" />
     <Compile Include="ItemFirearmRevolver.cs" />
     <Compile Include="ItemFirearmSimple.cs" />

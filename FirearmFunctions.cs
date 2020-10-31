@@ -39,19 +39,21 @@ namespace ModularFirearms
         /// </summary>
         public static float[,] blendTreePositions = new float[4, 2] { { 0.0f, 0.0f }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f } };
 
-        public static Vector3[] buckshotOffsetPosiitions = new Vector3[5] { Vector3.zero, new Vector3(0.05f, 0.05f, 0.0f), new Vector3(-0.05f, -0.05f, 0.0f), new Vector3(0.05f, 0.05f, 0.5f), new Vector3(0.07f, 0.07f, 0.0f) };
+        public static Vector3[] buckshotOffsetPosiitions = new Vector3[5] { Vector3.zero, new Vector3(0.05f, 0.05f, 0.0f), new Vector3(-0.05f, -0.05f, 0.0f), new Vector3(0.05f, -0.05f, 0.0f), new Vector3(0.07f, 0.07f, 0.0f) };
 
         public static string projectileColliderReference = "BodyCollider";
 
         public enum WeaponType
         {
-            TestWeapon = 0,
+            TestWeapon = 8,
+            AutoMag = 0,
             SemiAuto = 1,
             Shotgun = 2,
             BoltAction = 3,
             Revolver = 4,
             Sniper = 5,
-            Energy = 6
+            HighYield = 6,
+            Energy = 7
         }
 
         public enum AmmoType
@@ -63,7 +65,8 @@ namespace ModularFirearms
             ShotgunShell = 4,
             Revolver = 5,
             Battery = 6,
-            Sniper = 7
+            Sniper = 7,
+            Explosive = 8
         }
 
         public enum ProjectileType
@@ -131,7 +134,7 @@ namespace ModularFirearms
         /// <returns></returns>
         public static FireMode CycleFireMode(FireMode currentSelection, List<int> allowedFireModes = null)
         {
-            int selectionIndex = (int) currentSelection;
+            int selectionIndex = (int)currentSelection;
             selectionIndex++;
             if (allowedFireModes != null)
             {
@@ -173,7 +176,7 @@ namespace ModularFirearms
         /// <param name="leftHandHaptic"></param>
         /// <param name="rightHandHaptic"></param>
         /// <param name="hapticForce"></param>
-        public static void ApplyRecoil(Rigidbody itemRB, float[] recoilForces, float recoilMult=1.0f, bool leftHandHaptic=false, bool rightHandHaptic = false, float hapticForce=1.0f)
+        public static void ApplyRecoil(Rigidbody itemRB, float[] recoilForces, float recoilMult = 1.0f, bool leftHandHaptic = false, bool rightHandHaptic = false, float hapticForce = 1.0f)
         {
             if (rightHandHaptic) PlayerControl.handRight.HapticShort(hapticForce);
             if (leftHandHaptic) PlayerControl.handLeft.HapticShort(hapticForce);
@@ -223,7 +226,7 @@ namespace ModularFirearms
                     foreach (RagdollPart part in creature.ragdoll.parts)
                     {
                         part.rb.AddExplosionForce(force * part.rb.mass, origin, blastRadius, liftMult, forceMode);
-                        part.rb.AddForce(Vector3.up * liftMult *part.rb.mass, forceMode);
+                        part.rb.AddForce(Vector3.up * liftMult * part.rb.mass, forceMode);
                     }
                 }
             }
@@ -238,7 +241,7 @@ namespace ModularFirearms
         /// <param name="selection"></param>
         /// <param name="paramFloat1"></param>
         /// <param name="paramFloat2"></param>
-        public static void SetFireSelectionAnimator(Animator animator, FireMode selection, string paramFloat1="x", string paramFloat2 = "y")
+        public static void SetFireSelectionAnimator(Animator animator, FireMode selection, string paramFloat1 = "x", string paramFloat2 = "y")
         {
             if (animator == null) return;
             try
@@ -259,8 +262,10 @@ namespace ModularFirearms
         /// <param name="forceMult"></param>
         /// <param name="throwMult"></param>
         /// <param name="pooled"></param>
-        public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell=null, float forceMult=1.0f, float throwMult=1.0f, bool pooled=false, Collider IgnoreArg1 = null, bool isBuckshot = false)
+        public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell = null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
         {
+            if ((spawnPoint == null) || (String.IsNullOrEmpty(projectileID))) return;
+
             var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
             if (projectileData == null)
             {
@@ -275,7 +280,8 @@ namespace ModularFirearms
                 projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
                 if (IgnoreArg1 != null)
                 {
-                    try {
+                    try
+                    {
                         projectile.IgnoreColliderCollision(IgnoreArg1);
                         //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
                     }
@@ -298,10 +304,8 @@ namespace ModularFirearms
                 projectile.rb.velocity = shooterItem.rb.velocity;
                 projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
                 projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
-
             }
         }
-
 
         public static void ProjectileBurst(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell = null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
         {
@@ -338,7 +342,6 @@ namespace ModularFirearms
             }
 
         }
-
 
         public static void ShotgunBlast(Item shooterItem, string projectileID, Transform spawnPoint, float distance, float force, float forceProjectile, string imbueSpell = null, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
         {
@@ -553,6 +556,8 @@ namespace ModularFirearms
             Debug.LogWarning("[Fisher-Firearms][RB-DUMP] " + rb.name + ": " + rb.ToString());
             Debug.LogWarning("[Fisher-Firearms][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
         }
+
+
 
     }
 }

@@ -93,6 +93,9 @@ namespace ModularFirearms.Weapons
 
         void Awake()
         {
+            soundCounter = 0;
+            maxSoundCounter = 0;
+
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.FirearmModule>();
 
@@ -102,11 +105,10 @@ namespace ModularFirearms.Weapons
             if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.definition.GetCustomReference(module.animationRef).GetComponent<Animator>();
             if (!String.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.definition.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
 
-            if (!String.IsNullOrEmpty(module.fireSound1Ref)) fireSound1 = item.definition.GetCustomReference(module.fireSound1Ref).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.fireSound2Ref)) fireSound2 = item.definition.GetCustomReference(module.fireSound2Ref).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.fireSound3Ref)) fireSound3 = item.definition.GetCustomReference(module.fireSound3Ref).GetComponent<AudioSource>();
-            maxSoundCounter = module.maxFireSounds;
-            soundCounter = 1;
+            if (!String.IsNullOrEmpty(module.fireSound1Ref)) { fireSound1 = item.definition.GetCustomReference(module.fireSound1Ref).GetComponent<AudioSource>(); maxSoundCounter++; soundCounter = 1; }
+            if (!String.IsNullOrEmpty(module.fireSound2Ref)) { fireSound2 = item.definition.GetCustomReference(module.fireSound2Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
+            if (!String.IsNullOrEmpty(module.fireSound3Ref)) { fireSound3 = item.definition.GetCustomReference(module.fireSound3Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
+
 
             if (!String.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.definition.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
             if (!String.IsNullOrEmpty(module.pullSoundRef)) pullbackSound = item.definition.GetCustomReference(module.pullSoundRef).GetComponent<AudioSource>();
@@ -863,7 +865,8 @@ namespace ModularFirearms.Weapons
 
         public void PlayFireSound()
         {
-            if (soundCounter == 1) { fireSound1.Play(); }
+            if (soundCounter == 0) { return; }
+            else if (soundCounter == 1) { fireSound1.Play(); }
             else if (soundCounter == 2) { fireSound2.Play(); }
             else if (soundCounter == 3) { fireSound3.Play(); }
             IncSoundCounter();
@@ -928,32 +931,6 @@ namespace ModularFirearms.Weapons
 
             return true;
         }
-
-
-        private IEnumerator StartContiniousFiringSound(AudioSource a, AudioSource entry = null)
-        {
-            if (entry != null) entry.Play();
-            do yield return null;
-            while (entry.isPlaying);
-            if (triggerPressed)
-            {
-                a.loop = true;
-                a.Play();
-            }
-
-        }
-
-
-        private IEnumerator EndContiniousFiringSound(AudioSource a, AudioSource final = null, bool playFinal = true)
-        {
-            a.loop = false;
-            do yield return null;
-            while (a.isPlaying);
-            a.Stop();
-            if (final != null) final.Play();
-            yield return null;
-        }
-
 
     }
 }

@@ -125,26 +125,17 @@ namespace ModularFirearms.Shared
 
             selectedType = (WeaponType)FirearmFunctions.weaponTypeEnums.GetValue(firearmCategory);
             if (selectedType.Equals(WeaponType.TestWeapon)) item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>();
+            else if (selectedType.Equals(WeaponType.AutoMag)) item.gameObject.AddComponent<Weapons.AutomagGenerator>();
             else if (selectedType.Equals(WeaponType.SemiAuto)) item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>();
             else if (selectedType.Equals(WeaponType.Shotgun)) item.gameObject.AddComponent<Weapons.ShotgunGenerator>();
-            //else if (selectedType.Equals(WeaponType.Energy)) item.gameObject.AddComponent<Weapons.ItemRifleEnergy>();
+            
+
             //else if (selectedType.Equals(WeaponType.Shotgun)) item.gameObject.AddComponent<Weapons.ItemShotgunUNSC>();
             //else if (selectedType.Equals(WeaponType.BoltAction)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
             //else if (selectedType.Equals(WeaponType.Revolver)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
             //else if (selectedType.Equals(WeaponType.Sniper)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
             //else if (selectedType.Equals(WeaponType.Sniper)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
-
-            //if (weaponClass == 1)
-            //{
-            //    item.gameObject.AddComponent<ItemPistolUNSC>();
-            //}
-            //else if (weaponClass == 2)
-            //{
-            //    item.gameObject.AddComponent<ItemPistolEnergy>();
-            //}
-
         }
     }
 }
-
 
