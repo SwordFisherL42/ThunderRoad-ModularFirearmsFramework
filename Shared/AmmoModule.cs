@@ -14,6 +14,9 @@ namespace ModularFirearms.Shared
         public int ammoCapacity = 1;
         public float[] ejectionForceVector;
 
+        public string magazineID = "MagazineBasicPistol";
+        public bool despawnBagOnEmpty = false;
+
         public bool enableBulletHolder = false;
 
         public AmmoType GetSelectedType() { return (AmmoType)FirearmFunctions.ammoTypeEnums.GetValue(ammoType); }
@@ -26,6 +29,7 @@ namespace ModularFirearms.Shared
             selectedType = GetSelectedType();
             if (selectedType.Equals(AmmoType.Generic) || selectedType.Equals(AmmoType.SemiAuto) || selectedType.Equals(AmmoType.ShotgunShell)) item.gameObject.AddComponent<Items.InteractiveAmmo>();
             else if (selectedType.Equals(AmmoType.Magazine)) item.gameObject.AddComponent<Items.InteractiveMagazine>();
+            else if (selectedType.Equals(AmmoType.Pouch)) item.gameObject.AddComponent<Items.ItemInfintieAmmo>();
         }
 
     }

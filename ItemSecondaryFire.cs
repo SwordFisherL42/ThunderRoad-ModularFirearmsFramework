@@ -21,10 +21,10 @@ namespace ModularFirearms
             item = this.GetComponent<Item>();
             item.OnHeldActionEvent += OnHeldAction;
             module = item.data.GetModule<ItemModuleSecondaryFire>();
-            if (!string.IsNullOrEmpty(module.mainGripID)) gunGrip = item.definition.GetCustomReference(module.mainGripID).GetComponent<Handle>();
-            if (!string.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.definition.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
-            if (!string.IsNullOrEmpty(module.muzzleFlashRef)) MuzzleFlash = item.definition.GetCustomReference(module.muzzleFlashRef).GetComponent<ParticleSystem>();
-            if (!string.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.definition.GetCustomReference(module.muzzlePositionRef);
+            if (!string.IsNullOrEmpty(module.mainGripID)) gunGrip = item.GetCustomReference(module.mainGripID).GetComponent<Handle>();
+            if (!string.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
+            if (!string.IsNullOrEmpty(module.muzzleFlashRef)) MuzzleFlash = item.GetCustomReference(module.muzzleFlashRef).GetComponent<ParticleSystem>();
+            if (!string.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
             else muzzlePoint = item.transform;
         }
 
@@ -33,7 +33,7 @@ namespace ModularFirearms
             prevShot = Time.time;
         }
 
-        public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
+        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
             if (handle.Equals(gunGrip) && action == Interactable.Action.UseStart && ((Time.time - prevShot) > module.fireDelay))
             {

@@ -29,6 +29,18 @@ namespace ModularFirearms
     public delegate void IsFiringDelegate(bool status);
 
     /// <summary>
+    /// Represents a function that determines if a projectile is currently spawning
+    /// </summary>
+    /// <returns></returns>
+    public delegate bool IsSpawningDelegate();
+
+    /// <summary>
+    /// Represents a function that sets the projectile spawning flag
+    /// </summary>
+    /// <param name="status"></param>
+    public delegate void SetSpawningStatusDelegate(bool status);
+
+    /// <summary>
     /// Core Framework Functions, meant to be shared across multiple classes
     /// </summary>
     public class FirearmFunctions
@@ -58,7 +70,8 @@ namespace ModularFirearms
 
         public enum AmmoType
         {
-            Generic = 0,
+            Generic = 9,
+            Pouch = 0,
             Magazine = 1,
             AmmoLoader = 2,
             SemiAuto = 3,
@@ -84,6 +97,8 @@ namespace ModularFirearms
             Flashlight = 1,
             Laser = 2,
             GrenadeLauncher = 3,
+            AmmoCounter = 4,
+            Compass = 5
         }
 
         public static Array weaponTypeEnums = Enum.GetValues(typeof(WeaponType));
@@ -212,14 +227,14 @@ namespace ModularFirearms
 
             foreach (Creature creature in Creature.list)
             {
-                if (creature == Creature.player) continue;
+                if (creature == Player.currentCreature) continue;
                 if (Math.Abs(Vector3.Distance(creature.transform.position, origin)) <= blastRadius)
                 {
                     //Debug.Log("[F-L42-HitscanExplosion] Hit Creature: " + creature.name);
-                    if (!creature.health.isKilled)
+                    if (!creature.isKilled)
                     {
-                        creature.ragdoll.SetState(Creature.State.Dead);
-                        creature.health.Kill();
+                        creature.ragdoll.SetState(Ragdoll.State.Inert);
+                        creature.Kill();
                     }
                     creature.locomotion.rb.AddExplosionForce(force * creature.locomotion.rb.mass, origin, blastRadius, liftMult, forceMode);
                     creature.locomotion.rb.AddForce(Vector3.up * liftMult * creature.locomotion.rb.mass, forceMode);
@@ -262,7 +277,7 @@ namespace ModularFirearms
         /// <param name="forceMult"></param>
         /// <param name="throwMult"></param>
         /// <param name="pooled"></param>
-        public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell = null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
+        public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell = null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null, SetSpawningStatusDelegate SetSpawnStatus = null)
         {
             if ((spawnPoint == null) || (String.IsNullOrEmpty(projectileID))) return;
 
@@ -274,36 +289,56 @@ namespace ModularFirearms
             }
             else
             {
-                Item projectile = projectileData.Spawn(pooled);
-                if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
-                projectile.IgnoreObjectCollision(shooterItem);
-                projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
-                if (IgnoreArg1 != null)
+                SetSpawnStatus(true);
+                projectileData.SpawnAsync(i =>
                 {
                     try
                     {
-                        projectile.IgnoreColliderCollision(IgnoreArg1);
-                        //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
+                        i.transform.position = spawnPoint.position;
+                        i.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
+                        
+                        // shooterItem.IgnoreObjectCollision(i);
+                        i.ignoredItem = shooterItem;
+                        i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
+                        if (IgnoreArg1 != null)
+                        {
+                            try
+                            {
+                                i.IgnoreColliderCollision(IgnoreArg1);
+                                foreach (ColliderGroup CG in shooterItem.colliderGroups)
+                                {
+                                    foreach(Collider C in CG.colliders)
+                                    {
+                                        Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
+                                    }
+                                }
+                                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
+                                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
+                            }
+                            catch { }
+                        }
+                        
+                        i.rb.velocity = shooterItem.rb.velocity;
+                        i.rb.AddForce(i.rb.transform.forward * 1000.0f * forceMult);
+                        //i.rb.useGravity = false;
+                        i.Throw(throwMult, Item.FlyDetection.CheckAngle);
+                        SetSpawnStatus(false);
+                        if (!String.IsNullOrEmpty(imbueSpell))
+                        {
+                            // Set imbue charge on projectile using ItemProjectileSimple subclass
+                            ItemSimpleProjectile projectileController = i.gameObject.GetComponent<ItemSimpleProjectile>();
+                            if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
+                        }
                     }
-                    catch { }
-                }
-                //if (IgnoreArg2 != null)
-                //{
-                //    try { projectile.IgnoreColliderCollision(IgnoreArg2); }
-                //    catch { }
-                //}
-                if (!String.IsNullOrEmpty(imbueSpell))
-                {
-                    // Set imbue charge on projectile using ItemProjectileSimple subclass
-                    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
-                    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                }
-                // Match the Position, Rotation, & Speed of the spawner item
-                projectile.transform.position = spawnPoint.position;
-                projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
-                projectile.rb.velocity = shooterItem.rb.velocity;
-                projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
-                projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
+                    catch
+                    {
+                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING ");
+                    }
+                },
+                spawnPoint.position,
+                Quaternion.Euler(spawnPoint.rotation.eulerAngles),
+                null,
+                false);
             }
         }
 
@@ -317,28 +352,29 @@ namespace ModularFirearms
             }
             foreach (Vector3 offsetVec in buckshotOffsetPosiitions)
             {
-                Vector3 spawnPos = spawnPoint.position + offsetVec;
-                Item projectile = projectileData.Spawn(pooled);
-                if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
-                projectile.IgnoreObjectCollision(shooterItem);
-                projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
-                if (IgnoreArg1 != null)
-                {
-                    try { projectile.IgnoreColliderCollision(IgnoreArg1); }
-                    catch { }
-                }
-                if (!String.IsNullOrEmpty(imbueSpell))
-                {
-                    // Set imbue charge on projectile using ItemProjectileSimple subclass
-                    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
-                    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                }
-                // Match the Position, Rotation, & Speed of the spawner item
-                projectile.transform.position = spawnPos;
-                projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
-                projectile.rb.velocity = shooterItem.rb.velocity;
-                projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
-                projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
+                ShootProjectile(shooterItem, projectileID, spawnPoint, imbueSpell, forceMult, throwMult, pooled, IgnoreArg1);
+                //Vector3 spawnPos = spawnPoint.position + offsetVec;
+                //Item projectile = projectileData.Spawn(pooled);
+                //if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
+                //projectile.IgnoreObjectCollision(shooterItem);
+                //projectile.IgnoreRagdollCollision(Player.local.creature.ragdoll);
+                //if (IgnoreArg1 != null)
+                //{
+                //    try { projectile.IgnoreColliderCollision(IgnoreArg1); }
+                //    catch { }
+                //}
+                //if (!String.IsNullOrEmpty(imbueSpell))
+                //{
+                //    // Set imbue charge on projectile using ItemProjectileSimple subclass
+                //    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
+                //    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
+                //}
+                //// Match the Position, Rotation, & Speed of the spawner item
+                //projectile.transform.position = spawnPos;
+                //projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
+                //projectile.rb.velocity = shooterItem.rb.velocity;
+                //projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
+                //projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
             }
 
         }
@@ -350,8 +386,8 @@ namespace ModularFirearms
                 Creature hitCreature = hit.collider.transform.root.GetComponentInParent<Creature>();
                 if (hitCreature != null)
                 {
-                    if (hitCreature == Creature.player) return;
-                    Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit creature!");
+                    if (hitCreature == Player.currentCreature) return;
+                    //Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit creature!");
                     hitCreature.locomotion.rb.AddExplosionForce(force, hit.point, 1.0f, 1.0f, ForceMode.VelocityChange);
                     //hitCreature.ragdoll.SetState(Creature.State.Destabilized);
                     foreach (RagdollPart part in hitCreature.ragdoll.parts)
@@ -364,7 +400,7 @@ namespace ModularFirearms
                 {
                     try
                     {
-                        Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit item");
+                        //Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit item");
                         hit.collider.attachedRigidbody.AddExplosionForce(force, hit.point, 0.5f, 1.0f, ForceMode.VelocityChange);
                         hit.collider.attachedRigidbody.AddForce(spawnPoint.forward * force, ForceMode.Impulse);
                     }
@@ -382,28 +418,29 @@ namespace ModularFirearms
             }
             foreach (Vector3 offsetVec in buckshotOffsetPosiitions)
             {
-                Vector3 spawnPos = spawnPoint.position + offsetVec;
-                Item projectile = projectileData.Spawn(pooled);
-                if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
-                projectile.IgnoreObjectCollision(shooterItem);
-                projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
-                if (IgnoreArg1 != null)
-                {
-                    try { projectile.IgnoreColliderCollision(IgnoreArg1); }
-                    catch { }
-                }
-                if (!String.IsNullOrEmpty(imbueSpell))
-                {
-                    // Set imbue charge on projectile using ItemProjectileSimple subclass
-                    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
-                    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                }
-                // Match the Position, Rotation, & Speed of the spawner item
-                projectile.transform.position = spawnPos;
-                projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
-                projectile.rb.velocity = shooterItem.rb.velocity;
-                projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceProjectile);
-                projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
+                ShootProjectile(shooterItem, projectileID, spawnPoint, imbueSpell, forceProjectile, throwMult, pooled, IgnoreArg1);
+                //Vector3 spawnPos = spawnPoint.position + offsetVec;
+                //Item projectile = projectileData.Spawn(pooled);
+                //if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
+                //projectile.IgnoreObjectCollision(shooterItem);
+                //projectile.IgnoreRagdollCollision(Player.local.body.creature.ragdoll);
+                //if (IgnoreArg1 != null)
+                //{
+                //    try { projectile.IgnoreColliderCollision(IgnoreArg1); }
+                //    catch { }
+                //}
+                //if (!String.IsNullOrEmpty(imbueSpell))
+                //{
+                //    // Set imbue charge on projectile using ItemProjectileSimple subclass
+                //    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
+                //    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
+                //}
+                //// Match the Position, Rotation, & Speed of the spawner item
+                //projectile.transform.position = spawnPos;
+                //projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
+                //projectile.rb.velocity = shooterItem.rb.velocity;
+                //projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceProjectile);
+                //projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
             }
 
         }
@@ -496,7 +533,7 @@ namespace ModularFirearms
         /// <param name="emptySoundDriver">If `TrackedFire` returns a false, this AudioSource is played</param>
         /// <param name="WeaponIsFiring">A function delegated from the weapon to determine if the coroutine is running</param>
         /// <returns></returns>
-        public static IEnumerator GeneralFire(TrackFiredDelegate TrackedFire, TriggerPressedDelegate TriggerPressed, FireMode fireSelector = FireMode.Single, int fireRate = 60, int burstNumber = 3, AudioSource emptySoundDriver = null, IsFiringDelegate WeaponIsFiring = null)
+        public static IEnumerator GeneralFire(TrackFiredDelegate TrackedFire, TriggerPressedDelegate TriggerPressed, FireMode fireSelector = FireMode.Single, int fireRate = 60, int burstNumber = 3, AudioSource emptySoundDriver = null, IsFiringDelegate WeaponIsFiring = null, IsSpawningDelegate ProjectileIsSpawning = null)
         {
             WeaponIsFiring?.Invoke(true);
             float fireDelay = 60.0f / (float)fireRate;
@@ -509,6 +546,9 @@ namespace ModularFirearms
 
             else if (fireSelector == FireMode.Single)
             {
+                do yield return null;
+                while (ProjectileIsSpawning());
+
                 if (!TrackedFire())
                 {
                     if (emptySoundDriver != null) emptySoundDriver.Play();
@@ -521,6 +561,10 @@ namespace ModularFirearms
             {
                 for (int i = 0; i < burstNumber; i++)
                 {
+
+                    do yield return null;
+                    while (ProjectileIsSpawning());
+
                     if (!TrackedFire())
                     {
                         if (emptySoundDriver != null) emptySoundDriver.Play();
@@ -537,6 +581,9 @@ namespace ModularFirearms
                 // triggerPressed is handled in OnHeldAction(), so stop firing once the trigger/weapon is released
                 while (TriggerPressed())
                 {
+                    do yield return null;
+                    while (ProjectileIsSpawning());
+
                     if (!TrackedFire())
                     {
                         if (emptySoundDriver != null) emptySoundDriver.Play();

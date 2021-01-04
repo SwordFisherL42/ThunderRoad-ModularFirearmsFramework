@@ -9,15 +9,15 @@ namespace ModularFirearms
         protected Item item;
         protected ItemQuiver itemQuiver;
         protected ItemModuleQuiver module;
-        protected ObjectHolder holder;
+        protected Holder holder;
 
         protected void Awake()
         {
             this.item = this.GetComponent<Item>();
             this.itemQuiver = this.GetComponent<ItemQuiver>();
             this.module = this.item.data.GetModule<ItemModuleQuiver>();
-            this.holder = this.GetComponentInChildren<ObjectHolder>();
-            this.holder.UnSnapped += new ObjectHolder.HolderDelegate(this.OnProjectileRemoved);
+            this.holder = this.GetComponentInChildren<Holder>();
+            this.holder.UnSnapped += new Holder.HolderDelegate(this.OnProjectileRemoved);
         }
 
         protected void OnProjectileRemoved(Item interactiveObject)

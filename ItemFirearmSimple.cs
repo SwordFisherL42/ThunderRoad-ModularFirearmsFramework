@@ -50,17 +50,17 @@ namespace ModularFirearms
             item = this.GetComponent<Item>();
             module = item.data.GetModule<ItemModuleFirearmSimple>();
 
-            if (!string.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.definition.GetCustomReference(module.muzzlePositionRef);
+            if (!string.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
             else muzzlePoint = item.transform;
 
             //Fetch Animator, ParticleSystem, and AudioSources from Custom References (see "How-To Guide" for more info on custom references)
-            if (!string.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.definition.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
-            if (!string.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.definition.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
-            if (!string.IsNullOrEmpty(module.swtichSoundRef)) switchSound = item.definition.GetCustomReference(module.swtichSoundRef).GetComponent<AudioSource>();
-            if (!string.IsNullOrEmpty(module.reloadSoundRef)) reloadSound = item.definition.GetCustomReference(module.reloadSoundRef).GetComponent<AudioSource>();
-            if (!string.IsNullOrEmpty(module.npcRaycastPositionRef)) npcRayCastPoint = item.definition.GetCustomReference(module.npcRaycastPositionRef);
-            if (!string.IsNullOrEmpty(module.muzzleFlashRef)) MuzzleFlash = item.definition.GetCustomReference(module.muzzleFlashRef).GetComponent<ParticleSystem>();
-            if (!string.IsNullOrEmpty(module.animatorRef)) Animations = item.definition.GetCustomReference(module.animatorRef).GetComponent<Animator>();
+            if (!string.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
+            if (!string.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
+            if (!string.IsNullOrEmpty(module.swtichSoundRef)) switchSound = item.GetCustomReference(module.swtichSoundRef).GetComponent<AudioSource>();
+            if (!string.IsNullOrEmpty(module.reloadSoundRef)) reloadSound = item.GetCustomReference(module.reloadSoundRef).GetComponent<AudioSource>();
+            if (!string.IsNullOrEmpty(module.npcRaycastPositionRef)) npcRayCastPoint = item.GetCustomReference(module.npcRaycastPositionRef);
+            if (!string.IsNullOrEmpty(module.muzzleFlashRef)) MuzzleFlash = item.GetCustomReference(module.muzzleFlashRef).GetComponent<ParticleSystem>();
+            if (!string.IsNullOrEmpty(module.animatorRef)) Animations = item.GetCustomReference(module.animatorRef).GetComponent<Animator>();
 
             if (npcRayCastPoint == null) { npcRayCastPoint = muzzlePoint; }
 
@@ -88,7 +88,7 @@ namespace ModularFirearms
 
             //Handle interaction events
             item.OnHeldActionEvent += OnHeldAction;
-            if (!string.IsNullOrEmpty(module.mainGripID)) gunGrip = item.definition.GetCustomReference(module.mainGripID).GetComponent<Handle>();
+            if (!string.IsNullOrEmpty(module.mainGripID)) gunGrip = item.GetCustomReference(module.mainGripID).GetComponent<Handle>();
             if (gunGrip != null)
             {
                 gunGrip.Grabbed += OnMainGripGrabbed;
@@ -96,7 +96,7 @@ namespace ModularFirearms
             }
         }
 
-        public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
+        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
             if (action == Interactable.Action.UseStart)
             {
@@ -124,7 +124,7 @@ namespace ModularFirearms
             }
         }
 
-        public void OnMainGripGrabbed(Interactor interactor, Handle handle, EventTime eventTime)
+        public void OnMainGripGrabbed(RagdollHand interactor, Handle handle, EventTime eventTime)
         {
             if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = true;
             if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = true;
@@ -136,8 +136,8 @@ namespace ModularFirearms
                     ReloadWeapon();
                 }
                 //Debug.Log("[AI SHOOT] Gun held by NPC");
-                thisNPC = interactor.bodyHand.body.creature;
-                thisNPCBrain = (BrainHuman)thisNPC.brain;
+                thisNPC = interactor.ragdoll.creature;
+                thisNPCBrain = (BrainHuman) thisNPC.brain.instance;
                 npcPrevMeleeEnabled = thisNPCBrain.meleeEnabled;
                 if (npcPrevMeleeEnabled)
                 {
@@ -157,7 +157,7 @@ namespace ModularFirearms
 
         }
 
-        public void OnMainGripUnGrabbed(Interactor interactor, Handle handle, EventTime eventTime)
+        public void OnMainGripUnGrabbed(RagdollHand interactor, Handle handle, EventTime eventTime)
         {
             if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = false;
             if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = false;
@@ -201,7 +201,7 @@ namespace ModularFirearms
             {
                 if (!module.npcMeleeEnableFlag)
                 {
-                    thisNPCBrain.meleeEnabled = Vector3.Distance(item.rb.position, thisNPCBrain.targetCreature.transform.position) <= (gunGrip.definition.reach + 3f);
+                    thisNPCBrain.meleeEnabled = Vector3.Distance(item.rb.position, thisNPCBrain.targetCreature.transform.position) <= (gunGrip.reach + 3f);
                 }
                 var npcAimAngle = NpcAimingAngle(thisNPCBrain, npcRayCastPoint.TransformDirection(Vector3.forward), module.npcDistanceToFire);
                 if (Physics.Raycast(npcRayCastPoint.position, npcAimAngle, out RaycastHit hit, thisNPCBrain.detectionRadius))

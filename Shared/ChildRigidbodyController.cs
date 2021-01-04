@@ -57,7 +57,7 @@ namespace ModularFirearms.Shared
                 slideHandle = slideObject.GetComponent<Handle>();
                 slideForce = slideObject.GetComponent<ConstantForce>();
                 connectedJoint = parentItem.gameObject.GetComponent<ConfigurableJoint>();
-                if (!String.IsNullOrEmpty(parentModule.chamberBulletRef)) chamberBullet = parentItem.definition.GetCustomReference(parentModule.chamberBulletRef).gameObject;
+                if (!String.IsNullOrEmpty(parentModule.chamberBulletRef)) chamberBullet = parentItem.GetCustomReference(parentModule.chamberBulletRef).gameObject;
             }
             catch { Debug.LogError("[Fisher-Firearms][EXCEPTION] Unable to Initialize CRC ! "); }
         }

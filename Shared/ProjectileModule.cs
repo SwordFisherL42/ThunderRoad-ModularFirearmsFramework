@@ -9,6 +9,8 @@ namespace ModularFirearms.Shared
         public float lifetime = 2.0f;
         public int projectileType = 1;
 
+        public float flyingAcceleration = 1.0f;
+
         //Type 1 params
         public bool allowFlyTime = true;
         public bool useHitScanning = false;

@@ -88,10 +88,10 @@ namespace ModularFirearms.Shared
         public int maxReceiverAmmo = 12;
 
         // Gameplay/Physics/Recoil params
-        public float bulletForce = 7.0f;
+        public float bulletForce = 5.0f;
         public float shellEjectionForce = 0.5f;
         public float hapticForce = 5.0f;
-        public float throwMult = 3.0f;
+        public float throwMult = 2.0f;
         public float[] recoilForces;
 
         // old Pistol module params

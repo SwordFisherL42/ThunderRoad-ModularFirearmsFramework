@@ -15,7 +15,7 @@ namespace ModularFirearms
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<ItemModuleAmmoLoader>();
-            bulletMesh = item.definition.GetCustomReference(module.bulletMeshID).GetComponent<MeshRenderer>();
+            bulletMesh = item.GetCustomReference(module.bulletMeshID).GetComponent<MeshRenderer>();
         }
 
         public bool ConsumeAmmo()

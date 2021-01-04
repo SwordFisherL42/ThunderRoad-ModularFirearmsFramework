@@ -15,7 +15,7 @@ namespace ModularFirearms
         protected Handle gunGrip;
         protected ItemSlide childSlide;
         protected ItemMagazine insertedMagazine;
-        protected ObjectHolder pistolGripHolder;
+        protected Holder pistolGripHolder;
         //Unity Object References
         protected ConfigurableJoint slideJoint;
         protected Transform muzzlePoint;
@@ -52,15 +52,15 @@ namespace ModularFirearms
 
             module = item.data.GetModule<ItemModuleFirearmBase>();
 
-            if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.definition.GetCustomReference(module.muzzlePositionRef);
-            if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.definition.GetCustomReference(module.shellEjectionRef);
-            if (!String.IsNullOrEmpty(module.soundNames[0])) fireSound = item.definition.GetCustomReference(module.soundNames[0]).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.soundNames[1])) emptySound = item.definition.GetCustomReference(module.soundNames[1]).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.soundNames[2])) pullbackSound = item.definition.GetCustomReference(module.soundNames[2]).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.soundNames[3])) rackforwardSound = item.definition.GetCustomReference(module.soundNames[3]).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.definition.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
-            if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.definition.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
-            if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.definition.GetCustomReference(module.animationRef).GetComponent<Animator>();
+            if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
+            if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.GetCustomReference(module.shellEjectionRef);
+            if (!String.IsNullOrEmpty(module.soundNames[0])) fireSound = item.GetCustomReference(module.soundNames[0]).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.soundNames[1])) emptySound = item.GetCustomReference(module.soundNames[1]).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.soundNames[2])) pullbackSound = item.GetCustomReference(module.soundNames[2]).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.soundNames[3])) rackforwardSound = item.GetCustomReference(module.soundNames[3]).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
+            if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
+            if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.GetCustomReference(module.animationRef).GetComponent<Animator>();
 
             if (gunGrip != null)
             {
@@ -68,9 +68,9 @@ namespace ModularFirearms
                 gunGrip.UnGrabbed += OnMainGripUnGrabbed;
             }
 
-            pistolGripHolder = item.GetComponentInChildren<ObjectHolder>();
-            pistolGripHolder.Snapped += new ObjectHolder.HolderDelegate(this.OnMagazineInserted);
-            pistolGripHolder.UnSnapped += new ObjectHolder.HolderDelegate(this.OnMagazineRemoved);
+            pistolGripHolder = item.GetComponentInChildren<Holder>();
+            pistolGripHolder.Snapped += new Holder.HolderDelegate(this.OnMagazineInserted);
+            pistolGripHolder.UnSnapped += new Holder.HolderDelegate(this.OnMagazineRemoved);
 
             fireModeSelection = (FireMode)FirearmFunctions.fireModeEnums.GetValue(module.fireMode);
             if (module.allowedFireModes != null)
@@ -90,12 +90,30 @@ namespace ModularFirearms
             }
             else
             {
-                startMagazine = magazineData.Spawn(true);
-                pistolGripHolder.Snap(startMagazine);
-            }
-            pistolGripHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
+                magazineData.SpawnAsync(i =>
+                {
+                    try
+                    {
+                        startMagazine = i;
+                        pistolGripHolder.Snap(startMagazine);
+                        pistolGripHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
+                    }
+                    catch
+                    {
+                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SNAPPING MAGAZINE ");
+                    }
+                },
+                item.transform.position,
+                Quaternion.Euler(item.transform.rotation.eulerAngles),
+                null,
+                false);
 
-            childSlide = item.definition.GetCustomReference(module.childSlideRef).GetComponent<ItemSlide>();
+                // Old spawning method
+                //startMagazine = magazineData.Spawn(true);
+                //pistolGripHolder.Snap(startMagazine);
+            }
+            
+            childSlide = item.GetCustomReference(module.childSlideRef).GetComponent<ItemSlide>();
             if (childSlide == null) Debug.LogError("[Fisher-Firearms] ERROR! CHILD SLIDE WAS NULL");
             SetFireSelectionAnimator(Animations, fireModeSelection);
             return;
@@ -111,7 +129,7 @@ namespace ModularFirearms
             isFiring = status;
         }
 
-        public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
+        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
             // Trigger Action
             if (handle.Equals(gunGrip))
@@ -151,7 +169,7 @@ namespace ModularFirearms
             }
         }
 
-        public void OnMainGripGrabbed(Interactor interactor, Handle handle, EventTime eventTime)
+        public void OnMainGripGrabbed(RagdollHand interactor, Handle handle, EventTime eventTime)
         {
             if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = true;
             if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = true;
@@ -160,7 +178,7 @@ namespace ModularFirearms
 
         }
 
-        public void OnMainGripUnGrabbed(Interactor interactor, Handle handle, EventTime eventTime)
+        public void OnMainGripUnGrabbed(RagdollHand interactor, Handle handle, EventTime eventTime)
         {
             if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = false;
             if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = false;

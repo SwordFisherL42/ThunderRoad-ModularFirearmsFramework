@@ -20,8 +20,8 @@ namespace ModularFirearms.Items
             module = item.data.GetModule<Shared.AmmoModule>();
             thisAmmoType = module.GetSelectedType();
             capacity = module.ammoCapacity;
-            if (module.handleRef != null) ammoHandle = item.definition.GetCustomReference(module.handleRef).GetComponent<Handle>();
-            if (module.bulletMeshRef != null) bulletMesh = item.definition.GetCustomReference(module.bulletMeshRef).gameObject;
+            if (module.handleRef != null) ammoHandle = item.GetCustomReference(module.handleRef).GetComponent<Handle>();
+            if (module.bulletMeshRef != null) bulletMesh = item.GetCustomReference(module.bulletMeshRef).gameObject;
             Refill();
         }
 

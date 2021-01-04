@@ -19,6 +19,8 @@ namespace ModularFirearms.Weapons
         private DelegatedActionFunction spellImmediateAction;
         private DelegatedActionFunction spellDelayedAction;
 
+        public bool projectileIsSpawning = false;
+
         private LayerMask laserIgnore;
         private float lastSpellMenuPress;
         private GameObject compass;
@@ -41,7 +43,7 @@ namespace ModularFirearms.Weapons
         private MeshRenderer ammoCounterMesh;
         private Texture2D digitsGridTexture;
         /// Magazine Parameters///
-        protected ObjectHolder magazineHolder;
+        protected Holder magazineHolder;
         protected Items.InteractiveMagazine insertedMagazine;
         /// Trigger-Zone parameters ///
         private float PULL_THRESHOLD;
@@ -91,6 +93,16 @@ namespace ModularFirearms.Weapons
         private FireMode fireModeSelection;
         private List<int> allowedFireModes;
 
+        public bool ProjectileIsSpawning()
+        {
+            return projectileIsSpawning;
+        }
+
+        public void SetProjectileSpawningState(bool newState)
+        {
+            projectileIsSpawning = newState;
+        }
+
         void Awake()
         {
             soundCounter = 0;
@@ -100,47 +112,47 @@ namespace ModularFirearms.Weapons
             module = item.data.GetModule<Shared.FirearmModule>();
 
             /// Set all Object References ///
-            if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.definition.GetCustomReference(module.muzzlePositionRef);
-            if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.definition.GetCustomReference(module.shellEjectionRef);
-            if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.definition.GetCustomReference(module.animationRef).GetComponent<Animator>();
-            if (!String.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.definition.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
+            if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.GetCustomReference(module.shellEjectionRef);
+            if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.GetCustomReference(module.animationRef).GetComponent<Animator>();
+            if (!String.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
 
-            if (!String.IsNullOrEmpty(module.fireSound1Ref)) { fireSound1 = item.definition.GetCustomReference(module.fireSound1Ref).GetComponent<AudioSource>(); maxSoundCounter++; soundCounter = 1; }
-            if (!String.IsNullOrEmpty(module.fireSound2Ref)) { fireSound2 = item.definition.GetCustomReference(module.fireSound2Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
-            if (!String.IsNullOrEmpty(module.fireSound3Ref)) { fireSound3 = item.definition.GetCustomReference(module.fireSound3Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
+            if (!String.IsNullOrEmpty(module.fireSound1Ref)) { fireSound1 = item.GetCustomReference(module.fireSound1Ref).GetComponent<AudioSource>(); maxSoundCounter++; soundCounter = 1; }
+            if (!String.IsNullOrEmpty(module.fireSound2Ref)) { fireSound2 = item.GetCustomReference(module.fireSound2Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
+            if (!String.IsNullOrEmpty(module.fireSound3Ref)) { fireSound3 = item.GetCustomReference(module.fireSound3Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
 
 
-            if (!String.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.definition.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.pullSoundRef)) pullbackSound = item.definition.GetCustomReference(module.pullSoundRef).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.rackSoundRef)) rackforwardSound = item.definition.GetCustomReference(module.rackSoundRef).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.definition.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
-            if (!String.IsNullOrEmpty(module.smokeRef)) muzzleSmoke = item.definition.GetCustomReference(module.smokeRef).GetComponent<ParticleSystem>();
+            if (!String.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.pullSoundRef)) pullbackSound = item.GetCustomReference(module.pullSoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.rackSoundRef)) rackforwardSound = item.GetCustomReference(module.rackSoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
+            if (!String.IsNullOrEmpty(module.smokeRef)) muzzleSmoke = item.GetCustomReference(module.smokeRef).GetComponent<ParticleSystem>();
 
-            if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.definition.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
+            if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
 
             else Debug.LogError("[Fisher-GreatJourney][ERROR] No Reference to Main Handle (\"mainHandleRef\") in JSON! Weapon will not work as intended !!!");
-            if (!String.IsNullOrEmpty(module.slideHandleRef)) slideObject = item.definition.GetCustomReference(module.slideHandleRef).gameObject;
+            if (!String.IsNullOrEmpty(module.slideHandleRef)) slideObject = item.GetCustomReference(module.slideHandleRef).gameObject;
             else Debug.LogError("[Fisher-GreatJourney][ERROR] No Reference to Slide Handle (\"slideHandleRef\") in JSON! Weapon will not work as intended !!!");
-            if (!String.IsNullOrEmpty(module.slideCenterRef)) slideCenterPosition = item.definition.GetCustomReference(module.slideCenterRef).gameObject;
+            if (!String.IsNullOrEmpty(module.slideCenterRef)) slideCenterPosition = item.GetCustomReference(module.slideCenterRef).gameObject;
             else Debug.LogError("[Fisher-GreatJourney][ERROR] No Reference to Slide Center Position(\"slideCenterRef\") in JSON! Weapon will not work as intended...");
             if (slideObject != null) slideHandle = slideObject.GetComponent<Handle>();
 
-            if (!String.IsNullOrEmpty(module.compassRef)) compass = item.definition.GetCustomReference(module.compassRef).gameObject;
+            if (!String.IsNullOrEmpty(module.compassRef)) compass = item.GetCustomReference(module.compassRef).gameObject;
 
             if (!String.IsNullOrEmpty(module.flashlightRef))
             {
-                attachedLight = item.definition.GetCustomReference(module.flashlightRef).GetComponent<Light>();
+                attachedLight = item.GetCustomReference(module.flashlightRef).GetComponent<Light>();
 
                 if (!String.IsNullOrEmpty(module.flashlightMeshRef))
                 {
-                    flashlightMaterial = item.definition.GetCustomReference(module.flashlightMeshRef).GetComponent<MeshRenderer>().material;
+                    flashlightMaterial = item.GetCustomReference(module.flashlightMeshRef).GetComponent<MeshRenderer>().material;
                     flashlightEmissionColor = flashlightMaterial.GetColor("_EmissionColor");
                     if (!attachedLight.enabled) flashlightMaterial.SetColor("_EmissionColor", Color.black);
                 }
 
             }
 
-            if (!String.IsNullOrEmpty(module.laserRef)) attachedLaser = item.definition.GetCustomReference(module.laserRef).GetComponent<LineRenderer>();
+            if (!String.IsNullOrEmpty(module.laserRef)) attachedLaser = item.GetCustomReference(module.laserRef).GetComponent<LineRenderer>();
 
             if (compass != null)
             {
@@ -150,9 +162,9 @@ namespace ModularFirearms.Weapons
 
             if (attachedLaser != null)
             {
-                if (!String.IsNullOrEmpty(module.laserStartRef)) laserStart = item.definition.GetCustomReference(module.laserStartRef);
-                if (!String.IsNullOrEmpty(module.laserEndRef)) laserEnd = item.definition.GetCustomReference(module.laserEndRef);
-                if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.definition.GetCustomReference(module.rayCastPointRef);
+                if (!String.IsNullOrEmpty(module.laserStartRef)) laserStart = item.GetCustomReference(module.laserStartRef);
+                if (!String.IsNullOrEmpty(module.laserEndRef)) laserEnd = item.GetCustomReference(module.laserEndRef);
+                if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.GetCustomReference(module.rayCastPointRef);
                 //laserInfKeyframe = attachedLaser.widthCurve.keys[1];
                 //laserIgnore = 1 << 20;
                 LayerMask layermask1 = 1 << 29;
@@ -169,13 +181,13 @@ namespace ModularFirearms.Weapons
                 laserEnd.localPosition = new Vector3(laserEnd.localPosition.x, laserEnd.localPosition.y, laserEnd.localPosition.z);
             }
 
-            if (!String.IsNullOrEmpty(module.foregripHandleRef)) foreGrip = item.definition.GetCustomReference(module.foregripHandleRef).GetComponent<Handle>();
+            if (!String.IsNullOrEmpty(module.foregripHandleRef)) foreGrip = item.GetCustomReference(module.foregripHandleRef).GetComponent<Handle>();
 
             if (!String.IsNullOrEmpty(module.ammoCounterRef))
             {
                 //Debug.Log("[Fisher-GreatJourney] Getting Ammo Counter Objects ...");
-                ammoCounterMesh = item.definition.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>();
-                digitsGridTexture = (Texture2D)item.definition.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>().material.mainTexture;
+                ammoCounterMesh = item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>();
+                digitsGridTexture = (Texture2D)item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>().material.mainTexture;
                 //Debug.Log("[Fisher-GreatJourney] GOT Ammo Counter Objects !!!");
             }
 
@@ -219,9 +231,9 @@ namespace ModularFirearms.Weapons
             item.OnGrabEvent += OnAnyHandleGrabbed;
             item.OnUngrabEvent += OnAnyHandleUngrabbed;
 
-            magazineHolder = item.GetComponentInChildren<ObjectHolder>();
-            magazineHolder.Snapped += new ObjectHolder.HolderDelegate(this.OnMagazineInserted);
-            magazineHolder.UnSnapped += new ObjectHolder.HolderDelegate(this.OnMagazineRemoved);
+            magazineHolder = item.GetComponentInChildren<Holder>();
+            magazineHolder.Snapped += new Holder.HolderDelegate(this.OnMagazineInserted);
+            magazineHolder.UnSnapped += new Holder.HolderDelegate(this.OnMagazineRemoved);
 
         }
 
@@ -252,9 +264,23 @@ namespace ModularFirearms.Weapons
             }
             else
             {
-                magazineHolder.Snap(magazineData.Spawn(true));
+                magazineData.SpawnAsync(i =>
+                {
+                    try
+                    {
+                        magazineHolder.Snap(i);
+                        magazineHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
+                    }
+                    catch
+                    {
+                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SNAPPING MAGAZINE ");
+                    }
+                },
+                item.transform.position,
+                Quaternion.Euler(item.transform.rotation.eulerAngles),
+                null,
+                false);
             }
-            magazineHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
 
             //if (module.animateSelectionSwitch) SetFireSelectionAnimator(Animations, fireModeSelection);
             if (ammoCounter != null) ammoCounter.DisplayUpdate(0);
@@ -521,7 +547,7 @@ namespace ModularFirearms.Weapons
             yield return null;
         }
 
-        public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
+        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
             if (foreGrip != null)
             {
@@ -539,7 +565,7 @@ namespace ModularFirearms.Weapons
                 {
                     // Begin Firing
                     triggerPressed = true;
-                    if (!isFiring) StartCoroutine(FirearmFunctions.GeneralFire(TrackedFire, TriggerIsPressed, fireModeSelection, module.fireRate, module.burstNumber, emptySound, SetFiringFlag));
+                    if (!isFiring) StartCoroutine(FirearmFunctions.GeneralFire(TrackedFire, TriggerIsPressed, fireModeSelection, module.fireRate, module.burstNumber, emptySound, SetFiringFlag, ProjectileIsSpawning));
                 }
                 if (action == Interactable.Action.UseStop)
                 {
@@ -621,7 +647,7 @@ namespace ModularFirearms.Weapons
             if (slideController != null) slideController.LockSlide();
         }
 
-        public void OnAnyHandleGrabbed(Handle handle, Interactor interactor)
+        public void OnAnyHandleGrabbed(Handle handle, RagdollHand interactor)
         {
             if (handle.Equals(gunGrip))
             {
@@ -645,7 +671,7 @@ namespace ModularFirearms.Weapons
 
         }
 
-        public void OnAnyHandleUngrabbed(Handle handle, Interactor interactor, bool throwing)
+        public void OnAnyHandleUngrabbed(Handle handle, RagdollHand interactor, bool throwing)
         {
             if (handle.Equals(gunGrip))
             {
@@ -890,10 +916,10 @@ namespace ModularFirearms.Weapons
         {
             PreFireEffects();
 
-            if (!module.useBuckshot) FirearmFunctions.ShootProjectile(item, module.projectileID, muzzlePoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer);
+            if (!module.useBuckshot) FirearmFunctions.ShootProjectile(item, module.projectileID, muzzlePoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer, SetProjectileSpawningState);
             else FirearmFunctions.ProjectileBurst(item, module.projectileID, muzzlePoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer);
 
-            FirearmFunctions.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce, 1.0f, false, slideCapsuleStabilizer);
+            FirearmFunctions.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce, 1.0f, false, slideCapsuleStabilizer, SetProjectileSpawningState);
             FirearmFunctions.ApplyRecoil(item.rb, null, 1.0f, gunGripHeldLeft, gunGripHeldRight, module.hapticForce);
             return true;
         }

@@ -22,7 +22,7 @@ namespace ModularFirearms.Weapons
         private MeshRenderer ammoCounterMesh;
         private Texture2D digitsGridTexture;
         /// Magazine Parameters///
-        protected ObjectHolder magazineHolder;
+        protected Holder magazineHolder;
         protected Items.InteractiveMagazine insertedMagazine;
 
         /// Trigger-Zone parameters ///
@@ -77,17 +77,17 @@ namespace ModularFirearms.Weapons
             module = item.data.GetModule<Shared.FirearmModule>();
 
             /// Set all Object References ///
-            if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.definition.GetCustomReference(module.muzzlePositionRef);
+            if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
 
-            //if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.definition.GetCustomReference(module.shellEjectionRef);
-            //if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.definition.GetCustomReference(module.animationRef).GetComponent<Animator>();
+            //if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.GetCustomReference(module.shellEjectionRef);
+            //if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.GetCustomReference(module.animationRef).GetComponent<Animator>();
 
-            //if (!String.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.definition.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
+            //if (!String.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
             
 
-            if (!String.IsNullOrEmpty(module.fireSound1Ref)) { fireSound1 = item.definition.GetCustomReference(module.fireSound1Ref).GetComponent<AudioSource>(); maxSoundCounter++; soundCounter = 1; }
-            if (!String.IsNullOrEmpty(module.fireSound2Ref)) { fireSound2 = item.definition.GetCustomReference(module.fireSound2Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
-            if (!String.IsNullOrEmpty(module.fireSound3Ref)) { fireSound3 = item.definition.GetCustomReference(module.fireSound3Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
+            if (!String.IsNullOrEmpty(module.fireSound1Ref)) { fireSound1 = item.GetCustomReference(module.fireSound1Ref).GetComponent<AudioSource>(); maxSoundCounter++; soundCounter = 1; }
+            if (!String.IsNullOrEmpty(module.fireSound2Ref)) { fireSound2 = item.GetCustomReference(module.fireSound2Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
+            if (!String.IsNullOrEmpty(module.fireSound3Ref)) { fireSound3 = item.GetCustomReference(module.fireSound3Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
             //maxSoundCounter = module.maxFireSounds;
            
             
@@ -96,27 +96,27 @@ namespace ModularFirearms.Weapons
             //if (fireSound3 != null) maxSoundCounter++;
             
 
-            //if (!String.IsNullOrEmpty(module.fireSoundInRef)) fireSoundIn = item.definition.GetCustomReference(module.fireSoundInRef).GetComponent<AudioSource>();
-            //if (!String.IsNullOrEmpty(module.fireSoundLoopRef)) fireSoundLoop = item.definition.GetCustomReference(module.fireSoundLoopRef).GetComponent<AudioSource>();
-            //if (!String.IsNullOrEmpty(module.fireSoundOutRef)) fireSoundOut = item.definition.GetCustomReference(module.fireSoundOutRef).GetComponent<AudioSource>();
+            //if (!String.IsNullOrEmpty(module.fireSoundInRef)) fireSoundIn = item.GetCustomReference(module.fireSoundInRef).GetComponent<AudioSource>();
+            //if (!String.IsNullOrEmpty(module.fireSoundLoopRef)) fireSoundLoop = item.GetCustomReference(module.fireSoundLoopRef).GetComponent<AudioSource>();
+            //if (!String.IsNullOrEmpty(module.fireSoundOutRef)) fireSoundOut = item.GetCustomReference(module.fireSoundOutRef).GetComponent<AudioSource>();
 
-            if (!String.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.definition.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
 
-            if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.definition.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
-            if (!String.IsNullOrEmpty(module.smokeRef)) muzzleSmoke = item.definition.GetCustomReference(module.smokeRef).GetComponent<ParticleSystem>();
+            if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
+            if (!String.IsNullOrEmpty(module.smokeRef)) muzzleSmoke = item.GetCustomReference(module.smokeRef).GetComponent<ParticleSystem>();
 
-            if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.definition.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
+            if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
 
 
-            if (!String.IsNullOrEmpty(module.flashlightRef)) attachedLight = item.definition.GetCustomReference(module.flashlightRef).GetComponent<Light>();
+            if (!String.IsNullOrEmpty(module.flashlightRef)) attachedLight = item.GetCustomReference(module.flashlightRef).GetComponent<Light>();
 
-            if (!String.IsNullOrEmpty(module.foregripHandleRef)) foreGrip = item.definition.GetCustomReference(module.foregripHandleRef).GetComponent<Handle>();
+            if (!String.IsNullOrEmpty(module.foregripHandleRef)) foreGrip = item.GetCustomReference(module.foregripHandleRef).GetComponent<Handle>();
             //Debug.Log("[Fisher-GreatJourney] AUTOMAG Custom References Complete! !!!");
             //if (!String.IsNullOrEmpty(module.ammoCounterRef))
             //{
             //    //Debug.Log("[Fisher-GreatJourney] Getting Ammo Counter Objects ...");
-            //    ammoCounterMesh = item.definition.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>();
-            //    digitsGridTexture = (Texture2D)item.definition.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>().material.mainTexture;
+            //    ammoCounterMesh = item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>();
+            //    digitsGridTexture = (Texture2D)item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>().material.mainTexture;
             //    //Debug.Log("[Fisher-GreatJourney] GOT Ammo Counter Objects !!!");
             //}
 
@@ -143,10 +143,10 @@ namespace ModularFirearms.Weapons
             item.OnUngrabEvent += OnAnyHandleUngrabbed;
 
             //Debug.Log("[Fisher-GreatJourney] AUTOMAG Getting Holder... !!!");
-            magazineHolder = item.GetComponentInChildren<ObjectHolder>();
+            magazineHolder = item.GetComponentInChildren<Holder>();
 
-            magazineHolder.Snapped += new ObjectHolder.HolderDelegate(this.OnMagazineInserted);
-            magazineHolder.UnSnapped += new ObjectHolder.HolderDelegate(this.OnMagazineRemoved);
+            magazineHolder.Snapped += new Holder.HolderDelegate(this.OnMagazineInserted);
+            magazineHolder.UnSnapped += new Holder.HolderDelegate(this.OnMagazineRemoved);
 
             //Debug.Log("[Fisher-GreatJourney] AUTOMAG All Awake Complete! !!!");
 
@@ -167,9 +167,23 @@ namespace ModularFirearms.Weapons
             }
             else
             {
-                magazineHolder.Snap(magazineData.Spawn(true));
+                magazineData.SpawnAsync(i =>
+                {
+                    try
+                    {
+                        magazineHolder.Snap(i);
+                        magazineHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
+                    }
+                    catch
+                    {
+                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SNAPPING MAGAZINE ");
+                    }
+                },
+                item.transform.position,
+                Quaternion.Euler(item.transform.rotation.eulerAngles),
+                null,
+                false);
             }
-            magazineHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
 
             //if (module.animateSelectionSwitch) SetFireSelectionAnimator(Animations, fireModeSelection);
             if (ammoCounter != null) ammoCounter.DisplayUpdate(0);
@@ -198,7 +212,7 @@ namespace ModularFirearms.Weapons
             if (ammoCounter != null) { ammoCounter.DisplayUpdate(value); }
         }
 
-        public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
+        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
             if (foreGrip != null)
             {
@@ -245,7 +259,7 @@ namespace ModularFirearms.Weapons
             //if (slideController != null) slideController.LockSlide();
         }
 
-        public void OnAnyHandleGrabbed(Handle handle, Interactor interactor)
+        public void OnAnyHandleGrabbed(Handle handle, RagdollHand interactor)
         {
             if (handle.Equals(gunGrip))
             {
@@ -255,7 +269,7 @@ namespace ModularFirearms.Weapons
             }
         }
 
-        public void OnAnyHandleUngrabbed(Handle handle, Interactor interactor, bool throwing)
+        public void OnAnyHandleUngrabbed(Handle handle, RagdollHand interactor, bool throwing)
         {
             if (handle.Equals(gunGrip))
             {

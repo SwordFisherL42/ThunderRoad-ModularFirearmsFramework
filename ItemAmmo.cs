@@ -16,8 +16,8 @@ namespace ModularFirearms
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<ItemModuleAmmo>();
-            if (module.handleRef != null) ammoHandle = item.definition.GetCustomReference(module.handleRef).GetComponent<Handle>();
-            if (module.bulletMeshID != null) bulletMesh = item.definition.GetCustomReference(module.bulletMeshID).GetComponent<MeshRenderer>();
+            if (module.handleRef != null) ammoHandle = item.GetCustomReference(module.handleRef).GetComponent<Handle>();
+            if (module.bulletMeshID != null) bulletMesh = item.GetCustomReference(module.bulletMeshID).GetComponent<MeshRenderer>();
             Refill();
         }
 

@@ -28,11 +28,11 @@ namespace ModularFirearms
             item.OnGrabEvent += OnGrabEvent;
             item.OnUngrabEvent += OnUngrabEvent;
             module = item.data.GetModule<ItemModuleSlide>();
-            slideJoint = item.definition.GetCustomReference(module.slideJointRef).GetComponent<ConfigurableJoint>();
+            slideJoint = item.GetCustomReference(module.slideJointRef).GetComponent<ConfigurableJoint>();
             slideForce = item.transform.GetComponent<ConstantForce>();
-            slideHandle = item.definition.GetCustomReference(module.slideHandleRef).GetComponent<Handle>();
-            chamberShell = item.definition.GetCustomReference(module.chamberShellRef).GetComponent<MeshRenderer>();
-            chamberBullet = item.definition.GetCustomReference(module.chamberBulletRef).GetComponent<MeshRenderer>();
+            slideHandle = item.GetCustomReference(module.slideHandleRef).GetComponent<Handle>();
+            chamberShell = item.GetCustomReference(module.chamberShellRef).GetComponent<MeshRenderer>();
+            chamberBullet = item.GetCustomReference(module.chamberBulletRef).GetComponent<MeshRenderer>();
         }
 
         protected void Start()
@@ -45,7 +45,7 @@ namespace ModularFirearms
             return;
         }
 
-        protected void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
+        protected void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
             if (action == Interactable.Action.Ungrab)
             {
@@ -60,13 +60,13 @@ namespace ModularFirearms
             return;
         }
 
-        public void OnUngrabEvent(Handle handle, Interactor interactor, bool throwing)
+        public void OnUngrabEvent(Handle handle, RagdollHand interactor, bool throwing)
         {
             //Debug.Log("[Fisher-Firearms] Slide UnGrab!");
             isHeld = false;
         }
 
-        public void OnGrabEvent(Handle handle, Interactor interactor)
+        public void OnGrabEvent(Handle handle, RagdollHand interactor)
         {
             //Debug.Log("[Fisher-Firearms] Slide Grab!");
             isHeld = true;

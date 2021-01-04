@@ -14,7 +14,7 @@ namespace ModularFirearms.Weapons
         /// ThunderRoad Object References ///
         protected Item item;
         protected Shared.FirearmModule module;
-        protected ObjectHolder shellReceiver;
+        protected Holder shellReceiver;
         //protected ItemMagazine insertedMagazine;
         private Light attachedLight;
 
@@ -76,26 +76,26 @@ namespace ModularFirearms.Weapons
             module = item.data.GetModule<Shared.FirearmModule>();
 
             /// Set all Object References ///
-            if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.definition.GetCustomReference(module.muzzlePositionRef);
-            if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.definition.GetCustomReference(module.muzzlePositionRef);
-            if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.definition.GetCustomReference(module.shellEjectionRef);
-            if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.definition.GetCustomReference(module.animationRef).GetComponent<Animator>();
-            if (!String.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.definition.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.definition.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.pullSoundRef)) pullbackSound = item.definition.GetCustomReference(module.pullSoundRef).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.rackSoundRef)) rackforwardSound = item.definition.GetCustomReference(module.rackSoundRef).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.shellInsertSoundRef)) shellInsertSound = item.definition.GetCustomReference(module.shellInsertSoundRef).GetComponent<AudioSource>();
-            if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.definition.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
-            if (!String.IsNullOrEmpty(module.smokeRef)) muzzleSmoke = item.definition.GetCustomReference(module.smokeRef).GetComponent<ParticleSystem>();
-            if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.definition.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
+            if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
+            if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.GetCustomReference(module.muzzlePositionRef);
+            if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.GetCustomReference(module.shellEjectionRef);
+            if (!String.IsNullOrEmpty(module.animationRef)) Animations = item.GetCustomReference(module.animationRef).GetComponent<Animator>();
+            if (!String.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.pullSoundRef)) pullbackSound = item.GetCustomReference(module.pullSoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.rackSoundRef)) rackforwardSound = item.GetCustomReference(module.rackSoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.shellInsertSoundRef)) shellInsertSound = item.GetCustomReference(module.shellInsertSoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
+            if (!String.IsNullOrEmpty(module.smokeRef)) muzzleSmoke = item.GetCustomReference(module.smokeRef).GetComponent<ParticleSystem>();
+            if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
             else Debug.LogError("[Fisher-Firearms][ERROR] No Reference to Main Handle (\"mainHandleRef\") in JSON! Weapon will not work as intended !!!");
-            if (!String.IsNullOrEmpty(module.slideHandleRef)) slideObject = item.definition.GetCustomReference(module.slideHandleRef).gameObject;
+            if (!String.IsNullOrEmpty(module.slideHandleRef)) slideObject = item.GetCustomReference(module.slideHandleRef).gameObject;
             else Debug.LogError("[Fisher-Firearms][ERROR] No Reference to Slide Handle (\"slideHandleRef\") in JSON! Weapon will not work as intended !!!");
-            if (!String.IsNullOrEmpty(module.slideCenterRef)) slideCenterPosition = item.definition.GetCustomReference(module.slideCenterRef).gameObject;
+            if (!String.IsNullOrEmpty(module.slideCenterRef)) slideCenterPosition = item.GetCustomReference(module.slideCenterRef).gameObject;
             else Debug.LogError("[Fisher-Firearms][ERROR] No Reference to Slide Center Position(\"slideCenterRef\") in JSON! Weapon will not work as intended...");
             if (slideObject != null) slideHandle = slideObject.GetComponent<Handle>();
 
-            if (!String.IsNullOrEmpty(module.flashlightRef)) attachedLight = item.definition.GetCustomReference(module.flashlightRef).GetComponent<Light>();
+            if (!String.IsNullOrEmpty(module.flashlightRef)) attachedLight = item.GetCustomReference(module.flashlightRef).GetComponent<Light>();
 
             RACK_THRESHOLD = -0.1f * module.slideTravelDistance; //module.slideRackThreshold;
             PULL_THRESHOLD = -0.5f * module.slideTravelDistance;
@@ -110,9 +110,9 @@ namespace ModularFirearms.Weapons
             //item.OnSnapEvent += OnFirearmSnapped;
             //item.OnUnSnapEvent += OnFirearmUnSnapped;
 
-            shellReceiver = item.GetComponentInChildren<ObjectHolder>();
-            shellReceiver.Snapped += new ObjectHolder.HolderDelegate(this.OnShellInserted);
-            //shellReceiver.UnSnapped += new ObjectHolder.HolderDelegate(this.OnShellRemoved);
+            shellReceiver = item.GetComponentInChildren<Holder>();
+            shellReceiver.Snapped += new Holder.HolderDelegate(this.OnShellInserted);
+            //shellReceiver.UnSnapped += new Holder.HolderDelegate(this.OnShellRemoved);
 
         }
 
@@ -203,7 +203,7 @@ namespace ModularFirearms.Weapons
             //DumpRigidbodyToLog(slideRB);
         }
 
-        public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
+        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
             if (action == Interactable.Action.AlternateUseStart)
             {
@@ -275,7 +275,7 @@ namespace ModularFirearms.Weapons
             }
         }
 
-        public void OnAnyHandleGrabbed(Handle handle, Interactor interactor)
+        public void OnAnyHandleGrabbed(Handle handle, RagdollHand interactor)
         {
             //Debug.Log("[Fisher-Firearms] Grab: " + handle.name);
             if (handle.Equals(gunGrip))
@@ -314,7 +314,7 @@ namespace ModularFirearms.Weapons
 
         }
 
-        public void OnAnyHandleUngrabbed(Handle handle, Interactor interactor, bool throwing)
+        public void OnAnyHandleUngrabbed(Handle handle, RagdollHand interactor, bool throwing)
         {
             Debug.Log("[Fisher-Firearms] Ungrab: " + handle.name);
             if (handle.Equals(gunGrip))

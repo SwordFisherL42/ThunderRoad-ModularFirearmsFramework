@@ -16,9 +16,9 @@ namespace ModularFirearms
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<ItemModuleSimpleExplosive>();
-            meshObject = item.definition.GetCustomReference(module.shellMeshRef).gameObject;
-            if (!string.IsNullOrEmpty(module.particleEffectRef)) explosiveEffect = item.definition.GetCustomReference(module.particleEffectRef).GetComponent<ParticleSystem>();
-            if (!string.IsNullOrEmpty(module.soundRef)) explosiveSound = item.definition.GetCustomReference(module.soundRef).GetComponent<AudioSource>();
+            meshObject = item.GetCustomReference(module.shellMeshRef).gameObject;
+            if (!string.IsNullOrEmpty(module.particleEffectRef)) explosiveEffect = item.GetCustomReference(module.particleEffectRef).GetComponent<ParticleSystem>();
+            if (!string.IsNullOrEmpty(module.soundRef)) explosiveSound = item.GetCustomReference(module.soundRef).GetComponent<AudioSource>();
         }
 
         protected void Start()

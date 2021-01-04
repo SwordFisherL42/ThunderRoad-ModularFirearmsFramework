@@ -11,7 +11,7 @@ namespace ModularFirearms.Items
     {
         protected Item item;
         protected Shared.AmmoModule module;
-        protected ObjectHolder holder;
+        protected Holder holder;
         protected Handle magazineHandle;
         protected GameObject bulletMesh;
         protected int ammoCount;
@@ -22,11 +22,11 @@ namespace ModularFirearms.Items
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.AmmoModule>();
 
-            holder = item.GetComponentInChildren<ObjectHolder>();
-            holder.Snapped += new ObjectHolder.HolderDelegate(this.OnAmmoItemInserted);
+            holder = item.GetComponentInChildren<Holder>();
+            holder.Snapped += new Holder.HolderDelegate(this.OnAmmoItemInserted);
 
-            magazineHandle = item.definition.GetCustomReference(module.handleRef).GetComponent<Handle>();
-            bulletMesh = item.definition.GetCustomReference(module.bulletMeshRef).gameObject;
+            magazineHandle = item.GetCustomReference(module.handleRef).GetComponent<Handle>();
+            bulletMesh = item.GetCustomReference(module.bulletMeshRef).gameObject;
             RefillAll();
         }
 
