@@ -106,13 +106,14 @@ namespace ModularFirearms.Weapons
             item.OnHeldActionEvent += OnHeldAction;
             item.OnGrabEvent += OnAnyHandleGrabbed;
             item.OnUngrabEvent += OnAnyHandleUngrabbed;
+            //item.OnTouchActionEvent += TouchActionEvent;
 
             //item.OnSnapEvent += OnFirearmSnapped;
             //item.OnUnSnapEvent += OnFirearmUnSnapped;
 
             shellReceiver = item.GetComponentInChildren<Holder>();
             shellReceiver.Snapped += new Holder.HolderDelegate(this.OnShellInserted);
-            //shellReceiver.UnSnapped += new Holder.HolderDelegate(this.OnShellRemoved);
+            shellReceiver.UnSnapped += new Holder.HolderDelegate(this.OnShellRemoved);
 
         }
 
@@ -203,13 +204,44 @@ namespace ModularFirearms.Weapons
             //DumpRigidbodyToLog(slideRB);
         }
 
+        //public void TouchActionEvent(Interactable interactable, Interactable.Action action)
+        //{
+        //    if (action == Interactable.Action.Ungrab)
+        //    {
+                
+        //        Debug.Log("[Fisher-Firearms] Ungrab: " + interactable.interactableId);
+        //        if (interactable.interactableId == gunGrip.interactableId)
+        //        {
+        //            // Debug.Log("[Fisher-Firearms] GunGrip Ungrabbed!");
+        //            if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = false;
+        //            if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = false;
+        //            if ((!gunGripHeldRight && !gunGripHeldLeft) && (slideController != null))
+        //            {
+        //                slideHandle.data.positionDamperMultiplier = 1.0f;
+        //                slideHandle.data.positionSpringMultiplier = 1.0f;
+        //                slideHandle.data.rotationDamperMultiplier = 1.0f;
+        //                slideHandle.data.rotationSpringMultiplier = 1.0f;
+        //                slideController.LockSlide();
+        //            }
+        //        }
+        //        if (handle.name.Equals(slideHandle.name))
+        //        {
+        //            // Debug.Log("[Fisher-Firearms] Slide Ungrabbed!");
+        //            if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = false;
+        //            if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = false;
+        //            slideController.SetHeld(false);
+        //            // DumpRigidbodyToLog(slideController.rb);
+        //        }
+        //    }
+        //}
+
         public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
             if (action == Interactable.Action.AlternateUseStart)
             {
                 if (attachedLight != null) attachedLight.enabled = !attachedLight.enabled;
                 if (emptySound != null) emptySound.Play();
-                Debug.Log("[GreatJourney] Toggled Light!");
+                //Debug.Log("[ModularFirearms] Toggled Light!");
             }
             // Trigger Action
             if (handle.name.Equals(slideHandle.name))
@@ -316,26 +348,32 @@ namespace ModularFirearms.Weapons
 
         public void OnAnyHandleUngrabbed(Handle handle, RagdollHand interactor, bool throwing)
         {
-            Debug.Log("[Fisher-Firearms] Ungrab: " + handle.name);
+            //Debug.Log("[Fisher-Firearms] Ungrab: " + handle.name);
             if (handle.Equals(gunGrip))
             {
+                //Debug.Log("[Fisher-Firearms] Releasing main handle...");
                 // Debug.Log("[Fisher-Firearms] GunGrip Ungrabbed!");
                 if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = false;
+
                 if ((!gunGripHeldRight && !gunGripHeldLeft) && (slideController != null))
                 {
+                    //Debug.Log("[Fisher-Firearms] Locking Slide....");
                     slideHandle.data.positionDamperMultiplier = 1.0f;
                     slideHandle.data.positionSpringMultiplier = 1.0f;
                     slideHandle.data.rotationDamperMultiplier = 1.0f;
                     slideHandle.data.rotationSpringMultiplier = 1.0f;
                     slideController.LockSlide();
+                    //Debug.Log("[Fisher-Firearms] Slide LOCKED !");
                 }
             }
             if (handle.name.Equals(slideHandle.name))
             {
+                //Debug.Log("[Fisher-Firearms] Releasing SLIDE handle...");
                 // Debug.Log("[Fisher-Firearms] Slide Ungrabbed!");
                 if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = false;
+                //Debug.Log("[Fisher-Firearms] Unholding child Slide....");
                 slideController.SetHeld(false);
                 // DumpRigidbodyToLog(slideController.rb);
             }
@@ -354,7 +392,7 @@ namespace ModularFirearms.Weapons
                         if (shellInsertSound != null) shellInsertSound.Play();
                         chamberRoundOnNext = true;
                         currentReceiverAmmo += 1;
-                        interactiveObject.Despawn();
+                        
                         //if (currentReceiverAmmo >= module.maxReceiverAmmo) { shellReceiver.data.locked = true; }
                     }
                 }
@@ -367,19 +405,25 @@ namespace ModularFirearms.Weapons
             }
         }
 
-        //protected void OnShellRemoved(Item interactiveObject)
-        //{
-        //    try
-        //    {
-        //        Common.InteractiveAmmo insertedShell = interactiveObject.GetComponent<Common.InteractiveAmmo>();
-        //        if (insertedShell != null)
-        //        { }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Debug.Log("[Fisher-Firearms][ERROR] Exception in removing magazine from pistol." + e.ToString());
-        //    }
-        //}
+        protected void OnShellRemoved(Item interactiveObject)
+        {
+            try
+            {
+                Items.InteractiveAmmo insertedShell = interactiveObject.GetComponent<Items.InteractiveAmmo>();
+                if (insertedShell != null)
+                {
+                    if (insertedShell.GetAmmoType().Equals(AmmoType.ShotgunShell))
+                    {
+                        interactiveObject.Despawn();
+                    }
+                    
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Fisher-Firearms][ERROR] Exception in removing shell from receiver." + e.ToString());
+            }
+        }
 
         public void PreFireEffects()
         {
@@ -391,7 +435,10 @@ namespace ModularFirearms.Weapons
         public bool Fire()
         {
             PreFireEffects();
-            FirearmFunctions.ShotgunBlast(item, module.projectileID, rayCastPoint, module.blastRange, module.blastForce, module.bulletForce, FirearmFunctions.GetItemSpellChargeID(item), module.throwMult, false, slideCapsuleStabilizer);
+            //FirearmFunctions.ShotgunBlast(item, module.projectileID, rayCastPoint, module.blastRange, module.blastForce, module.bulletForce, FirearmFunctions.GetItemSpellChargeID(item), module.throwMult, false, slideCapsuleStabilizer);
+
+            FirearmFunctions.ProjectileBurst(item, module.projectileID, muzzlePoint,  FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer);
+
             //FirearmFunctions.ShootProjectile(item, module.projectileID, rayCastPoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, 1.0f, false, slideCapsuleStabilizer, true);
             //FirearmFunctions.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce);
             FirearmFunctions.ApplyRecoil(item.rb, module.recoilForces, 1.0f, gunGripHeldLeft || slideGripHeldLeft, gunGripHeldRight || slideGripHeldRight, module.hapticForce);

@@ -111,13 +111,13 @@ namespace ModularFirearms.Weapons
             if (!String.IsNullOrEmpty(module.flashlightRef)) attachedLight = item.GetCustomReference(module.flashlightRef).GetComponent<Light>();
 
             if (!String.IsNullOrEmpty(module.foregripHandleRef)) foreGrip = item.GetCustomReference(module.foregripHandleRef).GetComponent<Handle>();
-            //Debug.Log("[Fisher-GreatJourney] AUTOMAG Custom References Complete! !!!");
+            //Debug.Log("[Fisher-ModularFirearms] AUTOMAG Custom References Complete! !!!");
             //if (!String.IsNullOrEmpty(module.ammoCounterRef))
             //{
-            //    //Debug.Log("[Fisher-GreatJourney] Getting Ammo Counter Objects ...");
+            //    //Debug.Log("[Fisher-ModularFirearms] Getting Ammo Counter Objects ...");
             //    ammoCounterMesh = item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>();
             //    digitsGridTexture = (Texture2D)item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>().material.mainTexture;
-            //    //Debug.Log("[Fisher-GreatJourney] GOT Ammo Counter Objects !!!");
+            //    //Debug.Log("[Fisher-ModularFirearms] GOT Ammo Counter Objects !!!");
             //}
 
             fireModeSelection = (FireMode)FirearmFunctions.fireModeEnums.GetValue(module.fireMode);
@@ -132,23 +132,23 @@ namespace ModularFirearms.Weapons
             //    ammoCounter = new Shared.TextureProcessor();
             //    ammoCounter.SetGridTexture(digitsGridTexture);
             //    ammoCounter.SetTargetRenderer(ammoCounterMesh);
-            //    //Debug.Log("[Fisher-GreatJourney] Sucessfully Setup Ammo Counter!!");
+            //    //Debug.Log("[Fisher-ModularFirearms] Sucessfully Setup Ammo Counter!!");
             //}
 
             /// Item Events ///
-            //Debug.Log("[Fisher-GreatJourney] AUTOMAG Setup Item events! !!!");
+            //Debug.Log("[Fisher-ModularFirearms] AUTOMAG Setup Item events! !!!");
             item.OnHeldActionEvent += OnHeldAction;
 
             item.OnGrabEvent += OnAnyHandleGrabbed;
             item.OnUngrabEvent += OnAnyHandleUngrabbed;
 
-            //Debug.Log("[Fisher-GreatJourney] AUTOMAG Getting Holder... !!!");
+            //Debug.Log("[Fisher-ModularFirearms] AUTOMAG Getting Holder... !!!");
             magazineHolder = item.GetComponentInChildren<Holder>();
 
             magazineHolder.Snapped += new Holder.HolderDelegate(this.OnMagazineInserted);
             magazineHolder.UnSnapped += new Holder.HolderDelegate(this.OnMagazineRemoved);
 
-            //Debug.Log("[Fisher-GreatJourney] AUTOMAG All Awake Complete! !!!");
+            //Debug.Log("[Fisher-ModularFirearms] AUTOMAG All Awake Complete! !!!");
 
         }
 
@@ -162,7 +162,7 @@ namespace ModularFirearms.Weapons
             var magazineData = Catalog.GetData<ItemPhysic>(module.acceptedMagazineID, true);
             if (magazineData == null)
             {
-                Debug.LogError("[Fisher-GreatJourney][ERROR] No Magazine named " + module.acceptedMagazineID.ToString());
+                Debug.LogError("[Fisher-ModularFirearms][ERROR] No Magazine named " + module.acceptedMagazineID.ToString());
                 return;
             }
             else
@@ -222,7 +222,7 @@ namespace ModularFirearms.Weapons
                     {
                         if (attachedLight != null) attachedLight.enabled = !attachedLight.enabled;
                         if (emptySound != null) emptySound.Play();
-                        //Debug.Log("[GreatJourney] Toggled Light!");
+                        //Debug.Log("[ModularFirearms] Toggled Light!");
                         return;
                     }
                 }
@@ -263,7 +263,7 @@ namespace ModularFirearms.Weapons
         {
             if (handle.Equals(gunGrip))
             {
-                //     Debug.Log("[Fisher-GreatJourney] Main Handle Grabbed!");
+                //     Debug.Log("[Fisher-ModularFirearms] Main Handle Grabbed!");
                 if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = true;
                 if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = true;
             }
@@ -273,7 +273,7 @@ namespace ModularFirearms.Weapons
         {
             if (handle.Equals(gunGrip))
             {
-                //    Debug.Log("[Fisher-GreatJourney] Main Handle Ungrabbed!");
+                //    Debug.Log("[Fisher-ModularFirearms] Main Handle Ungrabbed!");
                 if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = false;
 
@@ -313,7 +313,7 @@ namespace ModularFirearms.Weapons
 
             catch (Exception e)
             {
-                Debug.LogError("[Fisher-GreatJourney][ERROR] Exception in Adding magazine: " + e.ToString());
+                Debug.LogError("[Fisher-ModularFirearms][ERROR] Exception in Adding magazine: " + e.ToString());
             }
 
             UpdateAmmoCounter();
@@ -329,7 +329,7 @@ namespace ModularFirearms.Weapons
                 }
                 //currentInteractiveObject = null;
             }
-            catch { Debug.LogWarning("[Fisher-GreatJourney] Unable to Eject the Magazine!"); }
+            catch { Debug.LogWarning("[Fisher-ModularFirearms] Unable to Eject the Magazine!"); }
 
             magazineHolder.data.disableTouch = false;
             UpdateAmmoCounter();
@@ -338,7 +338,7 @@ namespace ModularFirearms.Weapons
 
         public void MagazineRelease()
         {
-            //  Debug.Log("[Fisher-GreatJourney] Releasing Magazine!");
+            //  Debug.Log("[Fisher-ModularFirearms] Releasing Magazine!");
             try
             {
                 if (insertedMagazine != null)
@@ -348,7 +348,7 @@ namespace ModularFirearms.Weapons
                 }
                 //currentInteractiveObject = null;
             }
-            catch { Debug.LogWarning("[Fisher-GreatJourney] Unable to Eject the Magazine!"); }
+            catch { Debug.LogWarning("[Fisher-ModularFirearms] Unable to Eject the Magazine!"); }
 
             try
             {

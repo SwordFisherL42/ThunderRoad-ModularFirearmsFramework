@@ -130,11 +130,11 @@ namespace ModularFirearms.Weapons
 
             if (!String.IsNullOrEmpty(module.mainHandleRef)) gunGrip = item.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
 
-            else Debug.LogError("[Fisher-GreatJourney][ERROR] No Reference to Main Handle (\"mainHandleRef\") in JSON! Weapon will not work as intended !!!");
+            else Debug.LogError("[Fisher-ModularFirearms][ERROR] No Reference to Main Handle (\"mainHandleRef\") in JSON! Weapon will not work as intended !!!");
             if (!String.IsNullOrEmpty(module.slideHandleRef)) slideObject = item.GetCustomReference(module.slideHandleRef).gameObject;
-            else Debug.LogError("[Fisher-GreatJourney][ERROR] No Reference to Slide Handle (\"slideHandleRef\") in JSON! Weapon will not work as intended !!!");
+            else Debug.LogError("[Fisher-ModularFirearms][ERROR] No Reference to Slide Handle (\"slideHandleRef\") in JSON! Weapon will not work as intended !!!");
             if (!String.IsNullOrEmpty(module.slideCenterRef)) slideCenterPosition = item.GetCustomReference(module.slideCenterRef).gameObject;
-            else Debug.LogError("[Fisher-GreatJourney][ERROR] No Reference to Slide Center Position(\"slideCenterRef\") in JSON! Weapon will not work as intended...");
+            else Debug.LogError("[Fisher-ModularFirearms][ERROR] No Reference to Slide Center Position(\"slideCenterRef\") in JSON! Weapon will not work as intended...");
             if (slideObject != null) slideHandle = slideObject.GetComponent<Handle>();
 
             if (!String.IsNullOrEmpty(module.compassRef)) compass = item.GetCustomReference(module.compassRef).gameObject;
@@ -185,10 +185,10 @@ namespace ModularFirearms.Weapons
 
             if (!String.IsNullOrEmpty(module.ammoCounterRef))
             {
-                //Debug.Log("[Fisher-GreatJourney] Getting Ammo Counter Objects ...");
+                //Debug.Log("[Fisher-ModularFirearms] Getting Ammo Counter Objects ...");
                 ammoCounterMesh = item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>();
                 digitsGridTexture = (Texture2D)item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>().material.mainTexture;
-                //Debug.Log("[Fisher-GreatJourney] GOT Ammo Counter Objects !!!");
+                //Debug.Log("[Fisher-ModularFirearms] GOT Ammo Counter Objects !!!");
             }
 
             lastSpellMenuPress = 0.0f;
@@ -214,15 +214,15 @@ namespace ModularFirearms.Weapons
                 allowedFireModes = new List<int>(module.allowedFireModes);
             }
 
-            //if (digitsGridTexture == null) Debug.LogError("[Fisher-GreatJourney] COULD NOT GET GRID TEXTURE");
-            //if (ammoCounterMesh == null) Debug.LogError("[Fisher-GreatJourney] COULD NOT GET MESH RENDERER");
+            //if (digitsGridTexture == null) Debug.LogError("[Fisher-ModularFirearms] COULD NOT GET GRID TEXTURE");
+            //if (ammoCounterMesh == null) Debug.LogError("[Fisher-ModularFirearms] COULD NOT GET MESH RENDERER");
 
             if ((digitsGridTexture != null) && (ammoCounterMesh != null))
             {
                 ammoCounter = new Shared.TextureProcessor();
                 ammoCounter.SetGridTexture(digitsGridTexture);
                 ammoCounter.SetTargetRenderer(ammoCounterMesh);
-                //Debug.Log("[Fisher-GreatJourney] Sucessfully Setup Ammo Counter!!");
+                //Debug.Log("[Fisher-ModularFirearms] Sucessfully Setup Ammo Counter!!");
             }
 
             /// Item Events ///
@@ -253,13 +253,13 @@ namespace ModularFirearms.Weapons
             slideController = new Shared.ChildRigidbodyController(item, module);
             slideController.InitializeSlide(slideObject);
 
-            if (slideController == null) Debug.LogError("[Fisher-GreatJourney] ERROR! CHILD SLIDE CONTROLLER WAS NULL");
+            if (slideController == null) Debug.LogError("[Fisher-ModularFirearms] ERROR! CHILD SLIDE CONTROLLER WAS NULL");
             else slideController.SetupSlide();
 
             var magazineData = Catalog.GetData<ItemPhysic>(module.acceptedMagazineID, true);
             if (magazineData == null)
             {
-                Debug.LogError("[Fisher-GreatJourney][ERROR] No Magazine named " + module.acceptedMagazineID.ToString());
+                Debug.LogError("[Fisher-ModularFirearms][ERROR] No Magazine named " + module.acceptedMagazineID.ToString());
                 return;
             }
             else
@@ -282,7 +282,7 @@ namespace ModularFirearms.Weapons
                 false);
             }
 
-            //if (module.animateSelectionSwitch) SetFireSelectionAnimator(Animations, fireModeSelection);
+            SetFireSelectionAnimator(Animations, fireModeSelection);
             if (ammoCounter != null) ammoCounter.DisplayUpdate(0);
         }
 
@@ -300,7 +300,7 @@ namespace ModularFirearms.Weapons
                 {
                     if (slideController.IsHeld())
                     {
-                        //Debug.Log("[Fisher-GreatJourney] Entered PulledBack position");
+                        //Debug.Log("[Fisher-ModularFirearms] Entered PulledBack position");
                         //Debug.Log("[Fisher-Slide] PULL_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
                         if (pullbackSound != null) pullbackSound.Play();
                         isPulledBack = true;
@@ -324,12 +324,12 @@ namespace ModularFirearms.Weapons
             }
             if ((slideObject.transform.localPosition.z > (PULL_THRESHOLD - RACK_THRESHOLD)) && isPulledBack)
             {
-                //Debug.Log("[Fisher-GreatJourney] Showing Ammo...");
+                //Debug.Log("[Fisher-ModularFirearms] Showing Ammo...");
                 if (CountAmmoFromMagazine() > 0) { slideController.ChamberRoundVisible(true); }
             }
             if ((slideObject.transform.localPosition.z >= RACK_THRESHOLD) && !isRacked)
             {
-                //Debug.Log("[Fisher-GreatJourney] Entered Rack position");
+                //Debug.Log("[Fisher-ModularFirearms] Entered Rack position");
                 //Debug.Log("[Fisher-Slide] RACK_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
                 isRacked = true;
                 isPulledBack = false;
@@ -364,11 +364,11 @@ namespace ModularFirearms.Weapons
                 {
                     slideController.UnlockSlide();
                     slideController.initialCheck = true;
-                    //Debug.Log("[Fisher-GreatJourney] Initial Check unlocks slide.");
+                    //Debug.Log("[Fisher-ModularFirearms] Initial Check unlocks slide.");
                     //Debug.Log("[Fisher-Slide] inital slideObject position values: " + slideObject.transform.localPosition.ToString());
                 }
             }
-            catch { Debug.Log("[Fisher-GreatJourney] Slide EXCEPTION"); }
+            catch { Debug.Log("[Fisher-ModularFirearms] Slide EXCEPTION"); }
         }
 
         public void UpdateLaserPoint()
@@ -431,15 +431,9 @@ namespace ModularFirearms.Weapons
         {
             if (ammoCounter == null) return;
             if (!roundChambered) { ammoCounter.DisplayUpdate(CountAmmoFromMagazine()); }
-            else
-            {
-                ammoCounter.DisplayUpdate(CountAmmoFromMagazine() + 1);
-            }
-            //if (!roundChambered) { ammoCounter.DisplayUpdate(0); }
-            //else
-            //{
-            //    ammoCounter.DisplayUpdate(CountAmmoFromMagazine() + 1);
-            //}
+            else { ammoCounter.DisplayUpdate(CountAmmoFromMagazine() + 1); }
+            // if (!roundChambered) { ammoCounter.DisplayUpdate(0); }
+            // else{ ammoCounter.DisplayUpdate(CountAmmoFromMagazine() + 1); }
         }
 
         public void SetAmmoCounter(int value)
@@ -454,10 +448,10 @@ namespace ModularFirearms.Weapons
             {
                 // TODO: Figure out why adding RB from code doesnt work
                 slideRB = slideObject.AddComponent<Rigidbody>();
-                //  Debug.Log("[Fisher-GreatJourney][Config-Joint-Init] CREATED Rigidbody ON SlideObject...");
+                //  Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] CREATED Rigidbody ON SlideObject...");
 
             }
-            //else { Debug.Log("[Fisher-GreatJourney][Config-Joint-Init] ACCESSED Rigidbody on Slide Object..."); }
+            //else { Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] ACCESSED Rigidbody on Slide Object..."); }
 
             slideRB.mass = 1.0f;
             slideRB.drag = 0.0f;
@@ -474,12 +468,12 @@ namespace ModularFirearms.Weapons
             Physics.IgnoreLayerCollision(21, 15);
             Physics.IgnoreLayerCollision(21, 22);
             Physics.IgnoreLayerCollision(21, 23);
-            //  Debug.Log("[Fisher-GreatJourney][Config-Joint-Init] Created Stabilizing Collider on Slide Object");
+            //  Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] Created Stabilizing Collider on Slide Object");
 
             slideForce = slideObject.AddComponent<ConstantForce>();
-            //  Debug.Log("[Fisher-GreatJourney][Config-Joint-Init] Created ConstantForce on Slide Object");
+            //  Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] Created ConstantForce on Slide Object");
 
-            //  Debug.Log("[Fisher-GreatJourney][Config-Joint-Init] Creating Config Joint and Setting Joint Values...");
+            //  Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] Creating Config Joint and Setting Joint Values...");
             connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
             connectedJoint.connectedBody = slideRB;
             connectedJoint.anchor = new Vector3(0, 0, -0.5f * module.slideTravelDistance);
@@ -496,7 +490,7 @@ namespace ModularFirearms.Weapons
             connectedJoint.linearLimit = new SoftJointLimit { limit = 0.5f * module.slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
             connectedJoint.massScale = 1.0f;
             connectedJoint.connectedMassScale = module.slideMassOffset;
-            // Debug.Log("[Fisher-GreatJourney][Config-Joint-Init] Created Configurable Joint !");
+            // Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] Created Configurable Joint !");
             //DumpRigidbodyToLog(slideRB);
         }
 
@@ -517,9 +511,16 @@ namespace ModularFirearms.Weapons
 
         private void ToggleLaser()
         {
+            if (module.allowCycleFireMode)
+            {
+                if (emptySound != null) emptySound.Play();
+                fireModeSelection = FirearmFunctions.CycleFireMode(fireModeSelection, allowedFireModes);
+               SetFireSelectionAnimator(Animations, fireModeSelection);
+            }
             if (attachedLaser == null) return;
             if (emptySound != null) emptySound.Play();
             attachedLaser.enabled = !attachedLaser.enabled;
+
         }
 
         private IEnumerator SpellMenuAction()
@@ -604,7 +605,7 @@ namespace ModularFirearms.Weapons
                 {
                     if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = true;
                     if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = true;
-                    //    Debug.Log("[Fisher-GreatJourney] Slide Ungrabbed!");
+                    //    Debug.Log("[Fisher-ModularFirearms] Slide Ungrabbed!");
                     if (slideController != null) slideController.SetHeld(true);
                     slideController.ForwardState();
                 }
@@ -631,7 +632,7 @@ namespace ModularFirearms.Weapons
 
                 if (handle.Equals(slideHandle))
                 {
-                    //    Debug.Log("[Fisher-GreatJourney] Slide Ungrabbed!");
+                    //    Debug.Log("[Fisher-ModularFirearms] Slide Ungrabbed!");
                     if (slideController != null) slideController.SetHeld(false);
                 }
 
@@ -651,7 +652,7 @@ namespace ModularFirearms.Weapons
         {
             if (handle.Equals(gunGrip))
             {
-                //     Debug.Log("[Fisher-GreatJourney] Main Handle Grabbed!");
+                //     Debug.Log("[Fisher-ModularFirearms] Main Handle Grabbed!");
                 if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = true;
                 if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = true;
                 //if ((gunGripHeldRight || gunGripHeldLeft) && (slideController != null)) { slideController.UnlockSlide(); slideController.ForwardState(); }
@@ -662,7 +663,7 @@ namespace ModularFirearms.Weapons
             {
                 if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = true;
                 if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = true;
-                //    Debug.Log("[Fisher-GreatJourney] Slide Grabbed!");
+                //    Debug.Log("[Fisher-ModularFirearms] Slide Grabbed!");
                 slideController.SetHeld(true);
                 slideController.ForwardState();
                 //DumpRigidbodyToLog(slideController.rb);
@@ -675,7 +676,7 @@ namespace ModularFirearms.Weapons
         {
             if (handle.Equals(gunGrip))
             {
-                //    Debug.Log("[Fisher-GreatJourney] Main Handle Ungrabbed!");
+                //    Debug.Log("[Fisher-ModularFirearms] Main Handle Ungrabbed!");
                 if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = false;
                 if (!gunGripHeldRight && !gunGripHeldLeft)
@@ -689,7 +690,7 @@ namespace ModularFirearms.Weapons
             {
                 if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = false;
-                //    Debug.Log("[Fisher-GreatJourney] Slide Ungrabbed!");
+                //    Debug.Log("[Fisher-ModularFirearms] Slide Ungrabbed!");
                 slideController.SetHeld(false);
                 //DumpRigidbodyToLog(slideController.rb);
             }
@@ -740,7 +741,7 @@ namespace ModularFirearms.Weapons
 
             catch (Exception e)
             {
-                Debug.LogError("[Fisher-GreatJourney][ERROR] Exception in Adding magazine: " + e.ToString());
+                Debug.LogError("[Fisher-ModularFirearms][ERROR] Exception in Adding magazine: " + e.ToString());
             }
 
             if (roundChambered) UpdateAmmoCounter();
@@ -752,31 +753,35 @@ namespace ModularFirearms.Weapons
             {
                 if (insertedMagazine != null)
                 {
-                    insertedMagazine.Remove();
+                    //insertedMagazine.Eject(item.colliderGroups.ToArray());
+                    insertedMagazine.Eject(item);
                     insertedMagazine = null;
                 }
                 //currentInteractiveObject = null;
             }
-            catch { Debug.LogWarning("[Fisher-GreatJourney] Unable to Eject the Magazine!"); }
+            catch { Debug.LogWarning("[Fisher-ModularFirearms] Unable to Eject the Magazine!"); }
 
             magazineHolder.data.disableTouch = false;
             UpdateAmmoCounter();
+
+            //try
+            //{
+            //    if (insertedMagazine != null)
+            //    {
+            //        insertedMagazine.Remove();
+            //        insertedMagazine = null;
+            //    }
+            //    //currentInteractiveObject = null;
+            //}
+            //catch { Debug.LogWarning("[Fisher-ModularFirearms] Unable to Eject the Magazine!"); }
+
+            //magazineHolder.data.disableTouch = false;
+            //UpdateAmmoCounter();
         }
 
         public void MagazineRelease()
         {
-            //  Debug.Log("[Fisher-GreatJourney] Releasing Magazine!");
-            try
-            {
-                if (insertedMagazine != null)
-                {
-                    insertedMagazine.Eject();
-                    insertedMagazine = null;
-                }
-                //currentInteractiveObject = null;
-            }
-            catch { Debug.LogWarning("[Fisher-GreatJourney] Unable to Eject the Magazine!"); }
-
+            //  Debug.Log("[Fisher-ModularFirearms] Releasing Magazine!");
             try
             {
                 if (magazineHolder.holdObjects.Count > 0)
@@ -787,13 +792,12 @@ namespace ModularFirearms.Weapons
             }
             catch { }
 
-            magazineHolder.data.disableTouch = false;
-            UpdateAmmoCounter();
+
         }
 
         //public void MagazineRelease()
         //{
-        //    Debug.Log("[Fisher-GreatJourney] Releasing Magazine!");
+        //    Debug.Log("[Fisher-ModularFirearms] Releasing Magazine!");
         //    try
         //    {
         //        if (currentInteractiveObject != null)
@@ -810,7 +814,7 @@ namespace ModularFirearms.Weapons
         //            currentInteractiveObject = null;
         //        }
         //    }
-        //    catch { Debug.LogWarning("[Fisher-GreatJourney] Unable to Eject the Magazine!"); }
+        //    catch { Debug.LogWarning("[Fisher-ModularFirearms] Unable to Eject the Magazine!"); }
 
         //    magazineHolder.data.disableTouch = false;
         //    UpdateAmmoCounter();

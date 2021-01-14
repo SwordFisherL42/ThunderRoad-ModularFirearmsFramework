@@ -10,9 +10,9 @@ using ThunderRoad;
  * 
  */
 
-namespace ModularFirearms
+namespace ModularFirearms.Projectiles
 {
-    public class ItemSimpleProjectile : MonoBehaviour
+    public class SimpleProjectile : MonoBehaviour
     {
         protected Item item;
         protected Shared.ProjectileModule module;
@@ -45,7 +45,9 @@ namespace ModularFirearms
         private void OnCollisionEnter(Collision hit)
         {
             if (item.rb.useGravity) return;
-            else { item.rb.useGravity = true; isFlying = false; Debug.Log("[PROJECTILE] Collsion with: " + hit.collider.name);  }
+            else { item.rb.useGravity = true; isFlying = false;
+                // Debug.Log("[PROJECTILE] Collsion with: " + hit.collider.name);
+            }
         }
 
         private void TransferImbueCharge(Item imbueTarget, string spellID)

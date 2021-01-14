@@ -35,9 +35,9 @@ namespace ModularFirearms.Shared
 
             ProjectileType selectedType = GetSelectedType();
 
-            if (selectedType.Equals(ProjectileType.Pierce)) { item.gameObject.AddComponent<ItemSimpleProjectile>();}
-            else if (selectedType.Equals(ProjectileType.Explosive)) { item.gameObject.AddComponent<ItemSimpleExplosive>(); }
-            else { item.gameObject.AddComponent<ItemSimpleProjectile>(); }
+            if (selectedType.Equals(ProjectileType.Pierce)) { item.gameObject.AddComponent<Projectiles.SimpleProjectile>();}
+            else if (selectedType.Equals(ProjectileType.Explosive)) { item.gameObject.AddComponent<Projectiles.ExplosiveProjectile>(); }
+            else { item.gameObject.AddComponent<Projectiles.SimpleProjectile>(); }
 
         }
     }

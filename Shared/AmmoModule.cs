@@ -29,7 +29,7 @@ namespace ModularFirearms.Shared
             selectedType = GetSelectedType();
             if (selectedType.Equals(AmmoType.Generic) || selectedType.Equals(AmmoType.SemiAuto) || selectedType.Equals(AmmoType.ShotgunShell)) item.gameObject.AddComponent<Items.InteractiveAmmo>();
             else if (selectedType.Equals(AmmoType.Magazine)) item.gameObject.AddComponent<Items.InteractiveMagazine>();
-            else if (selectedType.Equals(AmmoType.Pouch)) item.gameObject.AddComponent<Items.ItemInfintieAmmo>();
+            else if (selectedType.Equals(AmmoType.Pouch)) item.gameObject.AddComponent<Items.AmmoResupply>();
         }
 
     }

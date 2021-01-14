@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace ModularFirearms.Items
 {
-    public class ItemInfintieAmmo : MonoBehaviour
+    public class AmmoResupply : MonoBehaviour
     {
         protected Item item;
         protected Shared.AmmoModule module;

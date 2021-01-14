@@ -32,7 +32,7 @@ namespace ModularFirearms.Shared
         public string laserEndRef;
         public float maxLaserDistance = 10.0f;
         public bool laserTogglePriority = false;
-        public float laserToggleHoldTime = 0.5f;
+        public float laserToggleHoldTime = 0.25f;
 
         public string emptySoundRef;
         public string pullSoundRef;
@@ -124,11 +124,13 @@ namespace ModularFirearms.Shared
             base.OnItemLoaded(item);
 
             selectedType = (WeaponType)FirearmFunctions.weaponTypeEnums.GetValue(firearmCategory);
+
             if (selectedType.Equals(WeaponType.TestWeapon)) item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>();
             else if (selectedType.Equals(WeaponType.AutoMag)) item.gameObject.AddComponent<Weapons.AutomagGenerator>();
             else if (selectedType.Equals(WeaponType.SemiAuto)) item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>();
             else if (selectedType.Equals(WeaponType.Shotgun)) item.gameObject.AddComponent<Weapons.ShotgunGenerator>();
-            
+
+            else { item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>(); }
 
             //else if (selectedType.Equals(WeaponType.Shotgun)) item.gameObject.AddComponent<Weapons.ItemShotgunUNSC>();
             //else if (selectedType.Equals(WeaponType.BoltAction)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();

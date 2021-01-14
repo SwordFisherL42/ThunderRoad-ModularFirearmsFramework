@@ -71,11 +71,24 @@ namespace ModularFirearms.Items
         }
 
         public void Remove() { insertedIntoObject = false; }
-
-        public void Eject()
+        //private void OnCollisionStay(Collision hit) { Debug.Log(gameObject.name + " is hitting " + hit.gameObject.name); }
+        //public void Eject(ColliderGroup[] ignoredColliders = null)
+        public void Eject(Item shooterItem = null)
         {
-            item.rb.AddRelativeForce(new Vector3(module.ejectionForceVector[0], module.ejectionForceVector[1], module.ejectionForceVector[2]), ForceMode.Impulse);
             insertedIntoObject = false;
+            //if (ignoredColliders != null)
+            //{
+            //    foreach (ColliderGroup CG in ignoredColliders)
+            //    {
+            //        foreach(Collider C in CG.colliders)
+            //        {
+            //            Physics.IgnoreCollision(item.colliderGroups[0].colliders[0], C, true);
+            //        }
+            //    }
+            //}
+            if (shooterItem != null) { item.IgnoreObjectCollision(shooterItem); }
+            item.IgnoreRagdollCollision(Player.local.creature.ragdoll);
+            item.rb.AddRelativeForce(new Vector3(module.ejectionForceVector[0], module.ejectionForceVector[1], module.ejectionForceVector[2]), ForceMode.Impulse);
             //magazineHandle.data.disableTouch = false;
         }
 

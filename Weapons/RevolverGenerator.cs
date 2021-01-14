@@ -12,9 +12,9 @@ using System.Linq;
  * 
  */
 
-namespace ModularFirearms
+namespace ModularFirearms.Weapons
 {
-    public class ItemFirearmRevolver : MonoBehaviour
+    public class RevolverGenerator : MonoBehaviour
     {
         // ThunderRoad References
         protected Item item;
@@ -102,12 +102,15 @@ namespace ModularFirearms
             insertedSpellID = null;
             try
             {
-                ItemAmmoLoader addedLoader = interactiveObject.GetComponent<ItemAmmoLoader>();
-                if (addedLoader != null)
+                Items.InteractiveAmmo insertedAmmo = interactiveObject.GetComponent<Items.InteractiveAmmo>();
+                FirearmFunctions.AmmoType insertedAmmoType = insertedAmmo.GetAmmoType();
+
+                itemQuiver.holder.UnSnap(interactiveObject);
+
+                // ItemAmmoLoader addedLoader = interactiveObject.GetComponent<ItemAmmoLoader>();
+                if ((insertedAmmoType == FirearmFunctions.AmmoType.AmmoLoader)||(insertedAmmoType == FirearmFunctions.AmmoType.Revolver))
                 {
-                    itemQuiver.holder.UnSnap(interactiveObject);
-                    int loaderCount = addedLoader.CountBullets();
-                    interactiveObject.Despawn();
+                    int loaderCount = insertedAmmo.GetAmmoCount();
                     reloadSound.Play();
                     if (loaderCount >= itemQuiver.holder.slots.Count)
                     {
@@ -129,31 +132,32 @@ namespace ModularFirearms
                             StartCoroutine(FirearmFunctions.TransferDeltaEnergy(itemImbue, transferedSpell));
                         }
                     }
-                    return;
                 }
 
-                ItemAmmo insertedAmmo = interactiveObject.GetComponent<ItemAmmo>();
-                if (insertedAmmo == null)
-                {
-                    itemQuiver.holder.UnSnap(interactiveObject);
-                    interactiveObject.Despawn();
-                    return;
-                }
-                else if (insertedAmmo.GetAmmoType() != module.ammoType)
-                {
-                    itemQuiver.holder.UnSnap(interactiveObject);
-                    return;
-                }
+                interactiveObject.Despawn();
+                return;
+                // ItemAmmo insertedAmmo = interactiveObject.GetComponent<ItemAmmo>();
+                //else if (insertedAmmo.GetAmmoType() == FirearmFunctions.AmmoType.Revolver)
+                //{
+                //    itemQuiver.holder.UnSnap(interactiveObject);
+                //    interactiveObject.Despawn();
+                //    return;
+                //}
+                //else
+                //{
+                //    itemQuiver.holder.UnSnap(interactiveObject);
+                //    return;
+                //}
 
-                insertedSpellID = FirearmFunctions.GetItemSpellChargeID(interactiveObject);
-                if (!string.IsNullOrEmpty(insertedSpellID))
-                {
-                    SpellCastCharge transferedSpell = Catalog.GetData<SpellCastCharge>(insertedSpellID, true).Clone();
-                    foreach (Imbue itemImbue in item.imbues)
-                    {
-                        StartCoroutine(FirearmFunctions.TransferDeltaEnergy(itemImbue, transferedSpell));
-                    }
-                }
+                //insertedSpellID = FirearmFunctions.GetItemSpellChargeID(interactiveObject);
+                //if (!string.IsNullOrEmpty(insertedSpellID))
+                //{
+                //    SpellCastCharge transferedSpell = Catalog.GetData<SpellCastCharge>(insertedSpellID, true).Clone();
+                //    foreach (Imbue itemImbue in item.imbues)
+                //    {
+                //        StartCoroutine(FirearmFunctions.TransferDeltaEnergy(itemImbue, transferedSpell));
+                //    }
+                //}
             }
             catch { Debug.Log("[Fisher-Firearms][ERROR] Exception in Adding Projectile."); }
         }
@@ -161,9 +165,9 @@ namespace ModularFirearms
         protected void TrackedFire()
         {
             // Method for Player Firing the weapon. Tracks bullet position/state, and performs the associated actions for each state
-            ItemAmmo firedAmmo = null;
+            Items.InteractiveAmmo firedAmmo = null;
             // If you are firing on a position that has no bullet or shell, move to next position but still animate the chamber/play the `empty sound`.
-            if (bulletIndex <= itemQuiver.holder.holdObjects.Count - 1) firedAmmo = itemQuiver.holder.holdObjects[bulletIndex].GetComponent<ItemAmmo>();
+            if (bulletIndex <= itemQuiver.holder.holdObjects.Count - 1) firedAmmo = itemQuiver.holder.holdObjects[bulletIndex].GetComponent<Items.InteractiveAmmo>();
             else
             {
                 StartCoroutine(AnimateAndFire(bulletIndex, true));
@@ -226,12 +230,12 @@ namespace ModularFirearms
         {
             itemQuiver.holder.data.disableTouch = true;
             isOpen = false;
-            if (spinSound != null) spinSound.Play();
-            StartCoroutine(SpinToRandom());
         }
 
         private IEnumerator AnimateAndFire(int spindex, bool misfire = false)
         {
+            if (spinSound != null) spinSound.Play();
+            StartCoroutine(SpinToRandom());
             FirearmFunctions.Animate(animations, module.fireAnimPrefix + spindex);
             if (!module.lockFiringToAnimation)
             {

@@ -2,12 +2,12 @@
 using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
-namespace ModularFirearms
+namespace ModularFirearms.Projectiles
 {
-    public class ItemSimpleExplosive : MonoBehaviour
+    public class ExplosiveProjectile : MonoBehaviour
     {
         protected Item item;
-        protected ItemModuleSimpleExplosive module;
+        protected Shared.ProjectileModule module;
         private ParticleSystem explosiveEffect;
         private AudioSource explosiveSound;
         private GameObject meshObject;
@@ -15,7 +15,7 @@ namespace ModularFirearms
         protected void Awake()
         {
             item = this.GetComponent<Item>();
-            module = item.data.GetModule<ItemModuleSimpleExplosive>();
+            module = item.data.GetModule<Shared.ProjectileModule>();
             meshObject = item.GetCustomReference(module.shellMeshRef).gameObject;
             if (!string.IsNullOrEmpty(module.particleEffectRef)) explosiveEffect = item.GetCustomReference(module.particleEffectRef).GetComponent<ParticleSystem>();
             if (!string.IsNullOrEmpty(module.soundRef)) explosiveSound = item.GetCustomReference(module.soundRef).GetComponent<AudioSource>();

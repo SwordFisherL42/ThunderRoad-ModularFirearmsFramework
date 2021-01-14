@@ -2,14 +2,14 @@
 using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
-namespace ModularFirearms
+namespace ModularFirearms.Attachments
 {
-    public class ItemSecondaryFire : MonoBehaviour
+    public class SecondaryFire : MonoBehaviour
     {
         private float prevShot;
         //ThunderRoad references
         protected Item item;
-        protected ItemModuleSecondaryFire module;
+        protected Shared.AttachmentModule module;
         private Handle gunGrip;
         //Unity references
         private AudioSource fireSound;
@@ -20,7 +20,7 @@ namespace ModularFirearms
         {
             item = this.GetComponent<Item>();
             item.OnHeldActionEvent += OnHeldAction;
-            module = item.data.GetModule<ItemModuleSecondaryFire>();
+            module = item.data.GetModule<Shared.AttachmentModule>();
             if (!string.IsNullOrEmpty(module.mainGripID)) gunGrip = item.GetCustomReference(module.mainGripID).GetComponent<Handle>();
             if (!string.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
             if (!string.IsNullOrEmpty(module.muzzleFlashRef)) MuzzleFlash = item.GetCustomReference(module.muzzleFlashRef).GetComponent<ParticleSystem>();
