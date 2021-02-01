@@ -31,6 +31,7 @@ namespace ModularFirearms.Weapons
         private GameObject slideCenterPosition;
         private ConstantForce slideForce;
         private Rigidbody slideRB;
+        private bool holdingSlideTrigger = false;
 
         /// Unity Object References ///
         public ConfigurableJoint connectedJoint;
@@ -246,13 +247,28 @@ namespace ModularFirearms.Weapons
             // Trigger Action
             if (handle.name.Equals(slideHandle.name))
             {
+                if (((action == Interactable.Action.UseStart)|| (action == Interactable.Action.AlternateUseStart)) && (!holdingSlideTrigger))
+                {
+                    holdingSlideTrigger = true;
+                    slideController.LockSlide(false);
+                    if (emptySound != null) emptySound.Play();
+                }
+
+                if (((action == Interactable.Action.UseStop)|| (action == Interactable.Action.AlternateUseStop)) && (holdingSlideTrigger))
+                {
+                    holdingSlideTrigger = false;
+                    slideController.UnlockSlide(false);
+                    // if (emptySound != null) emptySound.Play();
+                }
+
                 if (action == Interactable.Action.Ungrab)
                 {
+                    if (holdingSlideTrigger) { holdingSlideTrigger = false; slideController.UnlockSlide(); }
                     // Debug.Log("[Fisher-Firearms] Slide Ungrabbed!");
                     if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = false;
                     if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = false;
                     slideController.SetHeld(false);
-                    DumpRigidbodyToLog(slideController.rb);
+                    //DumpRigidbodyToLog(slideController.rb);
                 }
                 if (action == Interactable.Action.Grab)
                 {
@@ -260,7 +276,7 @@ namespace ModularFirearms.Weapons
                     if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = true;
                     if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = true;
                     slideController.SetHeld(true);
-                    DumpRigidbodyToLog(slideController.rb);
+                    //DumpRigidbodyToLog(slideController.rb);
                 }
             }
 
@@ -282,7 +298,7 @@ namespace ModularFirearms.Weapons
                 {
                     // Begin Firing
                     triggerPressed = true;
-                    slideController.LockSlide();
+                    if (!holdingSlideTrigger) slideController.LockSlide(false);
                     if (!TrackedFire())
                     {
                         if (emptySound != null)
@@ -297,7 +313,7 @@ namespace ModularFirearms.Weapons
                 {
                     // End Firing
                     triggerPressed = false;
-                    slideController.UnlockSlide();
+                    if (!holdingSlideTrigger) slideController.UnlockSlide(false);
                 }
                 //"Spell-Menu" Action
                 //if (action == Interactable.Action.AlternateUseStart)

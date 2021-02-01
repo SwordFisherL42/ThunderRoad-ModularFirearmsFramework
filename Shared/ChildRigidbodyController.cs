@@ -99,7 +99,7 @@ namespace ModularFirearms.Shared
         /// Stops forces on the Rigidbody, locks the Configurable Joint and sets the anchor position based on current state,
         /// and finally disables touch interaction.
         /// </summary>
-        public void LockSlide()
+        public void LockSlide(bool disable_touch = true)
         {
             SetRelativeSlideForce(new Vector3(0, 0, 0));
             connectedJoint.zMotion = ConfigurableJointMotion.Locked;
@@ -113,16 +113,16 @@ namespace ModularFirearms.Shared
                 currentAnchor = lockedNeutralAnchor;
                 connectedJoint.anchor = currentAnchor;
             }
-            DisableTouch();
+            if (disable_touch) DisableTouch();
         }
 
         /// <summary>
         /// Used for enabling the dynamic slide mechanics when the weapon is grabbed.
         /// Re-Enables touch, Resets the Configurable joint and the relative forward-force based on machine state.
         /// </summary>
-        public void UnlockSlide()
+        public void UnlockSlide(bool enable_touch = true)
         {
-            EnableTouch();
+            if (enable_touch) EnableTouch();
             SetRelativeSlideForce(new Vector3(0, 0, directionModifer * slideForwardForce));
             connectedJoint.zMotion = ConfigurableJointMotion.Limited;
             currentAnchor = originalAnchor;
