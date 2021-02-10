@@ -150,15 +150,11 @@ namespace ModularFirearms.Weapons
             slideRB = slideObject.GetComponent<Rigidbody>();
             if (slideRB == null)
             {
-                // TODO: Figure out why adding RB from code doesnt work
+                // NOTE: RB Needs to be assigned at Runtime (doesn't work when added to prefab in Editor)
                 slideRB = slideObject.AddComponent<Rigidbody>();
                 //Debug.LogWarning("[Fisher-Firearms][Config-Joint-Init] CREATED Rigidbody ON SlideObject...");
 
             }
-            //else
-            //{
-            //    Debug.Log("[Fisher-Firearms][Config-Joint-Init] ACCESSED Rigidbody on Slide Object...");
-            //}
 
             slideRB.mass = 1.0f;
             slideRB.drag = 0.0f;
@@ -180,9 +176,6 @@ namespace ModularFirearms.Weapons
 
             slideForce = slideObject.AddComponent<ConstantForce>();
             //Debug.Log("[Fisher-Firearms][Config-Joint-Init] Created ConstantForce on Slide Object");
-
-            //slideObject.AddComponent<ColliderGroup>();
-            //Debug.Log("[Fisher-Firearms][Config-Joint-Init] Created ColliderGroup on Slide Object");
 
             //Debug.Log("[Fisher-Firearms][Config-Joint-Init] Creating Config Joint and Setting Joint Values...");
             connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
@@ -240,10 +233,13 @@ namespace ModularFirearms.Weapons
         {
             if (action == Interactable.Action.AlternateUseStart)
             {
-                if (attachedLight != null) attachedLight.enabled = !attachedLight.enabled;
-                if (emptySound != null) emptySound.Play();
-                //Debug.Log("[ModularFirearms] Toggled Light!");
+                if (attachedLight != null) {
+                    attachedLight.enabled = !attachedLight.enabled;
+                    if (emptySound != null) emptySound.Play();
+                    //Debug.Log("[ModularFirearms] Toggled Light!");
+                }
             }
+
             // Trigger Action
             if (handle.name.Equals(slideHandle.name))
             {
@@ -339,11 +335,6 @@ namespace ModularFirearms.Weapons
                     slideHandle.data.rotationSpringMultiplier = num4;
                     slideController.UnlockSlide();
                 }
-                //slideHandle.data.positionDamperMultiplier = num1;
-                //slideHandle.data.positionSpringMultiplier = num2;
-                //slideHandle.data.rotationDamperMultiplier = num3;
-                //slideHandle.data.rotationSpringMultiplier = num4;
-                //if ((gunGripHeldRight || gunGripHeldLeft) && (slideController != null)) slideController.UnlockSlide();
             }
             if (handle.name.Equals(slideHandle.name))
             {
@@ -351,13 +342,6 @@ namespace ModularFirearms.Weapons
                 if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = true;
                 if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = true;
                 slideController.SetHeld(true);
-                //if (slideController.IsLocked())
-                //{
-                //    //slideHandle.Release();
-                //    SlideToggleLock();
-                //    slideController.ForwardState();
-                //}
-                // DumpRigidbodyToLog(slideController.rb);
             }
 
         }

@@ -36,7 +36,7 @@ namespace ModularFirearms.Items
         protected void SpawnAndSnap(string spawnedItemID, Holder holder)
         {
             if (waitingForSpawn) return;
-            ItemPhysic spawnedItemData = Catalog.GetData<ItemPhysic>(spawnedItemID, true);
+            ItemData spawnedItemData = Catalog.GetData<ItemData>(spawnedItemID, true);
             if (spawnedItemData == null) return;
             else
             {

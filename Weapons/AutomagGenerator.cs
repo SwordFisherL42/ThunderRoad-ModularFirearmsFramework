@@ -159,7 +159,7 @@ namespace ModularFirearms.Weapons
             if (fireSound2 != null) fireSound2.volume = module.soundVolume;
             if (fireSound3 != null) fireSound3.volume = module.soundVolume;
 
-            var magazineData = Catalog.GetData<ItemPhysic>(module.acceptedMagazineID, true);
+            var magazineData = Catalog.GetData<ItemData>(module.acceptedMagazineID, true);
             if (magazineData == null)
             {
                 Debug.LogError("[Fisher-ModularFirearms][ERROR] No Magazine named " + module.acceptedMagazineID.ToString());
@@ -352,9 +352,9 @@ namespace ModularFirearms.Weapons
 
             try
             {
-                if (magazineHolder.holdObjects.Count > 0)
+                if (magazineHolder.items.Count > 0)
                 {
-                    magazineHolder.UnSnap(magazineHolder.holdObjects[0]);
+                    magazineHolder.UnSnap(magazineHolder.items[0]);
                 }
 
             }

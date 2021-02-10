@@ -232,19 +232,31 @@ namespace ModularFirearms
                 if (creature == Player.currentCreature) continue;
                 if (Math.Abs(Vector3.Distance(creature.transform.position, origin)) <= blastRadius)
                 {
-                    //Debug.Log("[F-L42-HitscanExplosion] Hit Creature: " + creature.name);
+                    // Kill Creatures in Range
+                    Debug.Log("[F-L42-HitscanExplosion] Hit Creature: " + creature.name);
                     if (!creature.isKilled)
                     {
                         creature.ragdoll.SetState(Ragdoll.State.Inert);
                         creature.Kill();
                     }
+                    // Apply Forces to Creature Main Body
                     creature.locomotion.rb.AddExplosionForce(force * creature.locomotion.rb.mass, origin, blastRadius, liftMult, forceMode);
                     creature.locomotion.rb.AddForce(Vector3.up * liftMult * creature.locomotion.rb.mass, forceMode);
+
+                    // Dismember Creature Parts
+                    foreach (RagdollPart RDP in creature.ragdoll.parts)
+                    {
+                        Debug.Log("[F-L42-HitscanExplosion] Slicing " + RDP.name);
+                        RDP.Slice();
+                    }
+
+                    // Apply Forces to Creature Parts
                     foreach (RagdollPart part in creature.ragdoll.parts)
                     {
                         part.rb.AddExplosionForce(force * part.rb.mass, origin, blastRadius, liftMult, forceMode);
                         part.rb.AddForce(Vector3.up * liftMult * part.rb.mass, forceMode);
                     }
+
                 }
             }
 
@@ -283,7 +295,7 @@ namespace ModularFirearms
         {
             if ((spawnPoint == null) || (String.IsNullOrEmpty(projectileID))) return;
 
-            var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
+            var projectileData = Catalog.GetData<ItemData>(projectileID, true);
             if (projectileData == null)
             {
                 Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
@@ -346,7 +358,7 @@ namespace ModularFirearms
 
         public static void ProjectileBurst(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell = null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
         {
-            var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
+            var projectileData = Catalog.GetData<ItemData>(projectileID, true);
             if ((spawnPoint == null) || (String.IsNullOrEmpty(projectileID))) return;
             if (projectileData == null)
             {
@@ -462,7 +474,7 @@ namespace ModularFirearms
 
             }
 
-            var projectileData = Catalog.GetData<ItemPhysic>(projectileID, true);
+            var projectileData = Catalog.GetData<ItemData>(projectileID, true);
             if (projectileData == null)
             {
                 Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
@@ -718,24 +730,28 @@ namespace ModularFirearms
                     //Debug.Log("[F-L42-RayCast] Setting MaterialData... ");
                     MaterialData sourceMaterial = Catalog.GetData<MaterialData>("Metal", true); //(MaterialData)null; 
                     MaterialData targetMaterial = Catalog.GetData<MaterialData>("Flesh", true); //(MaterialData)null;
-                    //Debug.Log("[F-L42-RayCast] Fetching MaterialEffectData... ");
-                    MaterialEffectData daggerEffectData = Catalog.GetData<MaterialEffectData>("DaggerPierce", true);
+                                                                                                //Debug.Log("[F-L42-RayCast] Fetching MaterialEffectData... ");
+                                                                                                //MaterialEffectData daggerEffectData = Catalog.GetData<MaterialEffectData>("DaggerPierce", true);
 
                     //Damager daggerDamager = new Damager();
                     //DamagerData daggerDamagerData = Catalog.GetData<DamagerData>("DaggerPierce", true);
                     //daggerDamager.Load(daggerDamagerData);
                     //Debug.Log("[F-L42-RayCast] Defining DamageStruct... ");
-                    DamageStruct damageStruct = new DamageStruct(DamageType.Pierce, damageApplied)
-                    {
-                        materialEffectData = daggerEffectData
-                    };
+
+                    //DamageStruct damageStruct = new DamageStruct(DamageType.Pierce, damageApplied)
+                    //{
+                    //    materialEffectData = daggerEffectData
+                    //};
+
+                    DamageStruct damageStruct = new DamageStruct(DamageType.Pierce, damageApplied);
+
                     //Debug.Log("[F-L42-RayCast] Defining CollisionStruct... ");
-                    CollisionStruct collisionStruct = new CollisionStruct(damageStruct, (MaterialData)sourceMaterial, (MaterialData)targetMaterial)
+                    CollisionInstance collisionStruct = new CollisionInstance(damageStruct, (MaterialData)sourceMaterial, (MaterialData)targetMaterial)
                     {
                         contactPoint = hitPoint
                     };
                     //Debug.Log("[F-L42-RayCast] Applying Damage to creature... ");
-                    triggerCreature.Damage(ref collisionStruct);
+                    triggerCreature.Damage(collisionStruct);
                     //Debug.Log("[F-L42-RayCastFire] Damage Applied: " + damageApplied);
 
                     //Debug.Log("[F-L42-RayCast] SpawnEffect... ");

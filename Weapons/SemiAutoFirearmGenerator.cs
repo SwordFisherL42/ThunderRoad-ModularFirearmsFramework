@@ -256,7 +256,7 @@ namespace ModularFirearms.Weapons
             if (slideController == null) Debug.LogError("[Fisher-ModularFirearms] ERROR! CHILD SLIDE CONTROLLER WAS NULL");
             else slideController.SetupSlide();
 
-            var magazineData = Catalog.GetData<ItemPhysic>(module.acceptedMagazineID, true);
+            var magazineData = Catalog.GetData<ItemData>(module.acceptedMagazineID, true);
             if (magazineData == null)
             {
                 Debug.LogError("[Fisher-ModularFirearms][ERROR] No Magazine named " + module.acceptedMagazineID.ToString());
@@ -356,7 +356,7 @@ namespace ModularFirearms.Weapons
             UpdateCompassPosition();
 
             if (slideController != null) slideController.FixCustomComponents();
-            else return;
+            else return; //TODO: Remove this return, so we initialize even if we don't fix custom components
             if (slideController.initialCheck) return;
             try
             {
@@ -784,9 +784,9 @@ namespace ModularFirearms.Weapons
             //  Debug.Log("[Fisher-ModularFirearms] Releasing Magazine!");
             try
             {
-                if (magazineHolder.holdObjects.Count > 0)
+                if (magazineHolder.items.Count > 0)
                 {
-                    magazineHolder.UnSnap(magazineHolder.holdObjects[0]);
+                    magazineHolder.UnSnap(magazineHolder.items[0]);
                 }
 
             }

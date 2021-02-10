@@ -167,7 +167,8 @@ namespace ModularFirearms.Weapons
             // Method for Player Firing the weapon. Tracks bullet position/state, and performs the associated actions for each state
             Items.InteractiveAmmo firedAmmo = null;
             // If you are firing on a position that has no bullet or shell, move to next position but still animate the chamber/play the `empty sound`.
-            if (bulletIndex <= itemQuiver.holder.holdObjects.Count - 1) firedAmmo = itemQuiver.holder.holdObjects[bulletIndex].GetComponent<Items.InteractiveAmmo>();
+
+            if (bulletIndex <= itemQuiver.holder.items.Count - 1) firedAmmo = itemQuiver.holder.items[bulletIndex].GetComponent<Items.InteractiveAmmo>();
             else
             {
                 StartCoroutine(AnimateAndFire(bulletIndex, true));
@@ -275,7 +276,7 @@ namespace ModularFirearms.Weapons
             // Release all shells if chamber is open, otherwise attempt to fire the weapon.
             if (action == Interactable.Action.UseStart)
             {
-                if (isOpen && (animations.GetCurrentAnimatorClipInfo(0)[0].clip.name == module.idleOpenAnim)) foreach (Item chamberItem in itemQuiver.holder.holdObjects.ToList()) itemQuiver.holder.UnSnap(chamberItem);
+                if (isOpen && (animations.GetCurrentAnimatorClipInfo(0)[0].clip.name == module.idleOpenAnim)) foreach (Item chamberItem in itemQuiver.holder.items.ToList()) itemQuiver.holder.UnSnap(chamberItem);
                 else if (animations.GetCurrentAnimatorClipInfo(0)[0].clip.name.Contains(module.idleAnimPrefix)) TrackedFire();
             }
             // Alt-Use (Spell-Menu button) toggles the chamber open/close state.
