@@ -22,21 +22,29 @@ namespace ModularFirearms.Attachments
 
         private Handle attachmentHandle;
 
+        private Weapons.BaseFirearmGenerator parentFirearm;
+        private Shared.FirearmModule parentModule;
+
+        /// General Mechanics ///
+        public float lastSpellMenuPress;
+        public bool isLongPress = false;
+        public bool checkForLongPress = false;
+        public bool spellMenuPressed = false;
+
         protected void Awake()
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.AttachmentModule>();
             item.OnHeldActionEvent += this.OnHeldAction;
 
-            if (!String.IsNullOrEmpty(module.attachmentRef)) attachedLaser = item.GetCustomReference(module.attachmentRef).GetComponent<LineRenderer>();
+            if (!String.IsNullOrEmpty(module.laserRef)) attachedLaser = item.GetCustomReference(module.laserRef).GetComponent<LineRenderer>();
 
             if (attachedLaser != null)
             {
                 if (!String.IsNullOrEmpty(module.laserStartRef)) laserStart = item.GetCustomReference(module.laserStartRef);
                 if (!String.IsNullOrEmpty(module.laserEndRef)) laserEnd = item.GetCustomReference(module.laserEndRef);
-                if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.GetCustomReference(module.rayCastPointRef);
-                //laserInfKeyframe = attachedLaser.widthCurve.keys[1];
-                //laserIgnore = 1 << 20;
+                if (!String.IsNullOrEmpty(module.laserRayCastPointRef)) rayCastPoint = item.GetCustomReference(module.laserRayCastPointRef);
+
                 LayerMask layermask1 = 1 << 29;
                 LayerMask layermask2 = 1 << 28;
                 LayerMask layermask3 = 1 << 25;
@@ -51,20 +59,66 @@ namespace ModularFirearms.Attachments
                 laserEnd.localPosition = new Vector3(laserEnd.localPosition.x, laserEnd.localPosition.y, laserEnd.localPosition.z);
             }
 
-            if (!String.IsNullOrEmpty(module.activationSoundRef)) activationSound = item.GetCustomReference(module.activationSoundRef).GetComponent<AudioSource>();
-            if (module.attachmentHandleRef != null) attachmentHandle = item.GetCustomReference(module.attachmentRef).GetComponent<Handle>();
+            if (!String.IsNullOrEmpty(module.laserActivationSoundRef)) activationSound = item.GetCustomReference(module.laserActivationSoundRef).GetComponent<AudioSource>();
+            if (!String.IsNullOrEmpty(module.laserHandleRef)) attachmentHandle = item.GetCustomReference(module.laserHandleRef).GetComponent<Handle>();
 
+        }
+
+        protected void StartLongPress()
+        {
+            checkForLongPress = true;
+            lastSpellMenuPress = Time.time;
+        }
+
+        public void CancelLongPress()
+        {
+            checkForLongPress = false;
         }
 
         public void LateUpdate()
         {
+            if (checkForLongPress)
+            {
+                if (spellMenuPressed)
+                {
+
+                    if ((Time.time - lastSpellMenuPress) > module.longPressTime)
+                    {
+                        // Long Press Detected
+                        if (module.longPressToActivate) ToggleLaser();
+                        CancelLongPress();
+                    }
+
+                }
+                else
+                {
+                    // Long Press Self Cancelled (released button before time)
+                    // Short Press Detected
+                    CancelLongPress();
+                    if (!module.longPressToActivate) ToggleLaser();
+                }
+            }
+
             UpdateLaserPoint();
         }
 
-        protected void Start()
+        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
+            if (handle.Equals(attachmentHandle))
+            {
+                // "Spell-Menu" Action
+                if (action == Interactable.Action.AlternateUseStart)
+                {
+                    spellMenuPressed = true;
+                    StartLongPress();
 
+                }
 
+                if (action == Interactable.Action.AlternateUseStop)
+                {
+                    spellMenuPressed = false;
+                }
+            }
         }
 
         public void UpdateLaserPoint()
@@ -83,8 +137,6 @@ namespace ModularFirearms.Attachments
                     curve.AddKey(1, 0.0075f);
 
                     attachedLaser.widthCurve = curve;
-                    //attachedLaser.widthCurve.keys[1] = attachedLaser.widthCurve.keys[0];
-
                     attachedLaser.SetPosition(0, laserStart.position);
                     attachedLaser.SetPosition(1, laserEnd.position);
                 }
@@ -97,7 +149,6 @@ namespace ModularFirearms.Attachments
                     curve.AddKey(1, 0.0f);
 
                     attachedLaser.widthCurve = curve;
-                    //attachedLaser.widthCurve.keys[1] = laserInfKeyframe;
                     attachedLaser.SetPosition(0, laserStart.position);
                     attachedLaser.SetPosition(1, laserEnd.position);
                 }
@@ -111,17 +162,6 @@ namespace ModularFirearms.Attachments
             if (attachedLaser == null) return;
             if (activationSound != null) activationSound.Play();
             attachedLaser.enabled = !attachedLaser.enabled;
-        }
-
-        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
-        {
-            if (handle.Equals(attachmentHandle))
-            {
-                if (action == Interactable.Action.AlternateUseStart)
-                {
-                    ToggleLaser();
-                }
-            }
         }
 
     }

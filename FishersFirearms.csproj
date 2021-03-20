@@ -48,6 +48,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony, Version=2.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Y:\code\Harmony.2.0.4.0\net472\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\Program Files (x86)\Steam\steamapps\common\Blade &amp; Sorcery\BladeAndSorcery_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -74,8 +78,13 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\Program Files (x86)\Steam\steamapps\common\Blade &amp; Sorcery\BladeAndSorcery_Data\Managed\UnityEngine.dll</HintPath>
+    <Reference Include="Unity.Addressables, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files (x86)\Steam\steamapps\common\Blade &amp; Sorcery\BladeAndSorcery_Data\Managed\Unity.Addressables.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files (x86)\Steam\steamapps\common\Blade &amp; Sorcery\BladeAndSorcery_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
       <HintPath>..\..\..\Program Files (x86)\Steam\steamapps\common\Blade &amp; Sorcery\BladeAndSorcery_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
@@ -98,11 +107,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attachments\AmmoCounterController.cs" />
+    <Compile Include="Attachments\BulletHolderSpawner.cs" />
+    <Compile Include="Attachments\FireModeSwitchController.cs" />
     <Compile Include="Attachments\GrenadeLauncherController.cs" />
     <Compile Include="Attachments\CompassController.cs" />
     <Compile Include="Attachments\LaserController.cs" />
+    <Compile Include="BulletHolderModule.cs" />
     <Compile Include="Items\InteractiveMagazine.cs" />
     <Compile Include="Items\AmmoResupply.cs" />
+    <Compile Include="Projectiles\BasicProjectile.cs" />
     <Compile Include="Shared\AmmoModule.cs" />
     <Compile Include="Shared\AttachmentModule.cs" />
     <Compile Include="Shared\ChildRigidbodyController.cs" />
@@ -110,9 +123,12 @@
     <Compile Include="Attachments\FlashlightController.cs" />
     <Compile Include="Shared\MagazineGenerator.cs" />
     <Compile Include="Items\InteractiveAmmo.cs" />
+    <Compile Include="ModularFirearmsHotfixes.cs" />
     <Compile Include="Shared\ProjectileModule.cs" />
     <Compile Include="FirearmFunctions.cs" />
     <Compile Include="Weapons\AutomagGenerator.cs" />
+    <Compile Include="Weapons\BaseFirearmGenerator.cs" />
+    <Compile Include="Weapons\GrenadeGenerator.cs" />
     <Compile Include="Weapons\SemiAutoFirearmGenerator.cs" />
     <Compile Include="Weapons\RevolverGenerator.cs" />
     <Compile Include="ItemModuleFirearmRevolver.cs" />

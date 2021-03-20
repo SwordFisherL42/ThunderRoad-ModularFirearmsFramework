@@ -1,4 +1,5 @@
-﻿using ThunderRoad;
+﻿using System;
+using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
 
@@ -9,8 +10,8 @@ namespace ModularFirearms.Shared
         private AmmoType selectedType;
         public string handleRef;
         public string bulletMeshRef;
-        public int ammoType = 0;
-        public int acceptedAmmoType = 0;
+        public string ammoType = "SemiAuto";
+        public string acceptedAmmoType = "SemiAuto";
         public int ammoCapacity = 1;
         public float[] ejectionForceVector;
 
@@ -19,9 +20,9 @@ namespace ModularFirearms.Shared
 
         public bool enableBulletHolder = false;
 
-        public AmmoType GetSelectedType() { return (AmmoType)FirearmFunctions.ammoTypeEnums.GetValue(ammoType); }
+        public AmmoType GetSelectedType() { return (AmmoType)Enum.Parse(typeof(AmmoType), ammoType); }
 
-        public AmmoType GetAcceptedType() { return (AmmoType)FirearmFunctions.ammoTypeEnums.GetValue(acceptedAmmoType); }
+        public AmmoType GetAcceptedType() { return (AmmoType)Enum.Parse(typeof(AmmoType), acceptedAmmoType); }
 
         public override void OnItemLoaded(Item item)
         {

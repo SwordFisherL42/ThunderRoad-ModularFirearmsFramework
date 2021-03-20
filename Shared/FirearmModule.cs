@@ -1,4 +1,5 @@
-﻿using ThunderRoad;
+﻿using System;
+using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
 namespace ModularFirearms.Shared
@@ -7,6 +8,7 @@ namespace ModularFirearms.Shared
     {
         private WeaponType selectedType;
         public int firearmCategory = 0;
+        public string firearmType = "SemiAuto";
 
         public string mainHandleRef;
         public string slideHandleRef;
@@ -16,6 +18,8 @@ namespace ModularFirearms.Shared
         public string shellEjectionRef;
         public string chamberBulletRef;
         public string flashRef;
+        public string shellParticleRef;
+
         public string smokeRef;
         public float soundVolume = 1.0f;
 
@@ -31,8 +35,12 @@ namespace ModularFirearms.Shared
         public string laserStartRef;
         public string laserEndRef;
         public float maxLaserDistance = 10.0f;
+
         public bool laserTogglePriority = false;
         public float laserToggleHoldTime = 0.25f;
+
+        public bool longPressToEject = false;
+        public float longPressTime = 0.25f;
 
         public string emptySoundRef;
         public string pullSoundRef;
@@ -75,11 +83,12 @@ namespace ModularFirearms.Shared
         public string projectileID;
         public string shellID;
         public string ammoID;
-        public string acceptedMagazineID;
+        //public string acceptedMagazineID;
         public string[] acceptedMagazineIDs;
 
         public bool allowGrabMagazineFromGun = false;
-        public int fireMode = 1;
+        //public int fireMode = 1;
+        public string fireMode = "Single";
         public int[] allowedFireModes;
         public int fireRate = 600;
         public int burstNumber = 3;
@@ -88,20 +97,12 @@ namespace ModularFirearms.Shared
         public int maxReceiverAmmo = 12;
 
         // Gameplay/Physics/Recoil params
-        public float bulletForce = 5.0f;
+        public float bulletForce = 10.0f;
         public float shellEjectionForce = 0.5f;
         public float hapticForce = 5.0f;
         public float throwMult = 2.0f;
         public float[] recoilForces;
 
-        // old Pistol module params
-        ///// Common Parameters
-        //public string muzzlePointRef;
-        //public string muzzleParticleRef;
-        //public string projectileID;
-        //public string animationRef;
-        //public string fireSoundRef;
-        //public string handleRef;
         public string idleAnimName = "idle";
         public string overheatAnimName = "overheat";
         public float projectileForce = 1000.0f;
@@ -123,20 +124,19 @@ namespace ModularFirearms.Shared
         {
             base.OnItemLoaded(item);
 
-            selectedType = (WeaponType)FirearmFunctions.weaponTypeEnums.GetValue(firearmCategory);
+            //selectedType = (WeaponType)FirearmFunctions.weaponTypeEnums.GetValue(firearmCategory);
+            selectedType = (WeaponType)Enum.Parse(typeof(WeaponType), firearmType);
 
-            if (selectedType.Equals(WeaponType.TestWeapon)) item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>();
-            else if (selectedType.Equals(WeaponType.AutoMag)) item.gameObject.AddComponent<Weapons.AutomagGenerator>();
-            else if (selectedType.Equals(WeaponType.SemiAuto)) item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>();
+            if (selectedType.Equals(WeaponType.TestWeapon)) item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>();
+            else if (selectedType.Equals(WeaponType.SemiAuto)) item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>();
+
             else if (selectedType.Equals(WeaponType.Shotgun)) item.gameObject.AddComponent<Weapons.ShotgunGenerator>();
 
-            else { item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>(); }
+            else if (selectedType.Equals(WeaponType.SemiAutoLegacy)) item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>();
+            else if (selectedType.Equals(WeaponType.AutoMag)) item.gameObject.AddComponent<Weapons.AutomagGenerator>();
 
-            //else if (selectedType.Equals(WeaponType.Shotgun)) item.gameObject.AddComponent<Weapons.ItemShotgunUNSC>();
-            //else if (selectedType.Equals(WeaponType.BoltAction)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
-            //else if (selectedType.Equals(WeaponType.Revolver)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
-            //else if (selectedType.Equals(WeaponType.Sniper)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
-            //else if (selectedType.Equals(WeaponType.Sniper)) item.gameObject.AddComponent<Shotgun.ShotgunGenerator>();
+            else { item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>(); }
+
         }
     }
 }

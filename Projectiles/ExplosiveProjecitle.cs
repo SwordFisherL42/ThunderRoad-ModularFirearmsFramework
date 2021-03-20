@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
@@ -11,19 +12,26 @@ namespace ModularFirearms.Projectiles
         private ParticleSystem explosiveEffect;
         private AudioSource explosiveSound;
         private GameObject meshObject;
+        protected bool isFlying = false;
 
         protected void Awake()
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.ProjectileModule>();
-            meshObject = item.GetCustomReference(module.shellMeshRef).gameObject;
+            if (!string.IsNullOrEmpty(module.shellMeshRef)) meshObject = item.GetCustomReference(module.shellMeshRef).gameObject;
             if (!string.IsNullOrEmpty(module.particleEffectRef)) explosiveEffect = item.GetCustomReference(module.particleEffectRef).GetComponent<ParticleSystem>();
             if (!string.IsNullOrEmpty(module.soundRef)) explosiveSound = item.GetCustomReference(module.soundRef).GetComponent<AudioSource>();
         }
 
         protected void Start()
         {
+            this.item.Throw(module.throwMult, Item.FlyDetection.Forced);
+            if (module.allowFlyTime) { item.rb.useGravity = false; isFlying = true; }
             item.Despawn(module.lifetime);  //Default despawn, if no collisions occur
+        }
+
+        private void LateUpdate() {
+            if (isFlying) item.rb.velocity = item.rb.velocity * module.flyingAcceleration;
         }
 
         public void IgnoreItem(Item interactiveObject)
@@ -33,13 +41,18 @@ namespace ModularFirearms.Projectiles
 
         private void Explode()
         {
-            explosiveSound.transform.parent = null;
-            explosiveSound.Play();
-            meshObject.SetActive(false);
+            if (explosiveSound != null)
+            {
+                explosiveSound.transform.parent = null;
+                explosiveSound.Play();
+            }
+
+            if (meshObject != null) meshObject.SetActive(false);
             if (explosiveEffect != null)
             {
                 explosiveEffect.transform.parent = null;
-                HitscanExplosion(explosiveEffect.transform.position, module.explosiveForce, module.blastRadius, module.liftMult, (ForceMode)forceModeEnums.GetValue(module.forceMode));
+                //HitscanExplosion(explosiveEffect.transform.position, module.explosiveForce, module.blastRadius, module.liftMult, (ForceMode)forceModeEnums.GetValue(module.forceMode));
+                HitscanExplosion(explosiveEffect.transform.position, module.explosiveForce, module.blastRadius, module.liftMult, (ForceMode)Enum.Parse(typeof(ForceMode), module.forceMode));
                 explosiveEffect.Play();
             }
             
@@ -47,6 +60,7 @@ namespace ModularFirearms.Projectiles
 
         private void OnCollisionEnter(Collision hit)
         {
+            if (!item.rb.useGravity) { item.rb.useGravity = true; isFlying = false; }
             //Debug.Log("[F-L42] COLLISON WITH " + hit.transform.name);
             Explode();
             item.Despawn();

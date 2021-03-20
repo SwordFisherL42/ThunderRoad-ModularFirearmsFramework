@@ -17,16 +17,22 @@ namespace ModularFirearms.Attachments
         private Color flashlightEmissionColor;
         private AudioSource activationSound;
         private Handle attachmentHandle;
-        private MeshRenderer ignoredMesh;
+        //private MeshRenderer ignoredMesh;
         private int lightCullingMask;
+
+        /// General Mechanics ///
+        public float lastSpellMenuPress;
+        public bool isLongPress = false;
+        public bool checkForLongPress = false;
+        public bool spellMenuPressed = false;
 
         protected void Awake()
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.AttachmentModule>();
             item.OnHeldActionEvent += this.OnHeldAction;
-            if (module.attachmentRef != null) {
-                attachedLight = item.GetCustomReference(module.attachmentRef).GetComponent<Light>();
+            if (module.flashlightRef != null) {
+                attachedLight = item.GetCustomReference(module.flashlightRef).GetComponent<Light>();
                 if (!String.IsNullOrEmpty(module.flashlightMeshRef))
                 {
                     flashlightMaterial = item.GetCustomReference(module.flashlightMeshRef).GetComponent<MeshRenderer>().material;
@@ -34,24 +40,81 @@ namespace ModularFirearms.Attachments
                     if (!attachedLight.enabled) flashlightMaterial.SetColor("_EmissionColor", Color.black);
                 }
             }
-            if (!String.IsNullOrEmpty(module.activationSoundRef)) activationSound = item.GetCustomReference(module.activationSoundRef).GetComponent<AudioSource>();
-            if (module.attachmentHandleRef != null) attachmentHandle = item.GetCustomReference(module.attachmentRef).GetComponent<Handle>();
-            if (module.ignoredMeshRef != null) ignoredMesh = item.GetCustomReference(module.attachmentRef).GetComponent<MeshRenderer>();
+            if (!String.IsNullOrEmpty(module.flashlightActivationSoundRef)) activationSound = item.GetCustomReference(module.flashlightActivationSoundRef).GetComponent<AudioSource>();
+            if (module.flashlightHandleRef != null) attachmentHandle = item.GetCustomReference(module.flashlightHandleRef).GetComponent<Handle>();
+            //if (module.ignoredMeshRef != null) ignoredMesh = item.GetCustomReference(module.attachmentRef).GetComponent<MeshRenderer>();
             lightCullingMask = 1 << 20;
             lightCullingMask = ~lightCullingMask;
         }
 
         protected void Start()
         {
-            if (ignoredMesh != null)
-            {
-                ignoredMesh.gameObject.layer = 20; //Set to layer "None"
-            }
+            //if (ignoredMesh != null)
+            //{
+            //    ignoredMesh.gameObject.layer = 20; //Set to layer "None"
+            //}
             if (attachedLight != null)
             {
                 attachedLight.cullingMask = lightCullingMask;
             }
         }
+
+        protected void StartLongPress()
+        {
+            checkForLongPress = true;
+            lastSpellMenuPress = Time.time;
+        }
+
+        public void CancelLongPress()
+        {
+            checkForLongPress = false;
+        }
+
+        public void LateUpdate()
+        {
+            if (checkForLongPress)
+            {
+                if (spellMenuPressed)
+                {
+
+                    if ((Time.time - lastSpellMenuPress) > module.longPressTime)
+                    {
+                        // Long Press Detected
+                        if (module.longPressToActivate) ToggleLight();
+                        CancelLongPress();
+                    }
+
+                }
+                else
+                {
+                    // Long Press Self Cancelled (released button before time)
+                    // Short Press Detected
+                    CancelLongPress();
+                    if (!module.longPressToActivate) ToggleLight();
+                }
+            }
+
+        }
+
+        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
+        {
+            if (handle.Equals(attachmentHandle))
+            {
+                // "Spell-Menu" Action
+                if (action == Interactable.Action.AlternateUseStart)
+                {
+                    spellMenuPressed = true;
+                    StartLongPress();
+
+                }
+
+                if (action == Interactable.Action.AlternateUseStop)
+                {
+                    spellMenuPressed = false;
+                }
+            }
+        }
+
 
         private void ToggleLight()
         {
@@ -64,17 +127,6 @@ namespace ModularFirearms.Attachments
                 {
                     if (attachedLight.enabled) flashlightMaterial.SetColor("_EmissionColor", flashlightEmissionColor);
                     else flashlightMaterial.SetColor("_EmissionColor", Color.black);
-                }
-            }
-        }
-
-        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
-        {
-            if (handle.Equals(attachmentHandle))
-            {
-                if (action == Interactable.Action.AlternateUseStart)
-                {
-                    ToggleLight();
                 }
             }
         }

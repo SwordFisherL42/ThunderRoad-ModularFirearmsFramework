@@ -1,15 +1,18 @@
-﻿using ThunderRoad;
+﻿using System;
+using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
 namespace ModularFirearms.Shared
 {
     public class ProjectileModule : ItemModule
     {
+        public string CustomSplatterEffect;
 
         public float lifetime = 2.0f;
-        public int projectileType = 1;
+        public string projectileType = "Pierce";
 
         public float flyingAcceleration = 1.0f;
+        public float throwMult = 1.0f;
 
         //Type 1 params
         public bool allowFlyTime = true;
@@ -25,20 +28,21 @@ namespace ModularFirearms.Shared
         public string soundRef;
         public string shellMeshRef;
         //Default vars, can be overriden for special cases
-        public int forceMode = 1;
+        public string forceMode = "Impulse";
 
-        public ProjectileType GetSelectedType() { return (ProjectileType)FirearmFunctions.weaponTypeEnums.GetValue(projectileType); }
+        //public ProjectileType GetSelectedType() { return (ProjectileType)FirearmFunctions.weaponTypeEnums.GetValue(projectileType); }
+
+        public ProjectileType GetSelectedType(string projectileType) { return (ProjectileType)Enum.Parse(typeof(ProjectileType), projectileType); }
 
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
 
-            ProjectileType selectedType = GetSelectedType();
+            ProjectileType selectedType = GetSelectedType(projectileType);
 
-            if (selectedType.Equals(ProjectileType.Pierce)) { item.gameObject.AddComponent<Projectiles.SimpleProjectile>();}
+            if (selectedType.Equals(ProjectileType.Pierce) || selectedType.Equals(ProjectileType.Blunt)) { item.gameObject.AddComponent<Projectiles.BasicProjectile>(); }
             else if (selectedType.Equals(ProjectileType.Explosive)) { item.gameObject.AddComponent<Projectiles.ExplosiveProjectile>(); }
-            else { item.gameObject.AddComponent<Projectiles.SimpleProjectile>(); }
-
+            else { item.gameObject.AddComponent<Projectiles.BasicProjectile>(); }
         }
     }
 }

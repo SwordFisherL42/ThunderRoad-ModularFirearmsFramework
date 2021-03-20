@@ -118,8 +118,21 @@ namespace ModularFirearms.Weapons
 
         }
 
+        //private void IgnoreMovingLayer()
+        //{
+        //    foreach (ColliderGroup colliderGroup in this.item.colliderGroups)
+        //    {
+        //        foreach (Collider collider in colliderGroup.colliders)
+        //        {
+        //            Physics.IgnoreLayerCollision(collider.gameObject.layer, GameManager.GetLayer(LayerName.MovingObject));
+        //        }
+        //    }
+        //}
+
         protected void Start()
         {
+            //IgnoreMovingLayer();
+
             /// 1) Create and Initialize configurable joint between the base and slide
             /// 2) Create and Initialize the slide controller object
             /// 3) Setup the slide controller into the default state
@@ -437,7 +450,93 @@ namespace ModularFirearms.Weapons
             PreFireEffects();
             //FirearmFunctions.ShotgunBlast(item, module.projectileID, rayCastPoint, module.blastRange, module.blastForce, module.bulletForce, FirearmFunctions.GetItemSpellChargeID(item), module.throwMult, false, slideCapsuleStabilizer);
 
-            FirearmFunctions.ProjectileBurst(item, module.projectileID, muzzlePoint,  FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer);
+            //FirearmFunctions.ProjectileBurst(item, module.projectileID, muzzlePoint,  FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer);
+
+            ItemData spawnedItemData = Catalog.GetData<ItemData>(module.projectileID, true);
+            String imbueSpell = GetItemSpellChargeID(item);
+
+            var projectileData = Catalog.GetData<ItemData>(module.projectileID, true);
+            if ((muzzlePoint == null) || (String.IsNullOrEmpty(module.projectileID))) return false;
+            if (projectileData == null)
+            {
+                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + module.projectileID.ToString());
+                return false;
+            }
+            foreach (Vector3 offsetVec in buckshotOffsetPosiitions)
+            {
+                projectileData.SpawnAsync(i =>
+                {
+                    try
+                    {
+                        //i.transform.position = muzzlePoint.position + offsetVec;
+                        //i.transform.rotation = Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
+                        //i.rb.velocity = this.item.rb.velocity;
+                        //i.rb.AddForce(i.rb.transform.forward * 1000.0f * module.bulletForce);
+                        //this.item.IgnoreObjectCollision(i);
+                        //i.IgnoreObjectCollision(this.item);
+                        //i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
+
+                        i.Throw(1f, Item.FlyDetection.Forced);
+                        item.IgnoreObjectCollision(i);
+                        i.IgnoreObjectCollision(item);
+                        i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
+                        IgnoreProjectile(this.item, i, true);
+                        i.transform.position = muzzlePoint.position + offsetVec;
+                        i.transform.rotation = Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
+                        i.rb.velocity = item.rb.velocity;
+                        i.rb.AddForce(i.rb.transform.forward * 1000.0f * module.bulletForce);
+
+                        if (slideCapsuleStabilizer != null)
+                        {
+                            try
+                            {
+                                i.IgnoreColliderCollision(slideCapsuleStabilizer);
+                                foreach (ColliderGroup CG in this.item.colliderGroups)
+                                {
+                                    foreach (Collider C in CG.colliders)
+                                    {
+                                        Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
+                                    }
+                                }
+                                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
+                                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
+                            }
+                            catch { }
+                        }
+
+                        Projectiles.BasicProjectile projectileController = i.gameObject.GetComponent<Projectiles.BasicProjectile>();
+                        if (projectileController != null)
+                        {
+                            projectileController.SetShooterItem(this.item);
+                        }
+
+                        //-- Optional Switches --//
+                        //i.rb.useGravity = false;
+                        //i.Throw(throwMult, Item.FlyDetection.CheckAngle);
+                        //i.SetColliderAndMeshLayer(GameManager.GetLayer(LayerName.Default));
+                        //i.SetColliderLayer(GameManager.GetLayer(LayerName.None));
+                        //i.ignoredItem = shooterItem;
+                        //shooterItem.IgnoreObjectCollision(i);
+                        //Physics.IgnoreLayerCollision(GameManager.GetLayer(LayerName.None), GameManager.GetLayer(LayerName.Default));
+
+                        if (!String.IsNullOrEmpty(imbueSpell))
+                        {
+                            // Set imbue charge on projectile using ItemProjectileSimple subclass
+                            //Projectiles.SimpleProjectile projectileController = i.gameObject.GetComponent<Projectiles.SimpleProjectile>();
+                            if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
+                    }
+                },
+                Vector3.zero,
+                Quaternion.Euler(Vector3.zero),
+                null,
+                false);
+            }
 
             //FirearmFunctions.ShootProjectile(item, module.projectileID, rayCastPoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, 1.0f, false, slideCapsuleStabilizer, true);
             //FirearmFunctions.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce);

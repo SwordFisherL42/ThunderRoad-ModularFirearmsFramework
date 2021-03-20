@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
@@ -32,7 +33,7 @@ namespace ModularFirearms.Items
 
         public int GetAmmoTypeInt()
         {
-            return module.ammoType;
+            return (int)Enum.Parse(typeof(FireMode), module.ammoType);
         }
 
         public string GetAmmoID()

@@ -10,7 +10,7 @@ namespace ModularFirearms.Attachments
         //ThunderRoad references
         protected Item item;
         protected Shared.AttachmentModule module;
-        private Handle gunGrip;
+        private Handle secondaryHandle;
         //Unity references
         private AudioSource fireSound;
         private ParticleSystem MuzzleFlash;
@@ -21,7 +21,7 @@ namespace ModularFirearms.Attachments
             item = this.GetComponent<Item>();
             item.OnHeldActionEvent += OnHeldAction;
             module = item.data.GetModule<Shared.AttachmentModule>();
-            if (!string.IsNullOrEmpty(module.mainGripID)) gunGrip = item.GetCustomReference(module.mainGripID).GetComponent<Handle>();
+            if (!string.IsNullOrEmpty(module.mainGripID)) secondaryHandle = item.GetCustomReference(module.mainGripID).GetComponent<Handle>();
             if (!string.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
             if (!string.IsNullOrEmpty(module.muzzleFlashRef)) MuzzleFlash = item.GetCustomReference(module.muzzleFlashRef).GetComponent<ParticleSystem>();
             if (!string.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
@@ -35,7 +35,7 @@ namespace ModularFirearms.Attachments
 
         public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
-            if (handle.Equals(gunGrip) && action == Interactable.Action.UseStart && ((Time.time - prevShot) > module.fireDelay))
+            if (handle.Equals(secondaryHandle) && action == Interactable.Action.UseStart && ((Time.time - prevShot) > module.fireDelay))
             {
                 prevShot = Time.time;
                 Fire();

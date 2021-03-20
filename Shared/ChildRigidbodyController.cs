@@ -10,6 +10,7 @@ namespace ModularFirearms.Shared
 {
     public class ChildRigidbodyController
     {
+        public GameObject thisSlideObject;
         public Rigidbody rb;
         public bool initialCheck = false;
 
@@ -57,6 +58,7 @@ namespace ModularFirearms.Shared
                 slideHandle = slideObject.GetComponent<Handle>();
                 slideForce = slideObject.GetComponent<ConstantForce>();
                 connectedJoint = parentItem.gameObject.GetComponent<ConfigurableJoint>();
+                thisSlideObject = slideObject;
                 if (!String.IsNullOrEmpty(parentModule.chamberBulletRef)) chamberBullet = parentItem.GetCustomReference(parentModule.chamberBulletRef).gameObject;
             }
             catch { Debug.LogError("[Fisher-Firearms][EXCEPTION] Unable to Initialize CRC ! "); }
@@ -263,6 +265,13 @@ namespace ModularFirearms.Shared
         public GameObject GetConnectedObj()
         {
             return connectedJoint.gameObject;
+        }
+
+        public void DestroyJoint()
+        {
+            GameObject.Destroy(slideForce);
+            GameObject.Destroy(connectedJoint);
+            thisSlideObject.transform.parent = null;
         }
 
     }
