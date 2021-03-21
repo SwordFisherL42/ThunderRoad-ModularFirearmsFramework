@@ -1,12 +1,9 @@
 # Blade and Sorcery Modular Firearms Framework
-This repository is available for any BAS modders who want to build off of my "Modular Firearms" projects, which can be found on NexusMods:
+This repository is available for any BAS modders who want to examine the source code for my "Modular Firearms Framework".
 
- - [Fisher's Modular Revolvers](https://www.nexusmods.com/bladeandsorcery/mods/1613)
- - [Fisher's Modular Semi-Auto Pistols](https://www.nexusmods.com/bladeandsorcery/mods/1645)
+The compiled framework with all assets can be found on NexusMods:
+ - [Modular Firearms Framework](https://www.nexusmods.com/bladeandsorcery/mods/2555)
 
-### Getting Started
- - [Wiki for basic setup instructions](https://github.com/SwordFisherL42/BAS-Modular-Firearms/wiki)
- - [Example Unity Prefab](https://drive.google.com/file/d/1cTooU-dMMJfvqJaVDqNN9o-YF486eyfw/view)
-
-### Plugin Builds
-You can download the latest compiled version of the plugin [here](https://github.com/SwordFisherL42/BAS-Modular-Firearms/releases).
+### Tutorial for Making Addons
+If you want to make your own mod which depends on this framework, you can use this guide:
+ - [Google Docs Guide: Modular Firearms Tutorial](https://docs.google.com/document/d/1kIeNT2u3zPtcdFlYNIJIpR3vvXcpwDXe57mbQuay2rM/edit)
