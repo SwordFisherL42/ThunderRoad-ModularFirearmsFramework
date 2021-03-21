@@ -25,7 +25,6 @@ namespace ModularFirearms.Projectiles
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.ProjectileModule>();
-            //this.item.Throw(module.throwMult, Item.FlyDetection.Forced);
         }
 
         protected void Start()

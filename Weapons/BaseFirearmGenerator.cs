@@ -108,17 +108,6 @@ namespace ModularFirearms.Weapons
             fireModeSelection = NewFireMode;
         }
 
-        //private void IgnoreMovingLayer()
-        //{
-        //    foreach (ColliderGroup colliderGroup in this.item.colliderGroups)
-        //    {
-        //        foreach (Collider collider in colliderGroup.colliders)
-        //        {
-        //            Physics.IgnoreLayerCollision(collider.gameObject.layer, GameManager.GetLayer(LayerName.MovingObject));
-        //        }
-        //    }
-        //}
-
         void Awake()
         {
             soundCounter = 0;
@@ -160,14 +149,9 @@ namespace ModularFirearms.Weapons
             RACK_THRESHOLD = -0.1f * module.slideTravelDistance;
             PULL_THRESHOLD = -0.5f * module.slideTravelDistance;
 
-            //fireModeSelection = (FireMode)FirearmFunctions.fireModeEnums.GetValue(module.fireMode);
-
             fireModeSelection = (FireMode)Enum.Parse(typeof(FireMode), module.fireMode);
 
             validMagazineIDs = new List<string>(module.acceptedMagazineIDs);
-
-            //if (digitsGridTexture == null) Debug.LogError("[Fisher-ModularFirearms] COULD NOT GET GRID TEXTURE");
-            //if (ammoCounterMesh == null) Debug.LogError("[Fisher-ModularFirearms] COULD NOT GET MESH RENDERER");
 
             /// Item Events ///
             item.OnHeldActionEvent += OnHeldAction;
@@ -183,7 +167,6 @@ namespace ModularFirearms.Weapons
 
         void Start()
         {
-            //IgnoreMovingLayer();
             if (fireSound1 != null) fireSound1.volume = module.soundVolume;
             if (fireSound2 != null) fireSound2.volume = module.soundVolume;
             if (fireSound3 != null) fireSound3.volume = module.soundVolume;
@@ -535,19 +518,6 @@ namespace ModularFirearms.Weapons
                 slideController.SetHeld(false);
                 //DumpRigidbodyToLog(slideController.rb);
             }
-
-            //if ((!gunGripHeldRight && !gunGripHeldLeft))
-            //{
-            //    triggerPressed = false;
-            //    if (fireModeSelection.Equals(FireMode.Auto))
-            //    {
-            //        if ((fireSoundLoop != null) && (fireSoundOut != null))
-            //        {
-            //            StartCoroutine(EndContiniousFiringSound(fireSoundLoop, fireSoundOut, false));
-            //        }
-            //    }
-            //    if (slideController != null) slideController.LockSlide();
-            //}
         }
 
         public void MagazineRelease()
@@ -562,8 +532,6 @@ namespace ModularFirearms.Weapons
 
             }
             catch { }
-
-
         }
 
         public bool ConsumeOneFromMagazine()
@@ -723,18 +691,6 @@ namespace ModularFirearms.Weapons
             PlayFireSound();
             if (muzzleSmoke != null) muzzleSmoke.Play();
         }
-
-        //public bool Fire()
-        //{
-        //    PreFireEffects();
-
-        //    if (!module.useBuckshot) FirearmFunctions.ShootProjectile(item, module.projectileID, muzzlePoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer, SetProjectileSpawningState);
-        //    else FirearmFunctions.ProjectileBurst(item, module.projectileID, muzzlePoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer);
-        //    //FirearmFunctions.RayCastShoot(item, rayCastPoint, 500.0f, 200.0f);
-        //    FirearmFunctions.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce, 1.0f, false, slideCapsuleStabilizer, SetProjectileSpawningState);
-        //    FirearmFunctions.ApplyRecoil(item.rb, null, 1.0f, mainHandleHeldLeft, mainHandleHeldRight, module.hapticForce);
-        //    return true;
-        //}
 
         private void Fire(bool firedByNPC = false, bool playEffects = true)
         {

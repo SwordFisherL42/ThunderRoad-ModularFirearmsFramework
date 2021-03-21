@@ -239,8 +239,6 @@ namespace ModularFirearms
                         if (!creature.isKilled)
                         {
                             //Debug.Log("[F-L42-HitscanExplosion] Damaging Creature: " + creature.name);
-                            //creature.ragdoll.SetState(Ragdoll.State.Inert);
-                            //creature.Kill();
                             creature.Damage(new CollisionInstance(new DamageStruct(DamageType.Energy, 9999f), (MaterialData)null, (MaterialData)null));
                         }
                         // Apply Forces to Creature Main Body
@@ -248,13 +246,6 @@ namespace ModularFirearms
                         creature.locomotion.rb.AddForce(Vector3.up * liftMult * creature.locomotion.rb.mass, forceMode);
 
                         //// Dismember Creature Parts
-                        //foreach (RagdollPart RDP in creature.ragdoll.parts)
-                        //{
-                        //    if (!RDP.sliceAllowed) continue;
-                        //    Debug.Log("[F-L42-HitscanExplosion] Slicing " + RDP.name);
-                        //    RDP.Slice();
-                        //}
-
                         creature.ragdoll.headPart.Slice();
                         creature.ragdoll.GetPart(RagdollPart.Type.LeftLeg).Slice();
                         creature.ragdoll.GetPart(RagdollPart.Type.RightLeg).Slice();
@@ -336,17 +327,11 @@ namespace ModularFirearms
                         thisEffect.AddEffect(hitEffect, hit.point, Quaternion.Euler(0f, 0f, 0f), hit.collider.transform, thisCollision, false);
                         thisEffect.Play();
 
-                        //thisCollision.SpawnEffect(bladeMaterial, fleshMaterial, false, out thisEffect);
-                        //thisCollision.NewHit(item.colliderGroups[0].colliders[0], hit.collider, hit.collider.transform.GetComponent<ColliderGroup>(), item.colliderGroups[0], item.transform.forward * 25.0f, hit.contacts[0].point, hit.contacts[0].normal, 2.0f, bladeMaterial, fleshMaterial);
                         hitCreature.Damage(thisCollision);
 
                         if ((hitPart.name.Contains("Arm") || hitPart.name.Contains("Hand") || hitPart.name.Contains("Leg") || hitPart.name.Contains("Head"))) hitPart.Slice();
 
                         hitCreature.TestKill();
-
-                        //hitCreature.ragdoll.SetState(Ragdoll.State.Inert);
-                        //hitCreature.isKilled = true;
-
 
                     }
                 }
@@ -469,10 +454,6 @@ namespace ModularFirearms
                 Quaternion.Euler(Vector3.zero),
                 null,
                 false);
-                //spawnPoint.position,
-                //Quaternion.Euler(spawnPoint.rotation.eulerAngles),
-                //null,
-                //false);
             }
         }
 
@@ -551,28 +532,6 @@ namespace ModularFirearms
                 null,
                 false);
 
-                //Vector3 spawnPos = spawnPoint.position + offsetVec;
-                //Item projectile = projectileData.Spawn(pooled);
-                //if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
-                //projectile.IgnoreObjectCollision(shooterItem);
-                //projectile.IgnoreRagdollCollision(Player.local.creature.ragdoll);
-                //if (IgnoreArg1 != null)
-                //{
-                //    try { projectile.IgnoreColliderCollision(IgnoreArg1); }
-                //    catch { }
-                //}
-                //if (!String.IsNullOrEmpty(imbueSpell))
-                //{
-                //    // Set imbue charge on projectile using ItemProjectileSimple subclass
-                //    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
-                //    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                //}
-                //// Match the Position, Rotation, & Speed of the spawner item
-                //projectile.transform.position = spawnPos;
-                //projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
-                //projectile.rb.velocity = shooterItem.rb.velocity;
-                //projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
-                //projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
             }
 
         }
@@ -678,79 +637,7 @@ namespace ModularFirearms
                 Quaternion.Euler(spawnPoint.rotation.eulerAngles),
                 null,
                 false);
-                //ShootProjectile(shooterItem, projectileID, spawnPoint, imbueSpell, forceMult, throwMult, pooled, IgnoreArg1);
-                // ShootProjectile(shooterItem, projectileID, spawnPoint, imbueSpell, forceMult, throwMult, pooled, IgnoreArg1);
-                //projectileData.SpawnAsync(i =>
-                //{
-                //    try
-                //    {
 
-                //        i.transform.position = spawnPoint.position + offsetVec;
-                //        i.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
-
-                //        // shooterItem.IgnoreObjectCollision(i);
-                //        i.ignoredItem = shooterItem;
-                //        i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
-                //        if (IgnoreArg1 != null)
-                //        {
-                //            try
-                //            {
-                //                i.IgnoreColliderCollision(IgnoreArg1);
-                //                foreach (ColliderGroup CG in shooterItem.colliderGroups)
-                //                {
-                //                    foreach (Collider C in CG.colliders)
-                //                    {
-                //                        Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
-                //                    }
-                //                }
-                //                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
-                //                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
-                //            }
-                //            catch { }
-                //        }
-
-                //        i.rb.velocity = shooterItem.rb.velocity;
-                //        i.rb.AddForce(i.rb.transform.forward * 1000.0f * forceMult);
-                //        //i.rb.useGravity = false;
-                //        i.Throw(throwMult, Item.FlyDetection.CheckAngle);
-                //        if (!String.IsNullOrEmpty(imbueSpell))
-                //        {
-                //            // Set imbue charge on projectile using ItemProjectileSimple subclass
-                //            Projectiles.BasicProjectile projectileController = i.gameObject.GetComponent<Projectiles.BasicProjectile>();
-                //            if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                //        }
-                //    }
-                //    catch
-                //    {
-                //        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING ");
-                //    }
-                //},
-                //spawnPoint.position + offsetVec,
-                //Quaternion.Euler(spawnPoint.rotation.eulerAngles),
-                //null,
-                //pooled);
-                //Vector3 spawnPos = spawnPoint.position + offsetVec;
-                //Item projectile = projectileData.Spawn(pooled);
-                //if (!projectile.gameObject.activeInHierarchy) projectile.gameObject.SetActive(true);
-                //projectile.IgnoreObjectCollision(shooterItem);
-                //projectile.IgnoreRagdollCollision(Player.local.creature.ragdoll);
-                //if (IgnoreArg1 != null)
-                //{
-                //    try { projectile.IgnoreColliderCollision(IgnoreArg1); }
-                //    catch { }
-                //}
-                //if (!String.IsNullOrEmpty(imbueSpell))
-                //{
-                //    // Set imbue charge on projectile using ItemProjectileSimple subclass
-                //    ItemSimpleProjectile projectileController = projectile.gameObject.GetComponent<ItemSimpleProjectile>();
-                //    if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                //}
-                //// Match the Position, Rotation, & Speed of the spawner item
-                //projectile.transform.position = spawnPos;
-                //projectile.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
-                //projectile.rb.velocity = shooterItem.rb.velocity;
-                //projectile.rb.AddForce(projectile.rb.transform.forward * 1000.0f * forceMult);
-                //projectile.Throw(throwMult, Item.FlyDetection.CheckAngle);
             }
 
         }
@@ -925,20 +812,8 @@ namespace ModularFirearms
                 {
                     //Debug.Log("[F-L42-RayCast] Damaging enemy: " + triggerCreature.name);
                     //Debug.Log("[F-L42-RayCast] Setting MaterialData... ");
-                    MaterialData sourceMaterial = Catalog.GetData<MaterialData>("Metal", true); //(MaterialData)null; 
-                    MaterialData targetMaterial = Catalog.GetData<MaterialData>("Flesh", true); //(MaterialData)null;
-                                                                                                //Debug.Log("[F-L42-RayCast] Fetching MaterialEffectData... ");
-                                                                                                //MaterialEffectData daggerEffectData = Catalog.GetData<MaterialEffectData>("DaggerPierce", true);
-
-                    //Damager daggerDamager = new Damager();
-                    //DamagerData daggerDamagerData = Catalog.GetData<DamagerData>("DaggerPierce", true);
-                    //daggerDamager.Load(daggerDamagerData);
-                    //Debug.Log("[F-L42-RayCast] Defining DamageStruct... ");
-
-                    //DamageStruct damageStruct = new DamageStruct(DamageType.Pierce, damageApplied)
-                    //{
-                    //    materialEffectData = daggerEffectData
-                    //};
+                    MaterialData sourceMaterial = Catalog.GetData<MaterialData>("Metal", true); 
+                    MaterialData targetMaterial = Catalog.GetData<MaterialData>("Flesh", true);
 
                     DamageStruct damageStruct = new DamageStruct(DamageType.Pierce, damageApplied);
 
@@ -966,14 +841,11 @@ namespace ModularFirearms
             }
         }
 
-
         public static void DumpRigidbodyToLog(Rigidbody rb)
         {
             Debug.LogWarning("[Fisher-Firearms][RB-DUMP] " + rb.name + ": " + rb.ToString());
             Debug.LogWarning("[Fisher-Firearms][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
         }
-
-
 
     }
 }
