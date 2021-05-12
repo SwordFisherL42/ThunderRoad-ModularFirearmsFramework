@@ -39,7 +39,7 @@ namespace ModularFirearms
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
-            item.gameObject.AddComponent<ItemFirearmSimple>();
+            item.gameObject.AddComponent<Weapons.SimpleFirearm>();
         }
     }
 }

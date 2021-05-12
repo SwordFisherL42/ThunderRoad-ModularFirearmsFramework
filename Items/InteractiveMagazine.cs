@@ -5,13 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-namespace ModularFirearms
+namespace ModularFirearms.Items
 {
-    public class ItemMagazine : MonoBehaviour
+    public class InteractiveMagazine : MonoBehaviour
     {
         protected Item item;
-        protected ItemModuleMagazine module;
-        protected ObjectHolder holder;
+        protected Shared.AmmoModule module;
+        protected Holder holder;
         protected Handle magazineHandle;
         protected GameObject bulletMesh;
         protected int ammoCount;
@@ -20,13 +20,13 @@ namespace ModularFirearms
         protected void Awake()
         {
             item = this.GetComponent<Item>();
-            module = item.data.GetModule<ItemModuleMagazine>();
+            module = item.data.GetModule<Shared.AmmoModule>();
 
-            holder = item.GetComponentInChildren<ObjectHolder>();
-            holder.Snapped += new ObjectHolder.HolderDelegate(this.OnAmmoItemInserted);
+            holder = item.GetComponentInChildren<Holder>();
+            holder.Snapped += new Holder.HolderDelegate(this.OnAmmoItemInserted);
 
-            magazineHandle = item.definition.GetCustomReference(module.handleRef).GetComponent<Handle>();
-            bulletMesh = item.definition.GetCustomReference(module.bulletMeshRef).gameObject;
+            magazineHandle = item.GetCustomReference(module.handleRef).GetComponent<Handle>();
+            bulletMesh = item.GetCustomReference(module.bulletMeshRef).gameObject;
             RefillAll();
         }
 
@@ -34,15 +34,20 @@ namespace ModularFirearms
         {
             try
             {
-                ItemAmmo addedAmmo = interactiveObject.GetComponent<ItemAmmo>();
+                InteractiveAmmo addedAmmo = interactiveObject.GetComponent<InteractiveAmmo>();
                 if (addedAmmo != null)
                 {
-                    if (addedAmmo.GetAmmoType() == module.acceptedAmmoType)
+                    if (addedAmmo.GetAmmoType() == module.GetAcceptedType())
                     {
                         RefillOne();
                         holder.UnSnap(interactiveObject);
                         interactiveObject.Despawn();
                         return;
+                    }
+                    else
+                    {
+                        holder.UnSnap(interactiveObject);
+                        Debug.LogWarning("[Fisher-Firearms][WARNING] Inserted object has wrong AmmoType, and will be popped out");
                     }
                 }
                 else
@@ -59,15 +64,32 @@ namespace ModularFirearms
             return;
         }
 
-        public void Insert() {
+        public void Insert()
+        {
             insertedIntoObject = true;
-            magazineHandle.data.disableTouch = true;
+            //magazineHandle.data.disableTouch = true;
         }
 
-        public void Eject() {
-            item.rb.AddRelativeForce(new Vector3(module.ejectionForceVector[0], module.ejectionForceVector[1], module.ejectionForceVector[2]), ForceMode.Impulse);
+        public void Remove() { insertedIntoObject = false; }
+        //private void OnCollisionStay(Collision hit) { Debug.Log(gameObject.name + " is hitting " + hit.gameObject.name); }
+        //public void Eject(ColliderGroup[] ignoredColliders = null)
+        public void Eject(Item shooterItem = null)
+        {
             insertedIntoObject = false;
-            magazineHandle.data.disableTouch = false;
+            //if (ignoredColliders != null)
+            //{
+            //    foreach (ColliderGroup CG in ignoredColliders)
+            //    {
+            //        foreach(Collider C in CG.colliders)
+            //        {
+            //            Physics.IgnoreCollision(item.colliderGroups[0].colliders[0], C, true);
+            //        }
+            //    }
+            //}
+            if (shooterItem != null) { item.IgnoreObjectCollision(shooterItem); }
+            item.IgnoreRagdollCollision(Player.local.creature.ragdoll);
+            item.rb.AddRelativeForce(new Vector3(module.ejectionForceVector[0], module.ejectionForceVector[1], module.ejectionForceVector[2]), ForceMode.Impulse);
+            //magazineHandle.data.disableTouch = false;
         }
 
         public void ConsumeOne()

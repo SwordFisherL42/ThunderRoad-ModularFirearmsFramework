@@ -2,15 +2,15 @@
 using ThunderRoad;
 using static ModularFirearms.FirearmFunctions;
 
-namespace ModularFirearms
+namespace ModularFirearms.Attachments
 {
-    public class ItemSecondaryFire : MonoBehaviour
+    public class SecondaryFire : MonoBehaviour
     {
         private float prevShot;
         //ThunderRoad references
         protected Item item;
-        protected ItemModuleSecondaryFire module;
-        private Handle gunGrip;
+        protected Shared.AttachmentModule module;
+        private Handle secondaryHandle;
         //Unity references
         private AudioSource fireSound;
         private ParticleSystem MuzzleFlash;
@@ -20,11 +20,11 @@ namespace ModularFirearms
         {
             item = this.GetComponent<Item>();
             item.OnHeldActionEvent += OnHeldAction;
-            module = item.data.GetModule<ItemModuleSecondaryFire>();
-            if (!string.IsNullOrEmpty(module.mainGripID)) gunGrip = item.definition.GetCustomReference(module.mainGripID).GetComponent<Handle>();
-            if (!string.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.definition.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
-            if (!string.IsNullOrEmpty(module.muzzleFlashRef)) MuzzleFlash = item.definition.GetCustomReference(module.muzzleFlashRef).GetComponent<ParticleSystem>();
-            if (!string.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.definition.GetCustomReference(module.muzzlePositionRef);
+            module = item.data.GetModule<Shared.AttachmentModule>();
+            if (!string.IsNullOrEmpty(module.mainGripID)) secondaryHandle = item.GetCustomReference(module.mainGripID).GetComponent<Handle>();
+            if (!string.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
+            if (!string.IsNullOrEmpty(module.muzzleFlashRef)) MuzzleFlash = item.GetCustomReference(module.muzzleFlashRef).GetComponent<ParticleSystem>();
+            if (!string.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
             else muzzlePoint = item.transform;
         }
 
@@ -33,9 +33,9 @@ namespace ModularFirearms
             prevShot = Time.time;
         }
 
-        public void OnHeldAction(Interactor interactor, Handle handle, Interactable.Action action)
+        public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
-            if (handle.Equals(gunGrip) && action == Interactable.Action.UseStart && ((Time.time - prevShot) > module.fireDelay))
+            if (handle.Equals(secondaryHandle) && action == Interactable.Action.UseStart && ((Time.time - prevShot) > module.fireDelay))
             {
                 prevShot = Time.time;
                 Fire();
