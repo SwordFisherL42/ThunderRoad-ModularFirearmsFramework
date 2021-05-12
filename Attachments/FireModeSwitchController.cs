@@ -47,6 +47,7 @@ namespace ModularFirearms.Attachments
                 {
                     if (pivotTransform != null)
                     {
+                        //Debug.Log("[ModularFirearms] Setting Swtich Position selectionIndex: " + selectionIndex);
                         pivotTransform.position = switchPositions[selectionIndex].position;
                         pivotTransform.rotation = Quaternion.Euler(switchPositions[selectionIndex].rotation.eulerAngles);
                     }
@@ -85,10 +86,11 @@ namespace ModularFirearms.Attachments
             // Swtich Positions are passed as custom references. pivotTransform is then matched to these transforms
             foreach (string switchPositionRef in module.switchPositionRefs)
             {
+                //Debug.Log("Getting ref for  " + switchPositionRef + " " + switchPositions.Count);
                 Transform switchPosition = item.GetCustomReference(switchPositionRef);
                 switchPositions.Add(switchPosition);
             }
-            //Debug.Log("Got switchPositions refs");
+            //Debug.Log("Got switchPositions refs: " + switchPositions.Count + " " + switchPositions.ToString());
             // allowed fire modes are matched to swtich positions based on list index
             foreach (string allowedFireMode in module.allowedFireModes)
             {

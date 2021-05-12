@@ -95,6 +95,7 @@ namespace ModularFirearms.Shared
         public bool allowCycleFireMode = false;
 
         public int maxReceiverAmmo = 12;
+        public string shellReceiverDef;
 
         // Gameplay/Physics/Recoil params
         public float bulletForce = 10.0f;

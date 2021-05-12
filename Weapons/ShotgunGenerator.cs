@@ -112,7 +112,8 @@ namespace ModularFirearms.Weapons
             //item.OnSnapEvent += OnFirearmSnapped;
             //item.OnUnSnapEvent += OnFirearmUnSnapped;
 
-            shellReceiver = item.GetComponentInChildren<Holder>();
+            //shellReceiver = item.GetComponentInChildren<Holder>();
+            shellReceiver = item.GetCustomReference(module.shellReceiverDef).GetComponentInChildren<Holder>();
             shellReceiver.Snapped += new Holder.HolderDelegate(this.OnShellInserted);
             shellReceiver.UnSnapped += new Holder.HolderDelegate(this.OnShellRemoved);
 
