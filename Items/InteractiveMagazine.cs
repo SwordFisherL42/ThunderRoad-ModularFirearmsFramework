@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
 using ThunderRoad;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System;
 
 namespace ModularFirearms.Items
@@ -47,18 +44,18 @@ namespace ModularFirearms.Items
                     else
                     {
                         holder.UnSnap(interactiveObject);
-                        Debug.LogWarning("[Fisher-Firearms][WARNING] Inserted object has wrong AmmoType, and will be popped out");
+                        Debug.LogWarning("[ModularFirearmsFramework][WARNING] Inserted object has wrong AmmoType, and will be popped out");
                     }
                 }
                 else
                 {
                     holder.UnSnap(interactiveObject);
-                    Debug.LogWarning("[Fisher-Firearms][WARNING] Inserted object has no ItemAmmo component, and will be popped out");
+                    Debug.LogWarning("[ModularFirearmsFramework][WARNING] Inserted object has no ItemAmmo component, and will be popped out");
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("[Fisher-Firearms][ERROR] Exception in Adding Ammo.");
+                Debug.LogError("[ModularFirearmsFramework][ERROR] Exception in Adding Ammo.");
                 Debug.LogError(e.ToString());
             }
             return;

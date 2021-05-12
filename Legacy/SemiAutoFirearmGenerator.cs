@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ThunderRoad;
 using UnityEngine;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
-namespace ModularFirearms.Weapons
+namespace ModularFirearms.Legacy
 {
     public class SemiAutoFirearmGenerator : MonoBehaviour
     {
@@ -39,7 +39,7 @@ namespace ModularFirearms.Weapons
 
     //    private Handle foreGrip;
     //    /// Ammo Display Controller ///
-    //    private Shared.TextureProcessor ammoCounter;
+    //    private TextureProcessor ammoCounter;
     //    private MeshRenderer ammoCounterMesh;
     //    private Texture2D digitsGridTexture;
     //    /// Magazine Parameters///
@@ -51,7 +51,7 @@ namespace ModularFirearms.Weapons
     //    private SphereCollider slideCapsuleStabilizer;
     //    /// Slide Interaction ///
     //    protected Handle slideHandle;
-    //    private Shared.ChildRigidbodyController slideController;
+    //    private ChildRigidbodyController slideController;
     //    private GameObject slideObject;
     //    private GameObject slideCenterPosition;
     //    private ConstantForce slideForce;
@@ -219,7 +219,7 @@ namespace ModularFirearms.Weapons
 
     //        if ((digitsGridTexture != null) && (ammoCounterMesh != null))
     //        {
-    //            ammoCounter = new Shared.TextureProcessor();
+    //            ammoCounter = new TextureProcessor();
     //            ammoCounter.SetGridTexture(digitsGridTexture);
     //            ammoCounter.SetTargetRenderer(ammoCounterMesh);
     //            //Debug.Log("[Fisher-ModularFirearms] Sucessfully Setup Ammo Counter!!");
@@ -250,7 +250,7 @@ namespace ModularFirearms.Weapons
     //        /// 5) (optional) Set the firemode selection switch to the correct position
     //        InitializeConfigurableJoint(module.slideStabilizerRadius);
 
-    //        slideController = new Shared.ChildRigidbodyController(item, module);
+    //        slideController = new ChildRigidbodyController(item, module);
     //        slideController.InitializeSlide(slideObject);
 
     //        if (slideController == null) Debug.LogError("[Fisher-ModularFirearms] ERROR! CHILD SLIDE CONTROLLER WAS NULL");
@@ -273,7 +273,7 @@ namespace ModularFirearms.Weapons
     //                }
     //                catch
     //                {
-    //                    Debug.Log("[Fisher-Firearms] EXCEPTION IN SNAPPING MAGAZINE ");
+    //                    Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SNAPPING MAGAZINE ");
     //                }
     //            },
     //            item.transform.position,

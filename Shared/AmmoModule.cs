@@ -1,6 +1,6 @@
 ﻿using System;
 using ThunderRoad;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 
 namespace ModularFirearms.Shared

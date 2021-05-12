@@ -1,6 +1,6 @@
 ﻿using System;
 using ThunderRoad;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 namespace ModularFirearms.Shared
 {
@@ -125,16 +125,15 @@ namespace ModularFirearms.Shared
         {
             base.OnItemLoaded(item);
 
-            //selectedType = (WeaponType)FirearmFunctions.weaponTypeEnums.GetValue(firearmCategory);
             selectedType = (WeaponType)Enum.Parse(typeof(WeaponType), firearmType);
 
-            if (selectedType.Equals(WeaponType.TestWeapon)) item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>();
-            else if (selectedType.Equals(WeaponType.SemiAuto)) item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>();
-
+            if (selectedType.Equals(WeaponType.SemiAuto)) item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>();
             else if (selectedType.Equals(WeaponType.Shotgun)) item.gameObject.AddComponent<Weapons.ShotgunGenerator>();
 
-            else if (selectedType.Equals(WeaponType.SemiAutoLegacy)) item.gameObject.AddComponent<Weapons.SemiAutoFirearmGenerator>();
-            else if (selectedType.Equals(WeaponType.AutoMag)) item.gameObject.AddComponent<Weapons.AutomagGenerator>();
+            else if (selectedType.Equals(WeaponType.TestWeapon)) item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>();
+
+            else if (selectedType.Equals(WeaponType.SemiAutoLegacy)) item.gameObject.AddComponent<Legacy.SemiAutoFirearmGenerator>();
+            else if (selectedType.Equals(WeaponType.AutoMag)) item.gameObject.AddComponent<Legacy.AutomagGenerator>();
 
             else { item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>(); }
 

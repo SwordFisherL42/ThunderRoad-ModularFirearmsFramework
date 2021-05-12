@@ -43,7 +43,7 @@ namespace ModularFirearms
     /// <summary>
     /// Core Framework Functions, meant to be shared across multiple classes
     /// </summary>
-    public class FirearmFunctions
+    public class FrameworkCore
     {
         /// <summary>
         /// Provide static points for 2D cartesian blend tree, to be used for firemode selection states.
@@ -384,7 +384,7 @@ namespace ModularFirearms
             var projectileData = Catalog.GetData<ItemData>(projectileID, true);
             if (projectileData == null)
             {
-                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
+                Debug.LogError("[ModularFirearmsFramework][ERROR] No projectile named " + projectileID.ToString());
                 return;
             }
             else
@@ -447,7 +447,7 @@ namespace ModularFirearms
                     }
                     catch (Exception ex)
                     {
-                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
+                        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
                     }
                 },
                 Vector3.zero,
@@ -463,7 +463,7 @@ namespace ModularFirearms
             if ((spawnPoint == null) || (String.IsNullOrEmpty(projectileID))) return;
             if (projectileData == null)
             {
-                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
+                Debug.LogError("[ModularFirearmsFramework][ERROR] No projectile named " + projectileID.ToString());
                 return;
             }
             foreach (Vector3 offsetVec in buckshotOffsetPosiitions)
@@ -524,7 +524,7 @@ namespace ModularFirearms
                     }
                     catch (Exception ex)
                     {
-                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
+                        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
                     }
                 },
                 spawnPoint.position,
@@ -570,7 +570,7 @@ namespace ModularFirearms
             var projectileData = Catalog.GetData<ItemData>(projectileID, true);
             if (projectileData == null)
             {
-                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
+                Debug.LogError("[ModularFirearmsFramework][ERROR] No projectile named " + projectileID.ToString());
                 return;
             }
             foreach (Vector3 offsetVec in buckshotOffsetPosiitions)
@@ -630,7 +630,7 @@ namespace ModularFirearms
                     }
                     catch (Exception ex)
                     {
-                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
+                        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
                     }
                 },
                 spawnPoint.position,
@@ -843,8 +843,8 @@ namespace ModularFirearms
 
         public static void DumpRigidbodyToLog(Rigidbody rb)
         {
-            Debug.LogWarning("[Fisher-Firearms][RB-DUMP] " + rb.name + ": " + rb.ToString());
-            Debug.LogWarning("[Fisher-Firearms][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
+            Debug.LogWarning("[ModularFirearmsFramework][RB-DUMP] " + rb.name + ": " + rb.ToString());
+            Debug.LogWarning("[ModularFirearmsFramework][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
         }
 
     }

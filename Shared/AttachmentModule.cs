@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThunderRoad;
-using UnityEngine;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 namespace ModularFirearms.Shared
 {
@@ -34,8 +33,6 @@ namespace ModularFirearms.Shared
 
         public string[] allowedFireModes = { };
         public string[] switchPositionRefs = { };
-
-
 
         // Laser Pointer Attachment 
         public string laserRef;
@@ -68,7 +65,6 @@ namespace ModularFirearms.Shared
         public string muzzleFlashRef;
         public string fireAnim;
         public string mainGripID;
-
 
         // Old Integer Enum Parsing Method
         //public int attachmentType = 0;

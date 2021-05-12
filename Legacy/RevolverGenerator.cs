@@ -159,7 +159,7 @@ using System.Linq;
 //                //    }
 //                //}
 //            }
-//            catch { Debug.Log("[Fisher-Firearms][ERROR] Exception in Adding Projectile."); }
+//            catch { Debug.Log("[ModularFirearmsFramework][ERROR] Exception in Adding Projectile."); }
 //        }
 
 //        protected void TrackedFire()
@@ -192,7 +192,7 @@ using System.Linq;
 //                }
 //                if (bulletIndex >= itemQuiver.holder.slots.Count) bulletIndex = 0;
 //            }
-//            else Debug.Log("[Fisher-Firearms][ERROR] Logical Exception, ammo was somehow NULL...");
+//            else Debug.Log("[ModularFirearmsFramework][ERROR] Logical Exception, ammo was somehow NULL...");
 //        }
 
 //        public bool Fire()

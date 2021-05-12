@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using ThunderRoad;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 namespace ModularFirearms.Attachments
 {
@@ -94,7 +91,7 @@ namespace ModularFirearms.Attachments
             // allowed fire modes are matched to swtich positions based on list index
             foreach (string allowedFireMode in module.allowedFireModes)
             {
-                FirearmFunctions.FireMode switchMode = (FirearmFunctions.FireMode)Enum.Parse(typeof(FirearmFunctions.FireMode), allowedFireMode);
+                FrameworkCore.FireMode switchMode = (FrameworkCore.FireMode)Enum.Parse(typeof(FrameworkCore.FireMode), allowedFireMode);
                 switchModes.Add(switchMode);
             }
             //Debug.Log("Got switchModes refs");

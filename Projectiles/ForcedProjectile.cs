@@ -2,17 +2,10 @@
 using UnityEngine;
 using ThunderRoad;
 
-/* Description: An Item plugin for `ThunderRoad` which is required on any items
- * that are set up as a projectile. This class allows projectiles to be imbued 
- * via the AddChargeToQueue(...) method and defines an item lifetime for performance.
- * 
- * author: SwordFisherL42 ("Fisher")
- * 
- */
 
 namespace ModularFirearms.Projectiles
 {
-    public class SimpleProjectile : MonoBehaviour
+    public class ForcedProjectile : MonoBehaviour
     {
         protected Item item;
         protected Shared.ProjectileModule module;
@@ -23,13 +16,11 @@ namespace ModularFirearms.Projectiles
         private MaterialData bladeMaterial;
         private MaterialData fleshMaterial;
         private CollisionInstance thisCollision;
-        private EffectInstance thisEffect;
-        private ParticleSystem SplatterEffect;
+
         protected void Awake()
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.ProjectileModule>();
-            if (!string.IsNullOrEmpty(module.CustomSplatterEffect)) SplatterEffect = item.GetCustomReference(module.CustomSplatterEffect).GetComponent<ParticleSystem>();
             bladeMaterial = Catalog.GetData<MaterialData>("Blade", true);
             fleshMaterial = Catalog.GetData<MaterialData>("Flesh", true);
         }
@@ -146,7 +137,7 @@ namespace ModularFirearms.Projectiles
             {
                 try
                 {
-                    StartCoroutine(FirearmFunctions.TransferDeltaEnergy(itemImbue, transferedSpell));
+                    StartCoroutine(FrameworkCore.TransferDeltaEnergy(itemImbue, transferedSpell));
                     queuedSpell = null;
                     return;
                 }

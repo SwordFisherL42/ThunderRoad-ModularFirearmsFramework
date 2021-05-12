@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using ThunderRoad;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 namespace ModularFirearms.Items
 {

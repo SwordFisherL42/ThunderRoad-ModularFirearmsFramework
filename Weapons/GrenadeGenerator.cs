@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using ThunderRoad;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 namespace ModularFirearms.Weapons
 {
@@ -16,7 +11,7 @@ namespace ModularFirearms.Weapons
         public ConfigurableJoint connectedJoint;
         /// Slide Interaction ///
         protected Handle slideHandle;
-        private Shared.ChildRigidbodyController slideController;
+        private ChildRigidbodyController slideController;
         private GameObject slideObject;
         private GameObject slideCenterPosition;
         private ConstantForce slideForce;

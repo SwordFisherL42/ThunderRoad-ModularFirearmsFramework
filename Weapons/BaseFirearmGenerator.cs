@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using ThunderRoad;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 
 namespace ModularFirearms.Weapons
@@ -35,7 +29,7 @@ namespace ModularFirearms.Weapons
 
         /// Slide Interaction ///
         protected Handle slideHandle;
-        private Shared.ChildRigidbodyController slideController;
+        private ChildRigidbodyController slideController;
         private GameObject slideObject;
         private GameObject slideCenterPosition;
         private ConstantForce slideForce;
@@ -178,7 +172,7 @@ namespace ModularFirearms.Weapons
             /// 5) (optional) Set the firemode selection switch to the correct position
             InitializeConfigurableJoint(module.slideStabilizerRadius);
 
-            slideController = new Shared.ChildRigidbodyController(item, module);
+            slideController = new ChildRigidbodyController(item, module);
             slideController.InitializeSlide(slideObject);
 
             if (slideController == null) Debug.LogError("[Fisher-ModularFirearms] ERROR! CHILD SLIDE CONTROLLER WAS NULL");
@@ -201,7 +195,7 @@ namespace ModularFirearms.Weapons
                     }
                     catch
                     {
-                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SNAPPING MAGAZINE ");
+                        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SNAPPING MAGAZINE ");
                     }
                 },
                 item.transform.position,
@@ -271,7 +265,7 @@ namespace ModularFirearms.Weapons
                         }
                         else
                         {
-                            FirearmFunctions.ShootProjectile(item, module.ammoID, shellEjectionPoint, null, module.shellEjectionForce, 1.0f, false, slideCapsuleStabilizer);
+                            FrameworkCore.ShootProjectile(item, module.ammoID, shellEjectionPoint, null, module.shellEjectionForce, 1.0f, false, slideCapsuleStabilizer);
                             roundChambered = false;
                             chamberRoundOnNext = true;
                         }
@@ -336,7 +330,7 @@ namespace ModularFirearms.Weapons
                 {
                     // Begin Firing
                     triggerPressed = true;
-                    if (!isFiring) StartCoroutine(FirearmFunctions.GeneralFire(TrackedFire, TriggerIsPressed, fireModeSelection, module.fireRate, module.burstNumber, emptySound, SetFiringFlag, ProjectileIsSpawning));
+                    if (!isFiring) StartCoroutine(FrameworkCore.GeneralFire(TrackedFire, TriggerIsPressed, fireModeSelection, module.fireRate, module.burstNumber, emptySound, SetFiringFlag, ProjectileIsSpawning));
                 }
                 if (action == Interactable.Action.UseStop)
                 {
@@ -686,7 +680,7 @@ namespace ModularFirearms.Weapons
 
         public void PreFireEffects()
         {
-            FirearmFunctions.Animate(animations, module.fireAnimationRef);
+            FrameworkCore.Animate(animations, module.fireAnimationRef);
             if (muzzleFlash != null) muzzleFlash.Play();
             PlayFireSound();
             if (muzzleSmoke != null) muzzleSmoke.Play();
@@ -706,7 +700,7 @@ namespace ModularFirearms.Weapons
             SetProjectileSpawningState(true);
             spawnedItemData.SpawnAsync(i =>
             {
-                // Debug.Log("[Fisher-Firearms] Time: " + Time.time + " Spawning projectile: " + i.name);
+                // Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Spawning projectile: " + i.name);
                 try
                 {
                     i.Throw(1f, Item.FlyDetection.Forced);
@@ -751,7 +745,7 @@ namespace ModularFirearms.Weapons
                 }
                 catch
                 {
-                    Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING ");
+                    Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING ");
                 }
             },
             Vector3.zero,
@@ -781,7 +775,7 @@ namespace ModularFirearms.Weapons
                 //SetProjectileSpawningState(true);
                 //shellItemData.SpawnAsync(i =>
                 //{
-                //    // Debug.Log("[Fisher-Firearms] Time: " + Time.time + " Spawning projectile: " + i.name);
+                //    // Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Spawning projectile: " + i.name);
                 //    try
                 //    {
                 //        i.transform.position = shellEjectionPoint.position;
@@ -791,7 +785,7 @@ namespace ModularFirearms.Weapons
                 //    }
                 //    catch
                 //    {
-                //        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING SHELL CASING");
+                //        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING SHELL CASING");
                 //    }
                 //},
                 //Vector3.zero,

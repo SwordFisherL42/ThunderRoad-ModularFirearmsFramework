@@ -1,12 +1,8 @@
 ﻿using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
 using UnityEngine;
 using ThunderRoad;
 
-namespace ModularFirearms.Shared
+namespace ModularFirearms
 {
     public class ChildRigidbodyController
     {
@@ -15,7 +11,7 @@ namespace ModularFirearms.Shared
         public bool initialCheck = false;
 
         protected Item parentItem;
-        protected FirearmModule parentModule;
+        protected Shared.FirearmModule parentModule;
         
         private readonly float slideForwardForce;
         private readonly float slideBlowbackForce;
@@ -23,7 +19,7 @@ namespace ModularFirearms.Shared
         private readonly float lockedAnchorOffset;
         private readonly float lockedBackAnchorOffset;
 
-        public ChildRigidbodyController(Item Parent, FirearmModule ParentModule)
+        public ChildRigidbodyController(Item Parent, Shared.FirearmModule ParentModule)
         {
             parentItem = Parent;
             parentModule = ParentModule;
@@ -61,12 +57,12 @@ namespace ModularFirearms.Shared
                 thisSlideObject = slideObject;
                 if (!String.IsNullOrEmpty(parentModule.chamberBulletRef)) chamberBullet = parentItem.GetCustomReference(parentModule.chamberBulletRef).gameObject;
             }
-            catch { Debug.LogError("[Fisher-Firearms][EXCEPTION] Unable to Initialize CRC ! "); }
+            catch { Debug.LogError("[ModularFirearmsFramework][EXCEPTION] Unable to Initialize CRC ! "); }
         }
 
         public void SetupSlide()
         {
-            //Debug.Log("[Fisher-Firearms] Setting Up CRC...");
+            //Debug.Log("[ModularFirearmsFramework] Setting Up CRC...");
             originalAnchor = new Vector3(0, 0, -0.5f * parentModule.slideTravelDistance);
             lockedBackAnchor = new Vector3(0, 0, lockedBackAnchorOffset);
             lockedNeutralAnchor = new Vector3(0, 0, lockedAnchorOffset);
@@ -74,7 +70,7 @@ namespace ModularFirearms.Shared
             connectedJoint.anchor = currentAnchor;
             ChamberRoundVisible(false);
             LockSlide();
-            //Debug.Log("[Fisher-Firearms] CRC Setup Complete !!!");
+            //Debug.Log("[ModularFirearmsFramework] CRC Setup Complete !!!");
         }
 
         // State Functions //

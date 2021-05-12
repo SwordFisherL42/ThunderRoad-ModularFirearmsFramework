@@ -32,7 +32,7 @@ namespace ModularFirearms
             }
             catch (Exception ex)
             {
-                Debug.Log("[Harmony][Fisher.EffectPooling.Hotfixes][Exception] ERROR with patches: ");
+                Debug.Log("[Harmony][Fisher.ModularFirearms.Hotfixes][Exception] ERROR with patches: ");
                 Debug.Log(ex.StackTrace);
                 Debug.Log(ex.Message);
             }

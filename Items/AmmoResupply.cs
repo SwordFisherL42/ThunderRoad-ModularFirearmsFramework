@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using ThunderRoad;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace ModularFirearms.Items
 {
@@ -43,22 +41,21 @@ namespace ModularFirearms.Items
                 waitingForSpawn = true;
                 spawnedItemData.SpawnAsync(thisSpawnedItem =>
                 {
-                    //Debug.Log("[Fisher-HoldingBags] Time: " + Time.time + " Spawning weapon: " + thisSpawnedItem.name);
+                    //Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Spawning weapon: " + thisSpawnedItem.name);
                     try
                     {
                         if (holder.HasSlotFree())
                         {
                             holder.Snap(thisSpawnedItem);
-                            //Debug.Log("[Fisher-HoldingBags] Time: " + Time.time + " Snapped weapon: " + thisSpawnedItem.name);
-                            //waitingForSpawn = false;
+                            //Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Snapped weapon: " + thisSpawnedItem.name);
                         }
                         else
                         {
-                            //Debug.Log("[Fisher-HoldingBags] EXCEPTION Time: " + Time.time + " NO FREE SLOT FOR: " + thisSpawnedItem.name);
+                            //Debug.Log("[ModularFirearmsFramework] EXCEPTION Time: " + Time.time + " NO FREE SLOT FOR: " + thisSpawnedItem.name);
                         }
                         waitingForSpawn = false;
                     }
-                    catch (Exception e) { Debug.Log("[Fisher-Firearms] EXCEPTION IN SNAPPING: " + e.ToString()); }
+                    catch (Exception e) { Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SNAPPING: " + e.ToString()); }
                 });
                 //Debug.Log("[Fisher-HoldingBags] Time: " + Time.time + " Activating SpawnAndSnap: " + spawnedItemID);
                 return;

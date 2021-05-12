@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using ThunderRoad;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 namespace ModularFirearms.Projectiles
 {
@@ -51,7 +51,6 @@ namespace ModularFirearms.Projectiles
             if (explosiveEffect != null)
             {
                 explosiveEffect.transform.parent = null;
-                //HitscanExplosion(explosiveEffect.transform.position, module.explosiveForce, module.blastRadius, module.liftMult, (ForceMode)forceModeEnums.GetValue(module.forceMode));
                 HitscanExplosion(explosiveEffect.transform.position, module.explosiveForce, module.blastRadius, module.liftMult, (ForceMode)Enum.Parse(typeof(ForceMode), module.forceMode));
                 explosiveEffect.Play();
             }
@@ -61,7 +60,7 @@ namespace ModularFirearms.Projectiles
         private void OnCollisionEnter(Collision hit)
         {
             if (!item.rb.useGravity) { item.rb.useGravity = true; isFlying = false; }
-            //Debug.Log("[F-L42] COLLISON WITH " + hit.transform.name);
+            //Debug.Log("[ModularFirearmsFramework] COLLISON WITH " + hit.transform.name);
             Explode();
             item.Despawn();
         }
