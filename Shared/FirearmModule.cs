@@ -103,6 +103,7 @@ namespace ModularFirearms.Shared
         public float hapticForce = 5.0f;
         public float throwMult = 2.0f;
         public float[] recoilForces;
+        public float[] recoilTorques;
 
         public string idleAnimName = "idle";
         public string overheatAnimName = "overheat";

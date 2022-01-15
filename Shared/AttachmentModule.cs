@@ -42,6 +42,7 @@ namespace ModularFirearms.Shared
         public string laserHandleRef;
         public string laserRayCastPointRef;
         public string laserActivationSoundRef;
+        public bool laserStartActivated = true;
 
         // Ammo Counter Attachment
         public string ammoCounterRef;

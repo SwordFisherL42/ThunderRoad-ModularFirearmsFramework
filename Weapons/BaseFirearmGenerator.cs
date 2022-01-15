@@ -192,10 +192,11 @@ namespace ModularFirearms.Weapons
                     {
                         magazineHolder.Snap(i);
                         magazineHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
+                        //Debug.Log($"[Fisher-ModularFirearms] Magazine disableTouch {magazineHolder.data.disableTouch}");
                     }
                     catch
                     {
-                        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SNAPPING MAGAZINE ");
+                        Debug.Log("[Fisher-ModularFirearms] EXCEPTION IN SNAPPING MAGAZINE ");
                     }
                 },
                 item.transform.position,
@@ -416,6 +417,8 @@ namespace ModularFirearms.Weapons
                     insertedMagazine.Insert();
                     // Determine if the magazine can be pulled from the weapon (otherwise the ejection button is required)
                     magazineHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
+                    Handle h = interactiveObject.GetComponentInChildren<Handle>();
+                    if (h != null) h.data.disableTouch = !module.allowGrabMagazineFromGun;
                     string insertedMagID = insertedMagazine.GetMagazineID();
                     bool keepMagazine = false;
                     foreach (string magazineID in validMagazineIDs)
@@ -428,14 +431,14 @@ namespace ModularFirearms.Weapons
                     }
                     if (!keepMagazine)
                     {
-                        Debug.Log(item.name + " REJECTED MAGAZINE " + insertedMagID.ToString() + ". Allowed Magazines are:  "+ string.Join(",", validMagazineIDs.ToArray()));
+                        Debug.Log("[Fisher-ModularFirearms] " + item.name + " REJECTED MAGAZINE " + insertedMagID.ToString() + ". Allowed Magazines are:  "+ string.Join(",", validMagazineIDs.ToArray()));
                         // Reject the Magazine with incorrect ID
                         MagazineRelease();
                     }
                 }
                 else
                 {
-                    Debug.Log("Rejected MAGAZINE Due to NULL InteractiveMagazine Object");
+                    Debug.Log("[Fisher-ModularFirearms] Rejected MAGAZINE Due to NULL InteractiveMagazine Object");
                     // Reject the non-Magazine object
                     magazineHolder.UnSnap(interactiveObject);
                     insertedMagazine = null;
@@ -456,6 +459,8 @@ namespace ModularFirearms.Weapons
             {
                 if (insertedMagazine != null)
                 {
+                    Handle h = interactiveObject.GetComponentInChildren<Handle>();
+                    if (h != null) h.data.disableTouch = false;
                     insertedMagazine.Eject(item);
                     insertedMagazine = null;
                 }
@@ -693,117 +698,101 @@ namespace ModularFirearms.Weapons
 
             //ShootProjectile(item, module.projectileID, muzzlePoint, GetItemSpellChargeID(item), module.bulletForce, module.throwMult);
 
-            ItemData spawnedItemData = Catalog.GetData<ItemData>(module.projectileID, true);
-            String imbueSpell = GetItemSpellChargeID(item);
+            //Vector3 shootLocation = new Vector3(muzzlePoint.position.x, muzzlePoint.position.y, muzzlePoint.position.z);
+            //Quaternion shooterAngles = Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
+            //Vector3 shootVelocity = new Vector3(item.rb.velocity.x, item.rb.velocity.y, item.rb.velocity.z);
+            ShootProjectile(
+                item,
+                module.projectileID,
+                muzzlePoint,
+                GetItemSpellChargeID(item),
+                module.bulletForce,
+                module.throwMult,
+                false,
+                slideCapsuleStabilizer,
+                SetProjectileSpawningState
+                );
+            ApplyRecoil(item.rb, module.recoilForces, module.throwMult, mainHandleHeldLeft, mainHandleHeldRight, module.hapticForce, module.recoilTorques);
 
-            if (spawnedItemData == null) return;
-            SetProjectileSpawningState(true);
-            spawnedItemData.SpawnAsync(i =>
-            {
-                // Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Spawning projectile: " + i.name);
-                try
-                {
-                    i.Throw(1f, Item.FlyDetection.Forced);
-                    item.IgnoreObjectCollision(i);
-                    i.IgnoreObjectCollision(item);
-                    i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
+            //ItemData spawnedItemData = Catalog.GetData<ItemData>(module.projectileID, true);
+            //string imbueSpell = GetItemSpellChargeID(item);
+            //if (spawnedItemData == null) return;
+            //SetProjectileSpawningState(true);
+            //spawnedItemData.SpawnAsync(i =>
+            //{
+            //    // Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Spawning projectile: " + i.name);
+            //    try
+            //    {
+            //        i.Throw(1f, Item.FlyDetection.Forced);
+            //        item.IgnoreObjectCollision(i);
+            //        i.IgnoreObjectCollision(item);
+            //        i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
 
-                    if (slideCapsuleStabilizer != null)
-                    {
-                        try
-                        {
-                            i.IgnoreColliderCollision(slideCapsuleStabilizer);
-                            foreach (ColliderGroup CG in this.item.colliderGroups)
-                            {
-                                foreach (Collider C in CG.colliders)
-                                {
-                                    Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
-                                }
-                            }
-                            // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
-                            //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
-                        }
-                        catch { }
-                    }
+            //        if (slideCapsuleStabilizer != null)
+            //        {
+            //            try
+            //            {
+            //                i.IgnoreColliderCollision(slideCapsuleStabilizer);
+            //                foreach (ColliderGroup CG in this.item.colliderGroups)
+            //                {
+            //                    foreach (Collider C in CG.colliders)
+            //                    {
+            //                        Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
+            //                    }
+            //                }
+            //                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
+            //                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
+            //            }
+            //            catch { }
+            //        }
 
-                    IgnoreProjectile(this.item, i, true);
-                    i.transform.position = muzzlePoint.position;
-                    i.transform.rotation = Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
-                    i.rb.velocity = item.rb.velocity;
-                    i.rb.AddForce(i.rb.transform.forward * 1000.0f * module.bulletForce);
+            //        IgnoreProjectile(this.item, i, true);
 
-                    Projectiles.BasicProjectile projectileController = i.gameObject.GetComponent<Projectiles.BasicProjectile>();
-                    if (projectileController !=null ) projectileController.SetShooterItem(this.item);
+            //        Projectiles.BasicProjectile projectileController = i.gameObject.GetComponent<Projectiles.BasicProjectile>();
+            //        if (projectileController != null) projectileController.SetShooterItem(this.item);
 
-                    if (!String.IsNullOrEmpty(imbueSpell))
-                    {
-                        //  Set imbue charge on projectile using ItemProjectileSimple subclass
-                        if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                    }
-                    //ApplyRecoil(item.rb, module.recoilForces, module.recoilMult, gunGripHeldLeft, gunGripHeldRight, module.hapticForce);
-                    SetProjectileSpawningState(false);
-                }
-                catch
-                {
-                    Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING ");
-                }
-            },
-            Vector3.zero,
-            Quaternion.Euler(Vector3.zero),
-            null,
-            false);
+            //        i.transform.position = shootLocation; //muzzlePoint.position;
+            //        i.transform.rotation = shooterAngles; //Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
+            //        i.rb.velocity = shootVelocity; //item.rb.velocity;
+            //        i.rb.AddForce(i.rb.transform.forward * 1000.0f * module.bulletForce);
 
-            if (shellParticle != null) {
-
-                //GameObject newShell = GameObject.Instantiate(shellParticle, null);
-                //ParticleSystem newShellParticle = newShell.GetComponent<ParticleSystem>();
-                //if (newShellParticle !=null) newShellParticle.Play();
-                ////Particle will self destruct once played
-
-                if (shellParticle.isPlaying) shellParticle.Stop();
-                shellParticle.Play();
-            }
-
-            //muzzlePoint.position,
-            //Quaternion.Euler(muzzlePoint.rotation.eulerAngles),
+            //        if (!String.IsNullOrEmpty(imbueSpell))
+            //        {
+            //            //  Set imbue charge on projectile using ItemProjectileSimple subclass
+            //            if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
+            //        }
+            //        ApplyRecoil(item.rb, module.recoilForces, module.throwMult, mainHandleHeldLeft, mainHandleHeldRight, module.hapticForce, module.recoilTorques);
+            //        SetProjectileSpawningState(false);
+            //    }
+            //    catch
+            //    {
+            //        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING ");
+            //    }
+            //},
+            //shootLocation,
+            //Quaternion.Euler(Vector3.zero),
             //null,
             //false);
 
-                //ItemData shellItemData = Catalog.GetData<ItemData>(module.shellID, true);
-
-                //if (shellItemData == null) return;
-                //SetProjectileSpawningState(true);
-                //shellItemData.SpawnAsync(i =>
-                //{
-                //    // Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Spawning projectile: " + i.name);
-                //    try
-                //    {
-                //        i.transform.position = shellEjectionPoint.position;
-                //        i.transform.rotation = Quaternion.Euler(shellEjectionPoint.rotation.eulerAngles);
-                //        i.rb.velocity = item.rb.velocity;
-                //        i.rb.AddForce(i.rb.transform.forward * 1000.0f);
-                //    }
-                //    catch
-                //    {
-                //        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING SHELL CASING");
-                //    }
-                //},
-                //Vector3.zero,
-                //Quaternion.Euler(Vector3.zero),
-                //null,
-                //false);
-
+            if (shellParticle != null) {
+                GameObject newShell = GameObject.Instantiate(shellParticle.gameObject, null);
+                newShell.transform.position = shellParticle.transform.position;
+                newShell.transform.rotation = shellParticle.transform.rotation;
+                newShell.transform.parent = null;
+                ParticleSystem newShellParticle = newShell.GetComponent<ParticleSystem>();
+                if (newShellParticle != null) {
+                    var main = newShellParticle.main;
+                    main.stopAction = ParticleSystemStopAction.Destroy;
+                    newShellParticle.Play();
+                }
+            }
         }
-
 
         protected bool TrackedFire()
         {
             if (slideController != null)
             {
-                if (slideController.IsLocked())
-                {
-                    return false;
-                }
+                if (slideController.IsLocked()) return false;
             }
             if (!roundChambered) return false;
             // Round cycle sequence
@@ -821,12 +810,10 @@ namespace ModularFirearms.Weapons
                 isRacked = false;
                 isPulledBack = true;
                 chamberRoundOnNext = true;
-                //playSoundOnNext = true;
+                // playSoundOnNext = true;
                 slideController.LastShot();
             }
-
             UpdateAmmoCounter();
-
             return true;
         }
 

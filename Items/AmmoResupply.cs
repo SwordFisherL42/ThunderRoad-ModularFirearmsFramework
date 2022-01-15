@@ -47,6 +47,7 @@ namespace ModularFirearms.Items
                         if (holder.HasSlotFree())
                         {
                             holder.Snap(thisSpawnedItem);
+                            thisSpawnedItem.SetMeshLayer(GameManager.GetLayer(LayerName.FPVHide));
                             //Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Snapped weapon: " + thisSpawnedItem.name);
                         }
                         else

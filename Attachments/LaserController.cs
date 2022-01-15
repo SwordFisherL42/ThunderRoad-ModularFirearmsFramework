@@ -52,12 +52,21 @@ namespace ModularFirearms.Attachments
 
                 laserIgnore = ~laserIgnore;
                 maxLaserDistance = module.maxLaserDistance;
-                laserEnd.localPosition = new Vector3(laserEnd.localPosition.x, laserEnd.localPosition.y, laserEnd.localPosition.z);
+                laserEnd.localPosition = new Vector3(laserEnd.localPosition.x, laserEnd.localPosition.y, laserEnd.localPosition.z);  
             }
 
             if (!String.IsNullOrEmpty(module.laserActivationSoundRef)) activationSound = item.GetCustomReference(module.laserActivationSoundRef).GetComponent<AudioSource>();
             if (!String.IsNullOrEmpty(module.laserHandleRef)) attachmentHandle = item.GetCustomReference(module.laserHandleRef).GetComponent<Handle>();
 
+
+        }
+
+        protected void Start()
+        {
+            if (!module.laserStartActivated && attachedLaser != null)
+            {
+                attachedLaser.enabled = false;
+            }
         }
 
         protected void StartLongPress()
