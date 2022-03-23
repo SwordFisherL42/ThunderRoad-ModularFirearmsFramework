@@ -1,12 +1,8 @@
 ﻿using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
 using UnityEngine;
 using ThunderRoad;
 
-namespace ModularFirearms.Shared
+namespace ModularFirearms
 {
     public class ChildRigidbodyController
     {
@@ -15,7 +11,7 @@ namespace ModularFirearms.Shared
         public bool initialCheck = false;
 
         protected Item parentItem;
-        protected FirearmModule parentModule;
+        protected Shared.FirearmModule parentModule;
         
         private readonly float slideForwardForce;
         private readonly float slideBlowbackForce;
@@ -23,7 +19,7 @@ namespace ModularFirearms.Shared
         private readonly float lockedAnchorOffset;
         private readonly float lockedBackAnchorOffset;
 
-        public ChildRigidbodyController(Item Parent, FirearmModule ParentModule)
+        public ChildRigidbodyController(Item Parent, Shared.FirearmModule ParentModule)
         {
             parentItem = Parent;
             parentModule = ParentModule;
@@ -61,12 +57,11 @@ namespace ModularFirearms.Shared
                 thisSlideObject = slideObject;
                 if (!String.IsNullOrEmpty(parentModule.chamberBulletRef)) chamberBullet = parentItem.GetCustomReference(parentModule.chamberBulletRef).gameObject;
             }
-            catch { Debug.LogError("[Fisher-Firearms][EXCEPTION] Unable to Initialize CRC ! "); }
+            catch { Debug.LogError("[ModularFirearmsFramework][EXCEPTION] Unable to Initialize CRC ! "); }
         }
 
         public void SetupSlide()
         {
-            //Debug.Log("[Fisher-Firearms] Setting Up CRC...");
             originalAnchor = new Vector3(0, 0, -0.5f * parentModule.slideTravelDistance);
             lockedBackAnchor = new Vector3(0, 0, lockedBackAnchorOffset);
             lockedNeutralAnchor = new Vector3(0, 0, lockedAnchorOffset);
@@ -74,12 +69,11 @@ namespace ModularFirearms.Shared
             connectedJoint.anchor = currentAnchor;
             ChamberRoundVisible(false);
             LockSlide();
-            //Debug.Log("[Fisher-Firearms] CRC Setup Complete !!!");
         }
 
-        // State Functions //
+            // State Functions //
 
-        public void SetLockedState(bool forward = true)
+            public void SetLockedState(bool forward = true)
         {
             SetRelativeSlideForce(new Vector3(0, 0, 0));
             connectedJoint.zMotion = ConfigurableJointMotion.Locked;
@@ -219,8 +213,6 @@ namespace ModularFirearms.Shared
             return;
         }
 
-
-
         // Debugging Functions ...
         // Set defaults when Unity engine resets our values aribtrarily..
         public void FixCustomComponents()
@@ -273,6 +265,5 @@ namespace ModularFirearms.Shared
             GameObject.Destroy(connectedJoint);
             thisSlideObject.transform.parent = null;
         }
-
     }
 }

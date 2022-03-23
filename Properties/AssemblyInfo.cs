@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Fishers Modular Firearm Framework")]
-[assembly: AssemblyDescription("Blade and Sorcery plugin for scripting modular weapon events. Tested with game version U9")]
+[assembly: AssemblyTitle("Modular Firearm Framework")]
+[assembly: AssemblyDescription("Blade and Sorcery plugin by Fisher for scripting modular weapon events and interactions. Tested with game version U9")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("SwordFisherL42")]
+[assembly: AssemblyCompany("SwordFisherL42 (Fisher)")]
 [assembly: AssemblyProduct("Modular Firearm Framework")]
 [assembly: AssemblyCopyright("Copyright © 2021")]
 [assembly: AssemblyTrademark("")]
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("4.3.0.0")]
-[assembly: AssemblyFileVersion("4.3.0.0")]
+[assembly: AssemblyVersion("4.3.1.0")]
+[assembly: AssemblyFileVersion("4.3.1.0")]

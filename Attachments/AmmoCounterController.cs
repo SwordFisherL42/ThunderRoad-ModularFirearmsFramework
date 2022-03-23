@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using ThunderRoad;
 
@@ -14,7 +10,7 @@ namespace ModularFirearms.Attachments
         protected Shared.AttachmentModule module;
 
         /// Ammo Display Controller ///
-        private Shared.TextureProcessor ammoCounter;
+        private TextureProcessor ammoCounter;
         private MeshRenderer ammoCounterMesh;
         private Texture2D digitsGridTexture;
         private int lastAmmoCount = 0;
@@ -34,10 +30,8 @@ namespace ModularFirearms.Attachments
 
             if (!String.IsNullOrEmpty(module.ammoCounterRef))
             {
-                //Debug.Log("[Fisher-ModularFirearms] Getting Ammo Counter Objects ...");
                 ammoCounterMesh = item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>();
                 digitsGridTexture = (Texture2D)item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>().material.mainTexture;
-                //Debug.Log("[Fisher-ModularFirearms] GOT Ammo Counter Objects !!!");
             }
 
             //if (digitsGridTexture == null) Debug.LogError("[Fisher-ModularFirearms] COULD NOT GET GRID TEXTURE");
@@ -45,10 +39,9 @@ namespace ModularFirearms.Attachments
 
             if ((digitsGridTexture != null) && (ammoCounterMesh != null))
             {
-                ammoCounter = new Shared.TextureProcessor();
+                ammoCounter = new TextureProcessor();
                 ammoCounter.SetGridTexture(digitsGridTexture);
                 ammoCounter.SetTargetRenderer(ammoCounterMesh);
-                //Debug.Log("[Fisher-ModularFirearms] Sucessfully Setup Ammo Counter!!");
             }
 
             if (ammoCounter != null) ammoCounter.DisplayUpdate(newAmmoCount);

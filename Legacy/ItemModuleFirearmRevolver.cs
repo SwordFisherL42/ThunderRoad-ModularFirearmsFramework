@@ -1,6 +1,6 @@
 ﻿using ThunderRoad;
 
-namespace ModularFirearms
+namespace ModularFirearms.Legacy
 {
     public class ItemModuleFirearmRevolver : ItemModule
     {

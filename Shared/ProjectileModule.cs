@@ -1,6 +1,6 @@
 ﻿using System;
 using ThunderRoad;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 namespace ModularFirearms.Shared
 {
@@ -29,8 +29,6 @@ namespace ModularFirearms.Shared
         public string shellMeshRef;
         //Default vars, can be overriden for special cases
         public string forceMode = "Impulse";
-
-        //public ProjectileType GetSelectedType() { return (ProjectileType)FirearmFunctions.weaponTypeEnums.GetValue(projectileType); }
 
         public ProjectileType GetSelectedType(string projectileType) { return (ProjectileType)Enum.Parse(typeof(ProjectileType), projectileType); }
 

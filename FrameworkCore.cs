@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace ModularFirearms
 {
@@ -43,7 +44,7 @@ namespace ModularFirearms
     /// <summary>
     /// Core Framework Functions, meant to be shared across multiple classes
     /// </summary>
-    public class FirearmFunctions
+    public class FrameworkCore
     {
         /// <summary>
         /// Provide static points for 2D cartesian blend tree, to be used for firemode selection states.
@@ -66,7 +67,8 @@ namespace ModularFirearms
             HighYield = 6,
             Energy = 7,
             TestWeapon = 8,
-            SemiAutoLegacy = 9
+            SemiAutoLegacy = 9,
+            SimpleFirearm = 10
         }
 
         public enum AmmoType
@@ -140,11 +142,54 @@ namespace ModularFirearms
         /// A static array useful for accessing FireMode enums by index
         /// </summary>
         public static Array fireModeEnums = Enum.GetValues(typeof(FireMode));
-
         /// <summary>
         /// A static array useful for accessing ForceMode enums by index
         /// </summary>
         public static Array forceModeEnums = Enum.GetValues(typeof(ForceMode));
+
+        public static void DisableCulling(Item item, bool cullingEnabled = false)
+        {
+            FieldInfo f = item.GetType().GetField("cullingDetectionEnabled", BindingFlags.Instance | BindingFlags.NonPublic);
+            // (bool)f.GetValue(item) // Gets the field value
+            f.SetValue(item, cullingEnabled); // Sets the field value
+        }
+
+        public static void InitializeConfigurableJoint(ref Item thisItem, ref GameObject slideObject, ref GameObject slideCenterPosition, ref ConstantForce slideForce, ref ConfigurableJoint connectedJoint, ref Rigidbody slideRB, ref SphereCollider slideCapsuleStabilizer, float stabilizerRadius, float slideTravelDistance, float slideMassOffset)
+        {
+            slideRB = slideObject.GetComponent<Rigidbody>();
+            if (slideRB == null) slideRB = slideObject.AddComponent<Rigidbody>();
+            slideRB.mass = 1.0f;
+            slideRB.drag = 0.0f;
+            slideRB.angularDrag = 0.05f;
+            slideRB.useGravity = true;
+            slideRB.isKinematic = false;
+            slideRB.interpolation = RigidbodyInterpolation.None;
+            slideRB.collisionDetectionMode = CollisionDetectionMode.Discrete;
+            slideCapsuleStabilizer = slideCenterPosition.AddComponent<SphereCollider>();
+            slideCapsuleStabilizer.radius = stabilizerRadius;
+            slideCapsuleStabilizer.gameObject.layer = 21;
+            Physics.IgnoreLayerCollision(21, 12);
+            Physics.IgnoreLayerCollision(21, 15);
+            Physics.IgnoreLayerCollision(21, 22);
+            Physics.IgnoreLayerCollision(21, 23);
+            slideForce = slideObject.AddComponent<ConstantForce>();
+            connectedJoint = thisItem.gameObject.AddComponent<ConfigurableJoint>();
+            connectedJoint.connectedBody = slideRB;
+            connectedJoint.anchor = new Vector3(0, 0, -0.5f * slideTravelDistance);
+            connectedJoint.axis = Vector3.right;
+            connectedJoint.autoConfigureConnectedAnchor = false;
+            connectedJoint.connectedAnchor = Vector3.zero;//new Vector3(0.04f, -0.1f, -0.22f);
+            connectedJoint.secondaryAxis = Vector3.up;
+            connectedJoint.xMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.yMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
+            connectedJoint.angularXMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.angularYMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.angularZMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.linearLimit = new SoftJointLimit { limit = 0.5f * slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
+            connectedJoint.massScale = 1.0f;
+            connectedJoint.connectedMassScale = slideMassOffset;
+        }
 
         /// <summary>
         /// Take a given FireMode and return an increment/loop to the next enum value
@@ -195,7 +240,7 @@ namespace ModularFirearms
         /// <param name="leftHandHaptic"></param>
         /// <param name="rightHandHaptic"></param>
         /// <param name="hapticForce"></param>
-        public static void ApplyRecoil(Rigidbody itemRB, float[] recoilForces, float recoilMult = 1.0f, bool leftHandHaptic = false, bool rightHandHaptic = false, float hapticForce = 1.0f)
+        public static void ApplyRecoil(Rigidbody itemRB, float[] recoilForces, float recoilMult = 1.0f, bool leftHandHaptic = false, bool rightHandHaptic = false, float hapticForce = 1.0f, float[] recoilTorque = null)
         {
             if (rightHandHaptic) PlayerControl.handRight.HapticShort(hapticForce);
             if (leftHandHaptic) PlayerControl.handLeft.HapticShort(hapticForce);
@@ -205,6 +250,25 @@ namespace ModularFirearms
                 UnityEngine.Random.Range(recoilForces[0], recoilForces[1]) * recoilMult,
                 UnityEngine.Random.Range(recoilForces[2], recoilForces[3]) * recoilMult,
                 UnityEngine.Random.Range(recoilForces[4], recoilForces[5]) * recoilMult));
+            if (recoilTorque == null) return;
+            itemRB.AddRelativeTorque(new Vector3(
+                UnityEngine.Random.Range(recoilTorque[0], recoilTorque[1]) * recoilMult,
+                UnityEngine.Random.Range(recoilTorque[2], recoilTorque[3]) * recoilMult,
+                UnityEngine.Random.Range(recoilTorque[4], recoilTorque[5]) * recoilMult));
+        }
+
+        /// <summary>
+        /// Destroy all valid joints on a creature ragdoll
+        /// </summary>
+        /// <param name="creature"></param>
+        public static void FullSlice(Creature creature)
+        {
+            creature.ragdoll.headPart.Slice();
+            creature.ragdoll.GetPart(RagdollPart.Type.LeftArm).Slice();
+            creature.ragdoll.GetPart(RagdollPart.Type.RightArm).Slice();
+            creature.ragdoll.GetPart(RagdollPart.Type.LeftLeg).Slice();
+            creature.ragdoll.GetPart(RagdollPart.Type.RightLeg).Slice();
+            return;
         }
 
         /// <summary>
@@ -216,47 +280,33 @@ namespace ModularFirearms
         /// <param name="blastRadius"></param>
         /// <param name="liftMult"></param>
         /// <param name="forceMode"></param>
-        public static void HitscanExplosion(Vector3 origin, float force, float blastRadius, float liftMult, ForceMode forceMode = ForceMode.Impulse)
+        public static void HitscanExplosion(Vector3 origin, float force, float blastRadius, float liftMult, ForceMode forceMode = ForceMode.Impulse, bool ignorePlayer = true)
         {
-            try {
-                foreach (Item item in Item.list)
+            try
+            {
+                foreach (Item item in Item.allActive)
                 {
                     if (Math.Abs(Vector3.Distance(item.transform.position, origin)) <= blastRadius)
                     {
-                        //Debug.Log("[F-L42-HitscanExplosion] Hit Item: " + item.name);
                         item.rb.AddExplosionForce(force * item.rb.mass, origin, blastRadius, liftMult, forceMode);
                         item.rb.AddForce(Vector3.up * liftMult * item.rb.mass, forceMode);
                     }
                 }
-
-                foreach (Creature creature in Creature.list)
+                foreach (Creature creature in Creature.allActive)
                 {
-                    if (creature == Player.currentCreature) continue;
+                    if (!creature.isActiveAndEnabled || !creature.ragdoll.isActiveAndEnabled) continue;
+                    if (ignorePlayer && creature == Player.currentCreature) continue;
                     if (Math.Abs(Vector3.Distance(creature.transform.position, origin)) <= blastRadius)
                     {
-                        // Kill Creatures in Range
-                        //Debug.Log("[F-L42-HitscanExplosion] Hit Creature: " + creature.name);
-                        if (!creature.isKilled)
-                        {
-                            //Debug.Log("[F-L42-HitscanExplosion] Damaging Creature: " + creature.name);
-                            creature.Damage(new CollisionInstance(new DamageStruct(DamageType.Energy, 9999f), (MaterialData)null, (MaterialData)null));
-                        }
+                        // Dismember Creature Parts and Kill Creatures in Range
+                        if (creature.state == Creature.State.Alive) creature.TestKill();
+                        FullSlice(creature);
                         // Apply Forces to Creature Main Body
                         creature.locomotion.rb.AddExplosionForce(force * creature.locomotion.rb.mass, origin, blastRadius, liftMult, forceMode);
                         creature.locomotion.rb.AddForce(Vector3.up * liftMult * creature.locomotion.rb.mass, forceMode);
-
-                        //// Dismember Creature Parts
-                        creature.ragdoll.headPart.Slice();
-                        creature.ragdoll.GetPart(RagdollPart.Type.LeftLeg).Slice();
-                        creature.ragdoll.GetPart(RagdollPart.Type.RightLeg).Slice();
-                        creature.ragdoll.GetPart(RagdollPart.Type.RightArm).Slice();
-                        creature.ragdoll.GetPart(RagdollPart.Type.LeftArm).Slice();
-
-
                         // Apply Forces to Creature Parts
                         foreach (RagdollPart part in creature.ragdoll.parts)
                         {
-                            //Debug.Log("[F-L42-HitscanExplosion] Appyling Force to RD-part " + part.name);
                             part.rb.AddExplosionForce(force * part.rb.mass, origin, blastRadius, liftMult, forceMode);
                             part.rb.AddForce(Vector3.up * liftMult * part.rb.mass, forceMode);
                         }
@@ -264,7 +314,7 @@ namespace ModularFirearms
                 }
             }
             catch(Exception e) {
-                Debug.LogError("[F-L42-HitscanExplosion][EXCEPTION] " + e.Message + " \n " + e.StackTrace);
+                Debug.LogError("[Modular-Firearms][HitscanExplosion][EXCEPTION] " + e.Message + " \n " + e.StackTrace);
             }
         }
 
@@ -286,69 +336,29 @@ namespace ModularFirearms
             }
             catch { Debug.LogError("[FL42-FirearmFunctions][SetSwitchAnimation] Exception in setting Animator floats 'x' and 'y'"); }
         }
-
-        public static void RayCastShoot(Item sourceItem, Transform rayCastPoint, float maxDistance, float force)
+        public static bool IsAnimationPlaying(Animator animator, string animationName)
         {
-            Ray laserRay = new Ray(rayCastPoint.position, rayCastPoint.forward);
+            if ((animator == null) || String.IsNullOrEmpty(animationName)) return false;
 
-            if (Physics.Raycast(laserRay, out RaycastHit hit, maxDistance))
+            try
             {
-                Creature hitCreature = hit.collider.transform.root.GetComponent<Creature>();
-                if (hitCreature != null)
-                {
-                    Debug.Log("Hit Creature: " + hitCreature.name);
-
-                    RagdollPart hitPart = hit.transform.GetComponentInChildren<RagdollPart>();
-
-                    if (hitPart != null)
-                    {
-                        Debug.Log("Hit Part: " + hitPart.name);
-                        hitCreature.locomotion.rb.AddForce(rayCastPoint.forward * force, ForceMode.Impulse);
-                        hitPart.rb.AddForce(rayCastPoint.forward * force, ForceMode.Impulse);
-                        
-
-                        CollisionInstance thisCollision = new CollisionInstance(new DamageStruct(DamageType.Pierce, 99999f), (MaterialData) null, (MaterialData)null)
-                        {
-                            contactPoint = hit.collider.transform.position
-                        };
-
-                        EffectInstance thisEffect = new EffectInstance();
-                        EffectData hitEffect = Catalog.GetData<EffectData>("HitBladeDecalFlesh", true);
-                        thisEffect.AddEffect(hitEffect, hit.point, Quaternion.Euler(0f, 0f, 0f), hit.collider.transform, thisCollision, false);
-
-                        hitEffect = Catalog.GetData<EffectData>("HitMaterialFlesh", true); 
-                        thisEffect.AddEffect(hitEffect, hit.point, Quaternion.Euler(0f, 0f, 0f), hit.collider.transform, thisCollision, false);
-
-                        hitEffect = Catalog.GetData<EffectData>("HitProjectileOnFlesh", true); 
-                        thisEffect.AddEffect(hitEffect, hit.point, Quaternion.Euler(0f, 0f, 0f), hit.collider.transform, thisCollision, false);
-
-
-                        hitEffect = Catalog.GetData<EffectData>("DropBlood", true);
-                        thisEffect.AddEffect(hitEffect, hit.point, Quaternion.Euler(0f, 0f, 0f), hit.collider.transform, thisCollision, false);
-                        thisEffect.Play();
-
-                        hitCreature.Damage(thisCollision);
-
-                        if ((hitPart.name.Contains("Arm") || hitPart.name.Contains("Hand") || hitPart.name.Contains("Leg") || hitPart.name.Contains("Head"))) hitPart.Slice();
-
-                        hitCreature.TestKill();
-
-                    }
-                }
+                if (animator.GetCurrentAnimatorClipInfo(0)[0].clip.name.Contains(animationName)) return true;
+                else return false;
             }
-            else
+            catch (Exception e)
             {
-
+                Debug.Log("[Fisher-Firearms] Could not check animation: " + e.StackTrace);
+                return false;
             }
+
         }
 
-
-       /// <summary>
-       /// Dynamically sets Unity Collision Handling to ignore collisions between firearms and projectiles
-       /// </summary>
-       /// <param name="shooter"></param>
-       /// <param name="i"></param>
-       /// <param name="ignore"></param>
+        /// <summary>
+        /// Dynamically sets Unity Collision Handling to ignore collisions between firearms and projectiles
+        /// </summary>
+        /// <param name="shooter"></param>
+        /// <param name="i"></param>
+        /// <param name="ignore"></param>
         public static void IgnoreProjectile(Item shooter, Item i, bool ignore = true)
         {
             foreach (ColliderGroup colliderGroup in shooter.colliderGroups)
@@ -380,21 +390,23 @@ namespace ModularFirearms
         public static void ShootProjectile(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell = null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null, SetSpawningStatusDelegate SetSpawnStatus = null)
         {
             if ((spawnPoint == null) || (String.IsNullOrEmpty(projectileID))) return;
-
             var projectileData = Catalog.GetData<ItemData>(projectileID, true);
             if (projectileData == null)
             {
-                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
+                Debug.LogError("[Modular-Firearms][ERROR] No projectile named " + projectileID.ToString());
                 return;
             }
             else
             {
+                Vector3 shootLocation = new Vector3(spawnPoint.position.x, spawnPoint.position.y, spawnPoint.position.z);
+                Quaternion shooterAngles = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
+                Vector3 shootVelocity = new Vector3(shooterItem.rb.velocity.x, shooterItem.rb.velocity.y, shooterItem.rb.velocity.z);
                 SetSpawnStatus?.Invoke(true);
                 projectileData.SpawnAsync(i =>
                 {
                     try
                     {
-                        i.Throw(throwMult, Item.FlyDetection.Forced);
+                        i.Throw(1f, Item.FlyDetection.Forced);
                         shooterItem.IgnoreObjectCollision(i);
                         i.IgnoreObjectCollision(shooterItem);
                         i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
@@ -410,130 +422,32 @@ namespace ModularFirearms
                                         Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
                                     }
                                 }
-                                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
-                                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
                             }
                             catch { }
                         }
-
                         IgnoreProjectile(shooterItem, i, true);
-
-                        i.transform.position = spawnPoint.position;
-                        i.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
-                        i.rb.velocity = shooterItem.rb.velocity;
-                        i.rb.AddForce(i.rb.transform.forward * 1000.0f * forceMult);
-
                         Projectiles.BasicProjectile projectileController = i.gameObject.GetComponent<Projectiles.BasicProjectile>();
-                        if (projectileController != null) {
-                            projectileController.SetShooterItem(shooterItem);
-                            }
-
-                        //-- Optional Switches --//
-                        //i.rb.useGravity = false;
-                        //i.SetColliderAndMeshLayer(GameManager.GetLayer(LayerName.Default));
-                        //i.SetColliderLayer(GameManager.GetLayer(LayerName.None));
-                        //i.ignoredItem = shooterItem;
-                        //shooterItem.IgnoreObjectCollision(i);
-                        //Physics.IgnoreLayerCollision(GameManager.GetLayer(LayerName.None), GameManager.GetLayer(LayerName.Default));
-
-                        SetSpawnStatus?.Invoke(false);
+                        if (projectileController != null) projectileController.SetShooterItem(shooterItem);
+                        i.transform.position = shootLocation; 
+                        i.transform.rotation = shooterAngles;
+                        i.rb.velocity = shootVelocity;
+                        i.rb.AddForce(i.rb.transform.forward * 1000.0f * forceMult);
                         if (!String.IsNullOrEmpty(imbueSpell))
                         {
-                            // Set imbue charge on projectile using ItemProjectileSimple subclass
-                            //Projectiles.SimpleProjectile projectileController = i.gameObject.GetComponent<Projectiles.SimpleProjectile>();
                             if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                        }
-                        
+                        }  
+                        SetSpawnStatus?.Invoke(false);
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
+                        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING ");
                     }
                 },
-                Vector3.zero,
+                shootLocation,
                 Quaternion.Euler(Vector3.zero),
                 null,
                 false);
             }
-        }
-
-        public static void ProjectileBurst(Item shooterItem, string projectileID, Transform spawnPoint, string imbueSpell = null, float forceMult = 1.0f, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
-        {
-            var projectileData = Catalog.GetData<ItemData>(projectileID, true);
-            if ((spawnPoint == null) || (String.IsNullOrEmpty(projectileID))) return;
-            if (projectileData == null)
-            {
-                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
-                return;
-            }
-            foreach (Vector3 offsetVec in buckshotOffsetPosiitions)
-            {
-
-                projectileData.SpawnAsync(i =>
-                {
-                    try
-                    {
-                        i.transform.position = spawnPoint.position + offsetVec;
-                        i.transform.rotation = Quaternion.Euler(spawnPoint.rotation.eulerAngles);
-                        i.rb.velocity = shooterItem.rb.velocity;
-                        i.rb.AddForce(i.rb.transform.forward * 1000.0f * forceMult);
-                        shooterItem.IgnoreObjectCollision(i);
-                        i.IgnoreObjectCollision(shooterItem);
-                        i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
-
-                        if (IgnoreArg1 != null)
-                        {
-                            try
-                            {
-                                i.IgnoreColliderCollision(IgnoreArg1);
-                                foreach (ColliderGroup CG in shooterItem.colliderGroups)
-                                {
-                                    foreach (Collider C in CG.colliders)
-                                    {
-                                        Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
-                                    }
-                                }
-                                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
-                                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
-                            }
-                            catch { }
-                        }
-
-                        Projectiles.BasicProjectile projectileController = i.gameObject.GetComponent<Projectiles.BasicProjectile>();
-                        if (projectileController != null)
-                        {
-                            projectileController.SetShooterItem(shooterItem);
-                        }
-
-                        //-- Optional Switches --//
-                        //i.rb.useGravity = false;
-                        //i.Throw(throwMult, Item.FlyDetection.CheckAngle);
-                        //i.SetColliderAndMeshLayer(GameManager.GetLayer(LayerName.Default));
-                        //i.SetColliderLayer(GameManager.GetLayer(LayerName.None));
-                        //i.ignoredItem = shooterItem;
-                        //shooterItem.IgnoreObjectCollision(i);
-                        //Physics.IgnoreLayerCollision(GameManager.GetLayer(LayerName.None), GameManager.GetLayer(LayerName.Default));
-
-                        if (!String.IsNullOrEmpty(imbueSpell))
-                        {
-                            // Set imbue charge on projectile using ItemProjectileSimple subclass
-                            //Projectiles.SimpleProjectile projectileController = i.gameObject.GetComponent<Projectiles.SimpleProjectile>();
-                            if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-                        }
-
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
-                    }
-                },
-                spawnPoint.position,
-                Quaternion.Euler(spawnPoint.rotation.eulerAngles),
-                null,
-                false);
-
-            }
-
         }
 
         public static void ShotgunBlast(Item shooterItem, string projectileID, Transform spawnPoint, float distance, float force, float forceMult, string imbueSpell = null, float throwMult = 1.0f, bool pooled = false, Collider IgnoreArg1 = null)
@@ -544,7 +458,6 @@ namespace ModularFirearms
                 if (hitCreature != null)
                 {
                     if (hitCreature == Player.currentCreature) return;
-                    //Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit creature!");
                     hitCreature.locomotion.rb.AddExplosionForce(force, hit.point, 1.0f, 1.0f, ForceMode.VelocityChange);
                     //hitCreature.ragdoll.SetState(Creature.State.Destabilized);
                     foreach (RagdollPart part in hitCreature.ragdoll.parts)
@@ -557,7 +470,6 @@ namespace ModularFirearms
                 {
                     try
                     {
-                        //Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit item");
                         hit.collider.attachedRigidbody.AddExplosionForce(force, hit.point, 0.5f, 1.0f, ForceMode.VelocityChange);
                         hit.collider.attachedRigidbody.AddForce(spawnPoint.forward * force, ForceMode.Impulse);
                     }
@@ -570,7 +482,7 @@ namespace ModularFirearms
             var projectileData = Catalog.GetData<ItemData>(projectileID, true);
             if (projectileData == null)
             {
-                Debug.LogError("[Fisher-Firearms][ERROR] No projectile named " + projectileID.ToString());
+                Debug.LogError("[Modular-Firearms][ERROR] No projectile named " + projectileID.ToString());
                 return;
             }
             foreach (Vector3 offsetVec in buckshotOffsetPosiitions)
@@ -599,8 +511,6 @@ namespace ModularFirearms
                                         Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
                                     }
                                 }
-                                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
-                                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
                             }
                             catch { }
                         }
@@ -610,27 +520,15 @@ namespace ModularFirearms
                         {
                             projectileController.SetShooterItem(shooterItem);
                         }
-
-                        //-- Optional Switches --//
-                        //i.rb.useGravity = false;
-                        //i.Throw(throwMult, Item.FlyDetection.CheckAngle);
-                        //i.SetColliderAndMeshLayer(GameManager.GetLayer(LayerName.Default));
-                        //i.SetColliderLayer(GameManager.GetLayer(LayerName.None));
-                        //i.ignoredItem = shooterItem;
-                        //shooterItem.IgnoreObjectCollision(i);
-                        //Physics.IgnoreLayerCollision(GameManager.GetLayer(LayerName.None), GameManager.GetLayer(LayerName.Default));
-
                         if (!String.IsNullOrEmpty(imbueSpell))
                         {
-                            // Set imbue charge on projectile using ItemProjectileSimple subclass
-                            //Projectiles.SimpleProjectile projectileController = i.gameObject.GetComponent<Projectiles.SimpleProjectile>();
                             if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
                         }
 
                     }
                     catch (Exception ex)
                     {
-                        Debug.Log("[Fisher-Firearms] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
+                        Debug.Log("[Modular-Firearms] EXCEPTION IN SPAWNING " + ex.Message + " \n " + ex.StackTrace);
                     }
                 },
                 spawnPoint.position,
@@ -686,10 +584,10 @@ namespace ModularFirearms
         /// <param name="initial"></param>
         /// <param name="npcDistanceToFire"></param>
         /// <returns></returns>
-        public static Vector3 NpcAimingAngle(BrainHuman NPCBrain, Vector3 initial, float npcDistanceToFire = 10.0f)
+        public static Vector3 NpcAimingAngle(BrainModuleBow NPCBrain, Vector3 initial, float npcDistanceToFire = 10.0f)
         {
             if (NPCBrain == null) return initial;
-            var inaccuracyMult = 0.2f * (NPCBrain.aimSpreadCone / npcDistanceToFire);
+            var inaccuracyMult = 0.2f * (NPCBrain.aimSpreadAngle / npcDistanceToFire);
             return new Vector3(
                         initial.x + (UnityEngine.Random.Range(-inaccuracyMult, inaccuracyMult)),
                         initial.y + (UnityEngine.Random.Range(-inaccuracyMult, inaccuracyMult)),
@@ -803,49 +701,36 @@ namespace ModularFirearms
             yield return null;
         }
 
-
         public static void DamageCreatureCustom(Creature triggerCreature, float damageApplied, Vector3 hitPoint)
         {
             try
             {
                 if (triggerCreature.currentHealth > 0)
                 {
-                    //Debug.Log("[F-L42-RayCast] Damaging enemy: " + triggerCreature.name);
-                    //Debug.Log("[F-L42-RayCast] Setting MaterialData... ");
                     MaterialData sourceMaterial = Catalog.GetData<MaterialData>("Metal", true); 
                     MaterialData targetMaterial = Catalog.GetData<MaterialData>("Flesh", true);
-
                     DamageStruct damageStruct = new DamageStruct(DamageType.Pierce, damageApplied);
-
-                    //Debug.Log("[F-L42-RayCast] Defining CollisionStruct... ");
                     CollisionInstance collisionStruct = new CollisionInstance(damageStruct, (MaterialData)sourceMaterial, (MaterialData)targetMaterial)
                     {
                         contactPoint = hitPoint
                     };
-                    //Debug.Log("[F-L42-RayCast] Applying Damage to creature... ");
                     triggerCreature.Damage(collisionStruct);
-                    //Debug.Log("[F-L42-RayCastFire] Damage Applied: " + damageApplied);
-
-                    //Debug.Log("[F-L42-RayCast] SpawnEffect... ");
                     if (collisionStruct.SpawnEffect(sourceMaterial, targetMaterial, false, out EffectInstance effectInstance))
                     {
                         effectInstance.Play();
                     }
-                    //Debug.Log("[F-L42-RayCastFire] Damage Applied: " + damageApplied);
-
                 }
             }
             catch
             {
-                //Debug.Log("[F-L42-RayCast][ERROR] Unable to damage enemy!");
+                Debug.Log("[F-L42-RayCast][ERROR] Unable to damage enemy!");
             }
         }
 
         public static void DumpRigidbodyToLog(Rigidbody rb)
         {
-            Debug.LogWarning("[Fisher-Firearms][RB-DUMP] " + rb.name + ": " + rb.ToString());
-            Debug.LogWarning("[Fisher-Firearms][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
+            Debug.LogWarning("[Modular-Firearms][RB-DUMP] " + rb.name + ": " + rb.ToString());
+            Debug.LogWarning("[Modular-Firearms][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
         }
-
     }
 }

@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using ThunderRoad;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace ModularFirearms.Items
 {
@@ -43,24 +41,19 @@ namespace ModularFirearms.Items
                 waitingForSpawn = true;
                 spawnedItemData.SpawnAsync(thisSpawnedItem =>
                 {
-                    //Debug.Log("[Fisher-HoldingBags] Time: " + Time.time + " Spawning weapon: " + thisSpawnedItem.name);
+
                     try
                     {
                         if (holder.HasSlotFree())
                         {
                             holder.Snap(thisSpawnedItem);
-                            //Debug.Log("[Fisher-HoldingBags] Time: " + Time.time + " Snapped weapon: " + thisSpawnedItem.name);
-                            //waitingForSpawn = false;
-                        }
-                        else
-                        {
-                            //Debug.Log("[Fisher-HoldingBags] EXCEPTION Time: " + Time.time + " NO FREE SLOT FOR: " + thisSpawnedItem.name);
+                            thisSpawnedItem.SetMeshLayer(GameManager.GetLayer(LayerName.FPVHide));
+
                         }
                         waitingForSpawn = false;
                     }
-                    catch (Exception e) { Debug.Log("[Fisher-Firearms] EXCEPTION IN SNAPPING: " + e.ToString()); }
+                    catch (Exception e) { Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SNAPPING: " + e.ToString()); }
                 });
-                //Debug.Log("[Fisher-HoldingBags] Time: " + Time.time + " Activating SpawnAndSnap: " + spawnedItemID);
                 return;
             }
         }
@@ -77,7 +70,6 @@ namespace ModularFirearms.Items
             }
             else
             {
-                // Debug.Log("[Fisher-HoldingBags] Time: " + Time.time + " Activating OnWeaponItemRemoved: " + interactiveObject.data.id);
                 SpawnAndSnap(module.magazineID, holder);
                 usesRemaining -= 1;
                 return;

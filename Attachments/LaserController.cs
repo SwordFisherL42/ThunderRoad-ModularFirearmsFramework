@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using ThunderRoad;
 
@@ -21,9 +17,6 @@ namespace ModularFirearms.Attachments
         private float maxLaserDistance;
 
         private Handle attachmentHandle;
-
-        private Weapons.BaseFirearmGenerator parentFirearm;
-        private Shared.FirearmModule parentModule;
 
         /// General Mechanics ///
         public float lastSpellMenuPress;
@@ -56,12 +49,21 @@ namespace ModularFirearms.Attachments
 
                 laserIgnore = ~laserIgnore;
                 maxLaserDistance = module.maxLaserDistance;
-                laserEnd.localPosition = new Vector3(laserEnd.localPosition.x, laserEnd.localPosition.y, laserEnd.localPosition.z);
+                laserEnd.localPosition = new Vector3(laserEnd.localPosition.x, laserEnd.localPosition.y, laserEnd.localPosition.z);  
             }
 
             if (!String.IsNullOrEmpty(module.laserActivationSoundRef)) activationSound = item.GetCustomReference(module.laserActivationSoundRef).GetComponent<AudioSource>();
             if (!String.IsNullOrEmpty(module.laserHandleRef)) attachmentHandle = item.GetCustomReference(module.laserHandleRef).GetComponent<Handle>();
 
+
+        }
+
+        protected void Start()
+        {
+            if (!module.laserStartActivated && attachedLaser != null)
+            {
+                attachedLaser.enabled = false;
+            }
         }
 
         protected void StartLongPress()

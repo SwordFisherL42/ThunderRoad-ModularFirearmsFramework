@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using ThunderRoad;
-using static ModularFirearms.FirearmFunctions;
+using static ModularFirearms.FrameworkCore;
 
 namespace ModularFirearms.Items
 {
@@ -19,6 +19,7 @@ namespace ModularFirearms.Items
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.AmmoModule>();
+            DisableCulling(item);
             thisAmmoType = module.GetSelectedType();
             capacity = module.ammoCapacity;
             if (module.handleRef != null) ammoHandle = item.GetCustomReference(module.handleRef).GetComponent<Handle>();
