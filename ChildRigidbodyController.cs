@@ -62,7 +62,6 @@ namespace ModularFirearms
 
         public void SetupSlide()
         {
-            //Debug.Log("[ModularFirearmsFramework] Setting Up CRC...");
             originalAnchor = new Vector3(0, 0, -0.5f * parentModule.slideTravelDistance);
             lockedBackAnchor = new Vector3(0, 0, lockedBackAnchorOffset);
             lockedNeutralAnchor = new Vector3(0, 0, lockedAnchorOffset);
@@ -70,12 +69,11 @@ namespace ModularFirearms
             connectedJoint.anchor = currentAnchor;
             ChamberRoundVisible(false);
             LockSlide();
-            //Debug.Log("[ModularFirearmsFramework] CRC Setup Complete !!!");
         }
 
-        // State Functions //
+            // State Functions //
 
-        public void SetLockedState(bool forward = true)
+            public void SetLockedState(bool forward = true)
         {
             SetRelativeSlideForce(new Vector3(0, 0, 0));
             connectedJoint.zMotion = ConfigurableJointMotion.Locked;
@@ -215,8 +213,6 @@ namespace ModularFirearms
             return;
         }
 
-
-
         // Debugging Functions ...
         // Set defaults when Unity engine resets our values aribtrarily..
         public void FixCustomComponents()
@@ -269,6 +265,5 @@ namespace ModularFirearms
             GameObject.Destroy(connectedJoint);
             thisSlideObject.transform.parent = null;
         }
-
     }
 }

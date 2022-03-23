@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThunderRoad;
-using UnityEngine;
-using static ModularFirearms.FrameworkCore;
+﻿using UnityEngine;
 
 namespace ModularFirearms.Legacy
 {

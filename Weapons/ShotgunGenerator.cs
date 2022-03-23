@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using ThunderRoad;
 using static ModularFirearms.FrameworkCore;
@@ -41,7 +39,7 @@ namespace ModularFirearms.Weapons
         protected ParticleSystem muzzleSmoke;
         protected AudioSource fireSound;
         protected AudioSource emptySound;
-        protected AudioSource reloadSound;
+        //protected AudioSource reloadSound;
         protected AudioSource pullbackSound;
         protected AudioSource rackforwardSound;
         private AudioSource shellInsertSound;
@@ -62,7 +60,7 @@ namespace ModularFirearms.Weapons
         private bool playSoundOnNext = false;
         /// FireMode Selection and Ammo Tracking //
         private int currentReceiverAmmo;
-        private bool currentSlideState = false;
+        //private bool currentSlideState = false;
 
         private float num1;
         private float num2;
@@ -151,7 +149,6 @@ namespace ModularFirearms.Weapons
             else slideController.SetupSlide();
 
             shellReceiver.data.disableTouch = true;
-            //Debug.Log("[ModularFirearmsFramework] Setting the Slide Interactable to Limited...");
             //LimitSlideInteraction(currentSlideState);
 
             return;
@@ -164,8 +161,6 @@ namespace ModularFirearms.Weapons
             {
                 // NOTE: RB Needs to be assigned at Runtime (doesn't work when added to prefab in Editor)
                 slideRB = slideObject.AddComponent<Rigidbody>();
-                //Debug.LogWarning("[ModularFirearmsFramework][Config-Joint-Init] CREATED Rigidbody ON SlideObject...");
-
             }
 
             slideRB.mass = 1.0f;
@@ -184,12 +179,9 @@ namespace ModularFirearms.Weapons
             Physics.IgnoreLayerCollision(21, 15);
             Physics.IgnoreLayerCollision(21, 22);
             Physics.IgnoreLayerCollision(21, 23);
-            //Debug.Log("[ModularFirearmsFramework][Config-Joint-Init] Created Stabilizing Collider on Slide Object");
 
             slideForce = slideObject.AddComponent<ConstantForce>();
-            //Debug.Log("[ModularFirearmsFramework][Config-Joint-Init] Created ConstantForce on Slide Object");
 
-            //Debug.Log("[ModularFirearmsFramework][Config-Joint-Init] Creating Config Joint and Setting Joint Values...");
             connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
             connectedJoint.connectedBody = slideRB;
             connectedJoint.anchor = new Vector3(0, 0, -0.5f * module.slideTravelDistance);
@@ -206,7 +198,6 @@ namespace ModularFirearms.Weapons
             connectedJoint.linearLimit = new SoftJointLimit { limit = 0.5f * module.slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
             connectedJoint.massScale = 1.0f;
             connectedJoint.connectedMassScale = module.slideMassOffset;
-            //Debug.Log("[ModularFirearmsFramework][Config-Joint-Init] Created Configurable Joint !");
             //DumpRigidbodyToLog(slideRB);
         }
 
@@ -248,7 +239,6 @@ namespace ModularFirearms.Weapons
                 if (attachedLight != null) {
                     attachedLight.enabled = !attachedLight.enabled;
                     if (emptySound != null) emptySound.Play();
-                    //Debug.Log("[ModularFirearms] Toggled Light!");
                 }
             }
 
@@ -272,7 +262,6 @@ namespace ModularFirearms.Weapons
                 if (action == Interactable.Action.Ungrab)
                 {
                     if (holdingSlideTrigger) { holdingSlideTrigger = false; slideController.UnlockSlide(); }
-                    // Debug.Log("[ModularFirearmsFramework] Slide Ungrabbed!");
                     if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = false;
                     if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = false;
                     slideController.SetHeld(false);
@@ -280,7 +269,6 @@ namespace ModularFirearms.Weapons
                 }
                 if (action == Interactable.Action.Grab)
                 {
-                    //Debug.Log("[ModularFirearmsFramework] Slide Grabbed!");
                     if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = true;
                     if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = true;
                     slideController.SetHeld(true);
@@ -333,10 +321,8 @@ namespace ModularFirearms.Weapons
 
         public void OnAnyHandleGrabbed(Handle handle, RagdollHand interactor)
         {
-            //Debug.Log("[ModularFirearmsFramework] Grab: " + handle.name);
             if (handle.Equals(gunGrip))
             {
-                //Debug.Log("[ModularFirearmsFramework] GunGrip Grabbed!");
                 if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = true;
                 if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = true;
                 if ((gunGripHeldRight || gunGripHeldLeft) && (slideController != null))
@@ -350,7 +336,6 @@ namespace ModularFirearms.Weapons
             }
             if (handle.name.Equals(slideHandle.name))
             {
-                //Debug.Log("[ModularFirearmsFramework] Slide Grabbed!");
                 if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = true;
                 if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = true;
                 slideController.SetHeld(true);
@@ -360,34 +345,25 @@ namespace ModularFirearms.Weapons
 
         public void OnAnyHandleUngrabbed(Handle handle, RagdollHand interactor, bool throwing)
         {
-            //Debug.Log("[ModularFirearmsFramework] Ungrab: " + handle.name);
             if (handle.Equals(gunGrip))
             {
-                //Debug.Log("[ModularFirearmsFramework] Releasing main handle...");
-                // Debug.Log("[ModularFirearmsFramework] GunGrip Ungrabbed!");
                 if (interactor.playerHand == Player.local.handRight) gunGripHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) gunGripHeldLeft = false;
 
                 if ((!gunGripHeldRight && !gunGripHeldLeft) && (slideController != null))
                 {
-                    //Debug.Log("[ModularFirearmsFramework] Locking Slide....");
                     slideHandle.data.positionDamperMultiplier = 1.0f;
                     slideHandle.data.positionSpringMultiplier = 1.0f;
                     slideHandle.data.rotationDamperMultiplier = 1.0f;
                     slideHandle.data.rotationSpringMultiplier = 1.0f;
                     slideController.LockSlide();
-                    //Debug.Log("[ModularFirearmsFramework] Slide LOCKED !");
                 }
             }
             if (handle.name.Equals(slideHandle.name))
             {
-                //Debug.Log("[ModularFirearmsFramework] Releasing SLIDE handle...");
-                // Debug.Log("[ModularFirearmsFramework] Slide Ungrabbed!");
                 if (interactor.playerHand == Player.local.handRight) slideGripHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = false;
-                //Debug.Log("[ModularFirearmsFramework] Unholding child Slide....");
                 slideController.SetHeld(false);
-                // DumpRigidbodyToLog(slideController.rb);
             }
         }
 
@@ -408,7 +384,6 @@ namespace ModularFirearms.Weapons
                         //if (currentReceiverAmmo >= module.maxReceiverAmmo) { shellReceiver.data.locked = true; }
                     }
                 }
-
             }
 
             catch (Exception e)
@@ -448,9 +423,7 @@ namespace ModularFirearms.Weapons
         {
             PreFireEffects();
             //FirearmFunctions.ShotgunBlast(item, module.projectileID, rayCastPoint, module.blastRange, module.blastForce, module.bulletForce, FirearmFunctions.GetItemSpellChargeID(item), module.throwMult, false, slideCapsuleStabilizer);
-
             //FirearmFunctions.ProjectileBurst(item, module.projectileID, muzzlePoint,  FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer);
-
             ItemData spawnedItemData = Catalog.GetData<ItemData>(module.projectileID, true);
             String imbueSpell = GetItemSpellChargeID(item);
 
@@ -581,17 +554,13 @@ namespace ModularFirearms.Weapons
 
         protected void LateUpdate()
         {
-
-            //Debug.Log("[Fisher-Slide] LateUpdate slideObject position values: " + slideObject.transform.localPosition.ToString());
             if ((slideObject.transform.localPosition.z <= PULL_THRESHOLD) && !isPulledBack)
             {
                 if (slideController != null)
                 {
                     if (slideController.IsHeld())
                     {
-                        //Debug.Log("[ModularFirearmsFramework] Entered PulledBack position");
-                        currentSlideState = false;
-                        //Debug.Log("[Fisher-Slide] PULL_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
+                        //currentSlideState = false;
                         if (pullbackSound != null) pullbackSound.Play();
                         isPulledBack = true;
                         isRacked = false;
@@ -603,7 +572,6 @@ namespace ModularFirearms.Weapons
                         //{
                         //    shellReceiver.data.locked = false;
                         //}
-
                         if (roundChambered)
                         {
                             if (roundSpent) { FrameworkCore.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce, 1.0f, false, slideCapsuleStabilizer); }
@@ -622,14 +590,11 @@ namespace ModularFirearms.Weapons
             }
             if ((slideObject.transform.localPosition.z > (PULL_THRESHOLD - RACK_THRESHOLD)) && isPulledBack)
             {
-                //Debug.Log("[ModularFirearmsFramework] Showing Ammo...");
                 if (CountAmmoFromReceiver() > 0) { slideController.ChamberRoundVisible(true); }
             }
             if ((slideObject.transform.localPosition.z >= RACK_THRESHOLD) && !isRacked)
             {
-                //Debug.Log("[ModularFirearmsFramework] Entered Rack position");
-                currentSlideState = true;
-                //Debug.Log("[Fisher-Slide] RACK_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
+                //currentSlideState = true;
                 isRacked = true;
                 isPulledBack = false;
                 shellReceiver.data.disableTouch = true;
@@ -660,8 +625,6 @@ namespace ModularFirearms.Weapons
                 {
                     slideController.UnlockSlide();
                     slideController.initialCheck = true;
-                    // Debug.Log("[ModularFirearmsFramework] Initial Check unlocks slide.");
-                    //Debug.Log("[Fisher-Slide] inital slideObject position values: " + slideObject.transform.localPosition.ToString());
                 }
             }
             catch { Debug.Log("[ModularFirearmsFramework] Slide EXCEPTION"); }

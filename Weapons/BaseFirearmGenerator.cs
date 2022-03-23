@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ThunderRoad;
-
 using static ModularFirearms.FrameworkCore;
-
 
 namespace ModularFirearms.Weapons
 {
@@ -85,21 +83,237 @@ namespace ModularFirearms.Weapons
         private int soundCounter;
         private int maxSoundCounter;
 
-        public bool ProjectileIsSpawning()
-        {
-            return projectileIsSpawning;
-        }
+        public bool ProjectileIsSpawning() { return projectileIsSpawning; }
 
-        public void SetProjectileSpawningState(bool newState)
-        {
-            projectileIsSpawning = newState;
-        }
+        public void SetProjectileSpawningState(bool newState) { projectileIsSpawning = newState;}
+
+        public void SetFiringFlag(bool status) { isFiring = status; }
+
+        public bool TriggerIsPressed() { return triggerPressed; }
+
+        public void SetAmmoCounter(int value) { ammoCount = value; }
+
+        public int GetAmmoCounter() { return ammoCount; }
+
+        public void SetNextFireMode(FireMode NewFireMode) { fireModeSelection = NewFireMode; }
 
         public FireMode GetCurrentFireMode() { return fireModeSelection; }
 
-        public void SetNextFireMode(FireMode NewFireMode)
+        public void IncSoundCounter()
         {
-            fireModeSelection = NewFireMode;
+            soundCounter++;
+            if (soundCounter > maxSoundCounter) soundCounter = 1;
+        }
+
+        public bool ConsumeOneFromMagazine()
+        {
+            if (insertedMagazine != null)
+            {
+                if (insertedMagazine.GetAmmoCount() > 0)
+                {
+                    insertedMagazine.ConsumeOne();
+                    return true;
+                }
+                else return false;
+            }
+            else return false;
+        }
+
+        public int CountAmmoFromMagazine()
+        {
+            if (insertedMagazine != null)
+            {
+                return insertedMagazine.GetAmmoCount();
+            }
+            else return 0;
+        }
+
+        public void UpdateAmmoCounter()
+        {
+            if (!roundChambered) { SetAmmoCounter(CountAmmoFromMagazine()); }
+            else { SetAmmoCounter(CountAmmoFromMagazine() + 1); }
+        }
+
+        protected void StartLongPress()
+        {
+            checkForLongPress = true;
+            lastSpellMenuPress = Time.time;
+        }
+
+        public void CancelLongPress()
+        {
+            checkForLongPress = false;
+        }
+
+        public void MagazineRelease()
+        {
+            try
+            {
+                if (magazineHolder.items.Count > 0)
+                {
+                    magazineHolder.UnSnap(magazineHolder.items[0]);
+                }
+            }
+            catch { }
+        }
+
+        public void ForceDrop()
+        {
+            try { slideHandle.Release(); }
+            catch { }
+            if (slideController != null) slideController.LockSlide();
+        }
+
+        public void PlayFireSound()
+        {
+            if (soundCounter == 0) { return; }
+            else if (soundCounter == 1) { fireSound1.Play(); }
+            else if (soundCounter == 2) { fireSound2.Play(); }
+            else if (soundCounter == 3) { fireSound3.Play(); }
+            IncSoundCounter();
+        }
+
+        public void PreFireEffects()
+        {
+            FrameworkCore.Animate(animations, module.fireAnimationRef);
+            if (muzzleFlash != null) muzzleFlash.Play();
+            PlayFireSound();
+            if (muzzleSmoke != null) muzzleSmoke.Play();
+        }
+
+        protected bool TrackedFire()
+        {
+            if (slideController != null)
+            {
+                if (slideController.IsLocked()) return false;
+            }
+            if (!roundChambered) return false;
+            // Round cycle sequence
+            roundChambered = false;
+            slideController.ChamberRoundVisible(roundChambered);
+            Fire();
+            if (ConsumeOneFromMagazine())
+            {
+                roundChambered = true;
+                slideController.ChamberRoundVisible(roundChambered);
+                slideController.BlowBack();
+            }
+            else
+            {
+                isRacked = false;
+                isPulledBack = true;
+                chamberRoundOnNext = true;
+                // playSoundOnNext = true;
+                slideController.LastShot();
+            }
+            UpdateAmmoCounter();
+            return true;
+        }
+
+        private void InitializeConfigurableJoint(float stabilizerRadius)
+        {
+            slideRB = slideObject.GetComponent<Rigidbody>();
+            if (slideRB == null) slideRB = slideObject.AddComponent<Rigidbody>();
+            slideRB.mass = 1.0f;
+            slideRB.drag = 0.0f;
+            slideRB.angularDrag = 0.05f;
+            slideRB.useGravity = true;
+            slideRB.isKinematic = false;
+            slideRB.interpolation = RigidbodyInterpolation.None;
+            slideRB.collisionDetectionMode = CollisionDetectionMode.Discrete;
+            // Stabilizing Collider on Slide Object
+            slideCapsuleStabilizer = slideCenterPosition.AddComponent<SphereCollider>();
+            slideCapsuleStabilizer.radius = stabilizerRadius;
+            slideCapsuleStabilizer.gameObject.layer = 21;
+            Physics.IgnoreLayerCollision(21, 12);
+            Physics.IgnoreLayerCollision(21, 15);
+            Physics.IgnoreLayerCollision(21, 22);
+            Physics.IgnoreLayerCollision(21, 23);
+            // Creating Config Joint and Setting Joint Values
+            slideForce = slideObject.AddComponent<ConstantForce>();
+            connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
+            connectedJoint.connectedBody = slideRB;
+            connectedJoint.anchor = new Vector3(0, 0, -0.5f * module.slideTravelDistance);
+            connectedJoint.axis = Vector3.right;
+            connectedJoint.autoConfigureConnectedAnchor = false;
+            connectedJoint.connectedAnchor = Vector3.zero; // new Vector3(0.04f, -0.1f, -0.22f);
+            connectedJoint.secondaryAxis = Vector3.up;
+            connectedJoint.xMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.yMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
+            connectedJoint.angularXMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.angularYMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.angularZMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.linearLimit = new SoftJointLimit { limit = 0.5f * module.slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
+            connectedJoint.massScale = 1.0f;
+            connectedJoint.connectedMassScale = module.slideMassOffset;
+        }
+
+        public bool SlideToggleLock()
+        {
+            if ((insertedMagazine != null) && (insertedMagazine.GetAmmoCount() <= 0)) return false;
+
+            if (slideController != null)
+            {
+                // If the slide is locked back and there is a loaded magazine inserted, load the next round
+                if (slideController.IsLocked())
+                {
+                    if (ConsumeOneFromMagazine())
+                    {
+                        roundChambered = true;
+                    }
+                    chamberRoundOnNext = false;
+                    playSoundOnNext = false;
+                    isRacked = true;
+                    isPulledBack = false;
+                    slideController.ForwardState();
+                    if (rackforwardSound != null) rackforwardSound.Play();
+                    UpdateAmmoCounter();
+                    return true;
+                }
+                // If the slide is held back by the player and not yet locked, lock it
+                else if (slideController.IsHeld() && isPulledBack)
+                {
+                    slideController.LockedBackState();
+                    if (emptySound != null) emptySound.Play();
+
+                    return true;
+                }
+                else return false;
+            }
+            else return false;
+        }
+
+        private void Fire(bool firedByNPC = false, bool playEffects = true)
+        {
+            if (playEffects) PreFireEffects();
+            if (firedByNPC) return;
+            ShootProjectile(
+                item,
+                module.projectileID,
+                muzzlePoint,
+                GetItemSpellChargeID(item),
+                module.bulletForce,
+                module.throwMult,
+                false,
+                slideCapsuleStabilizer,
+                SetProjectileSpawningState
+                );
+            ApplyRecoil(item.rb, module.recoilForces, module.throwMult, mainHandleHeldLeft, mainHandleHeldRight, module.hapticForce, module.recoilTorques);
+            if (shellParticle != null)
+            {
+                GameObject newShell = GameObject.Instantiate(shellParticle.gameObject, null);
+                newShell.transform.position = shellParticle.transform.position;
+                newShell.transform.rotation = shellParticle.transform.rotation;
+                newShell.transform.parent = null;
+                ParticleSystem newShellParticle = newShell.GetComponent<ParticleSystem>();
+                if (newShellParticle != null)
+                {
+                    var main = newShellParticle.main;
+                    main.stopAction = ParticleSystemStopAction.Destroy;
+                    newShellParticle.Play();
+                }
+            }
         }
 
         void Awake()
@@ -109,7 +323,7 @@ namespace ModularFirearms.Weapons
 
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.FirearmModule>();
-
+            DisableCulling(item);
             /// Set all Object References ///
             if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.GetCustomReference(module.rayCastPointRef);
             if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
@@ -192,7 +406,6 @@ namespace ModularFirearms.Weapons
                     {
                         magazineHolder.Snap(i);
                         magazineHolder.data.disableTouch = !module.allowGrabMagazineFromGun;
-                        //Debug.Log($"[Fisher-ModularFirearms] Magazine disableTouch {magazineHolder.data.disableTouch}");
                     }
                     catch
                     {
@@ -205,17 +418,6 @@ namespace ModularFirearms.Weapons
                 false);
             }
 
-        }
-
-        protected void StartLongPress()
-        {
-            checkForLongPress = true;
-            lastSpellMenuPress = Time.time;
-        }
-
-        public void CancelLongPress()
-        {
-            checkForLongPress = false;
         }
 
         protected void LateUpdate()
@@ -231,7 +433,6 @@ namespace ModularFirearms.Weapons
                         if (module.longPressToEject) MagazineRelease();
                         CancelLongPress();
                     }
-
                 }
                 else
                 {
@@ -253,8 +454,7 @@ namespace ModularFirearms.Weapons
                 {
                     if (slideController.IsHeld())
                     {
-                        //Debug.Log("[Fisher-ModularFirearms] Entered PulledBack position");
-                        //Debug.Log("[Fisher-Slide] PULL_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
+                        // Entered PulledBack position
                         if (pullbackSound != null) pullbackSound.Play();
                         isPulledBack = true;
                         isRacked = false;
@@ -277,13 +477,12 @@ namespace ModularFirearms.Weapons
             }
             if ((slideObject.transform.localPosition.z > (PULL_THRESHOLD - RACK_THRESHOLD)) && isPulledBack)
             {
-                //Debug.Log("[Fisher-ModularFirearms] Showing Ammo...");
+                // Show chamber ammo
                 if (CountAmmoFromMagazine() > 0) { slideController.ChamberRoundVisible(true); }
             }
             if ((slideObject.transform.localPosition.z >= RACK_THRESHOLD) && !isRacked)
             {
-                //Debug.Log("[Fisher-ModularFirearms] Entered Rack position");
-                //Debug.Log("[Fisher-Slide] RACK_THRESHOLD slideObject position values: " + slideObject.transform.localPosition.ToString());
+                // Entered Rack position"
                 isRacked = true;
                 isPulledBack = false;
 
@@ -294,7 +493,6 @@ namespace ModularFirearms.Weapons
                         slideController.ChamberRoundVisible(true);
                         chamberRoundOnNext = false;
                         roundChambered = true;
-
                     }
                 }
                 if (playSoundOnNext)
@@ -306,7 +504,7 @@ namespace ModularFirearms.Weapons
             }
 
             if (slideController != null) slideController.FixCustomComponents();
-            else return; //TODO: Remove this return, so we initialize even if we don't fix custom components
+            else return; // TODO: Remove this return, so we initialize even if we don't fix custom components
             if (slideController.initialCheck) return;
             try
             {
@@ -314,8 +512,6 @@ namespace ModularFirearms.Weapons
                 {
                     slideController.UnlockSlide();
                     slideController.initialCheck = true;
-                    //Debug.Log("[Fisher-ModularFirearms] Initial Check unlocks slide.");
-                    //Debug.Log("[Fisher-Slide] inital slideObject position values: " + slideObject.transform.localPosition.ToString());
                 }
             }
             catch { Debug.Log("[Fisher-ModularFirearms] Slide EXCEPTION"); }
@@ -370,7 +566,6 @@ namespace ModularFirearms.Weapons
                 {
                     if (interactor.playerHand == Player.local.handRight) slideHandleHeldRight = true;
                     if (interactor.playerHand == Player.local.handLeft) slideHandleHeldLeft = true;
-                    //    Debug.Log("[Fisher-ModularFirearms] Slide Ungrabbed!");
                     if (slideController != null) slideController.SetHeld(true);
                     slideController.ForwardState();
                 }
@@ -396,7 +591,6 @@ namespace ModularFirearms.Weapons
 
                 if (handle.Equals(slideHandle))
                 {
-                    //    Debug.Log("[Fisher-ModularFirearms] Slide Ungrabbed!");
                     if (slideController != null) slideController.SetHeld(false);
                 }
 
@@ -431,14 +625,14 @@ namespace ModularFirearms.Weapons
                     }
                     if (!keepMagazine)
                     {
-                        Debug.Log("[Fisher-ModularFirearms] " + item.name + " REJECTED MAGAZINE " + insertedMagID.ToString() + ". Allowed Magazines are:  "+ string.Join(",", validMagazineIDs.ToArray()));
+                        Debug.LogWarning("[Fisher-ModularFirearms] " + item.name + " REJECTED MAGAZINE " + insertedMagID.ToString() + ". Allowed Magazines are:  "+ string.Join(",", validMagazineIDs.ToArray()));
                         // Reject the Magazine with incorrect ID
                         MagazineRelease();
                     }
                 }
                 else
                 {
-                    Debug.Log("[Fisher-ModularFirearms] Rejected MAGAZINE Due to NULL InteractiveMagazine Object");
+                    Debug.LogWarning("[Fisher-ModularFirearms] Rejected MAGAZINE Due to NULL InteractiveMagazine Object");
                     // Reject the non-Magazine object
                     magazineHolder.UnSnap(interactiveObject);
                     insertedMagazine = null;
@@ -475,21 +669,18 @@ namespace ModularFirearms.Weapons
         {
             if (handle.Equals(mainHandle))
             {
-                //     Debug.Log("[Fisher-ModularFirearms] Main Handle Grabbed!");
+                // Handle Grabbed
                 if (interactor.playerHand == Player.local.handRight) mainHandleHeldRight = true;
                 if (interactor.playerHand == Player.local.handLeft) mainHandleHeldLeft = true;
-                //if ((gunGripHeldRight || gunGripHeldLeft) && (slideController != null)) { slideController.UnlockSlide(); slideController.ForwardState(); }
                 if ((mainHandleHeldRight || mainHandleHeldLeft) && (slideController != null)) slideController.UnlockSlide();
             }
-
             if (handle.Equals(slideHandle))
             {
+                // Slide Grabbed
                 if (interactor.playerHand == Player.local.handRight) slideHandleHeldRight = true;
                 if (interactor.playerHand == Player.local.handLeft) slideHandleHeldLeft = true;
-                //    Debug.Log("[Fisher-ModularFirearms] Slide Grabbed!");
                 slideController.SetHeld(true);
                 slideController.ForwardState();
-                //DumpRigidbodyToLog(slideController.rb);
             }
 
 
@@ -499,7 +690,7 @@ namespace ModularFirearms.Weapons
         {
             if (handle.Equals(mainHandle))
             {
-                //    Debug.Log("[Fisher-ModularFirearms] Main Handle Ungrabbed!");
+                // Handle Ungrabbed
                 if (interactor.playerHand == Player.local.handRight) mainHandleHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) mainHandleHeldLeft = false;
                 if (!mainHandleHeldRight && !mainHandleHeldLeft)
@@ -511,310 +702,11 @@ namespace ModularFirearms.Weapons
             }
             if (handle.Equals(slideHandle))
             {
+                // Slide Ungrabbed
                 if (interactor.playerHand == Player.local.handRight) slideHandleHeldRight = false;
                 if (interactor.playerHand == Player.local.handLeft) slideHandleHeldLeft = false;
-                //    Debug.Log("[Fisher-ModularFirearms] Slide Ungrabbed!");
                 slideController.SetHeld(false);
-                //DumpRigidbodyToLog(slideController.rb);
             }
-        }
-
-        public void MagazineRelease()
-        {
-            //  Debug.Log("[Fisher-ModularFirearms] Releasing Magazine!");
-            try
-            {
-                if (magazineHolder.items.Count > 0)
-                {
-                    magazineHolder.UnSnap(magazineHolder.items[0]);
-                }
-
-            }
-            catch { }
-        }
-
-        public bool ConsumeOneFromMagazine()
-        {
-            if (insertedMagazine != null)
-            {
-                if (insertedMagazine.GetAmmoCount() > 0)
-                {
-                    insertedMagazine.ConsumeOne();
-                    return true;
-                }
-                else return false;
-            }
-            else return false;
-        }
-
-        public int CountAmmoFromMagazine()
-        {
-            if (insertedMagazine != null)
-            {
-                return insertedMagazine.GetAmmoCount();
-            }
-            else return 0;
-        }
-
-        public void UpdateAmmoCounter()
-        {
-            if (!roundChambered) { SetAmmoCounter(CountAmmoFromMagazine()); }
-            else { SetAmmoCounter(CountAmmoFromMagazine() + 1); }
-        }
-
-        public void SetAmmoCounter(int value) { ammoCount = value; }
-
-        public int GetAmmoCounter() { return ammoCount; }
-
-        private void InitializeConfigurableJoint(float stabilizerRadius)
-        {
-            slideRB = slideObject.GetComponent<Rigidbody>();
-            if (slideRB == null)
-            {
-                // TODO: Figure out why adding RB from code doesnt work
-                slideRB = slideObject.AddComponent<Rigidbody>();
-                //  Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] CREATED Rigidbody ON SlideObject...");
-
-            }
-            //else { Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] ACCESSED Rigidbody on Slide Object..."); }
-
-            slideRB.mass = 1.0f;
-            slideRB.drag = 0.0f;
-            slideRB.angularDrag = 0.05f;
-            slideRB.useGravity = true;
-            slideRB.isKinematic = false;
-            slideRB.interpolation = RigidbodyInterpolation.None;
-            slideRB.collisionDetectionMode = CollisionDetectionMode.Discrete;
-
-            slideCapsuleStabilizer = slideCenterPosition.AddComponent<SphereCollider>();
-            slideCapsuleStabilizer.radius = stabilizerRadius;
-            slideCapsuleStabilizer.gameObject.layer = 21;
-            Physics.IgnoreLayerCollision(21, 12);
-            Physics.IgnoreLayerCollision(21, 15);
-            Physics.IgnoreLayerCollision(21, 22);
-            Physics.IgnoreLayerCollision(21, 23);
-            //  Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] Created Stabilizing Collider on Slide Object");
-
-            slideForce = slideObject.AddComponent<ConstantForce>();
-            //  Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] Created ConstantForce on Slide Object");
-
-            //  Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] Creating Config Joint and Setting Joint Values...");
-            connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
-            connectedJoint.connectedBody = slideRB;
-            connectedJoint.anchor = new Vector3(0, 0, -0.5f * module.slideTravelDistance);
-            connectedJoint.axis = Vector3.right;
-            connectedJoint.autoConfigureConnectedAnchor = false;
-            connectedJoint.connectedAnchor = Vector3.zero;//new Vector3(0.04f, -0.1f, -0.22f);
-            connectedJoint.secondaryAxis = Vector3.up;
-            connectedJoint.xMotion = ConfigurableJointMotion.Locked;
-            connectedJoint.yMotion = ConfigurableJointMotion.Locked;
-            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
-            connectedJoint.angularXMotion = ConfigurableJointMotion.Locked;
-            connectedJoint.angularYMotion = ConfigurableJointMotion.Locked;
-            connectedJoint.angularZMotion = ConfigurableJointMotion.Locked;
-            connectedJoint.linearLimit = new SoftJointLimit { limit = 0.5f * module.slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
-            connectedJoint.massScale = 1.0f;
-            connectedJoint.connectedMassScale = module.slideMassOffset;
-            // Debug.Log("[Fisher-ModularFirearms][Config-Joint-Init] Created Configurable Joint !");
-            //DumpRigidbodyToLog(slideRB);
-        }
-
-        public void ForceDrop()
-        {
-            try { slideHandle.Release(); }
-            catch { }
-            if (slideController != null) slideController.LockSlide();
-        }
-
-        public void SetFiringFlag(bool status)
-        {
-            isFiring = status;
-        }
-
-        public bool TriggerIsPressed() { return triggerPressed; }
-
-        public bool SlideToggleLock()
-        {
-            if ((insertedMagazine != null) && (insertedMagazine.GetAmmoCount() <= 0)) return false;
-
-            if (slideController != null)
-            {
-                // If the slide is locked back and there is a loaded magazine inserted, load the next round
-                if (slideController.IsLocked())
-                {
-                    if (ConsumeOneFromMagazine())
-                    {
-                        roundChambered = true;
-                    }
-                    chamberRoundOnNext = false;
-                    playSoundOnNext = false;
-                    isRacked = true;
-                    isPulledBack = false;
-                    slideController.ForwardState();
-                    if (rackforwardSound != null) rackforwardSound.Play();
-                    UpdateAmmoCounter();
-                    return true;
-                }
-                // If the slide is held back by the player and not yet locked, lock it
-                else if (slideController.IsHeld() && isPulledBack)
-                {
-                    slideController.LockedBackState();
-                    if (emptySound != null) emptySound.Play();
-
-                    return true;
-                }
-                else return false;
-            }
-            else return false;
-        }
-
-        public void PlayFireSound()
-        {
-            if (soundCounter == 0) { return; }
-            else if (soundCounter == 1) { fireSound1.Play(); }
-            else if (soundCounter == 2) { fireSound2.Play(); }
-            else if (soundCounter == 3) { fireSound3.Play(); }
-            IncSoundCounter();
-        }
-
-        public void IncSoundCounter()
-        {
-            soundCounter++;
-            if (soundCounter > maxSoundCounter) soundCounter = 1;
-        }
-
-        public void PreFireEffects()
-        {
-            FrameworkCore.Animate(animations, module.fireAnimationRef);
-            if (muzzleFlash != null) muzzleFlash.Play();
-            PlayFireSound();
-            if (muzzleSmoke != null) muzzleSmoke.Play();
-        }
-
-        private void Fire(bool firedByNPC = false, bool playEffects = true)
-        {
-            if (playEffects) PreFireEffects();
-            if (firedByNPC) return;
-
-            //ShootProjectile(item, module.projectileID, muzzlePoint, GetItemSpellChargeID(item), module.bulletForce, module.throwMult);
-
-            //Vector3 shootLocation = new Vector3(muzzlePoint.position.x, muzzlePoint.position.y, muzzlePoint.position.z);
-            //Quaternion shooterAngles = Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
-            //Vector3 shootVelocity = new Vector3(item.rb.velocity.x, item.rb.velocity.y, item.rb.velocity.z);
-            ShootProjectile(
-                item,
-                module.projectileID,
-                muzzlePoint,
-                GetItemSpellChargeID(item),
-                module.bulletForce,
-                module.throwMult,
-                false,
-                slideCapsuleStabilizer,
-                SetProjectileSpawningState
-                );
-            ApplyRecoil(item.rb, module.recoilForces, module.throwMult, mainHandleHeldLeft, mainHandleHeldRight, module.hapticForce, module.recoilTorques);
-
-            //ItemData spawnedItemData = Catalog.GetData<ItemData>(module.projectileID, true);
-            //string imbueSpell = GetItemSpellChargeID(item);
-            //if (spawnedItemData == null) return;
-            //SetProjectileSpawningState(true);
-            //spawnedItemData.SpawnAsync(i =>
-            //{
-            //    // Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Spawning projectile: " + i.name);
-            //    try
-            //    {
-            //        i.Throw(1f, Item.FlyDetection.Forced);
-            //        item.IgnoreObjectCollision(i);
-            //        i.IgnoreObjectCollision(item);
-            //        i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
-
-            //        if (slideCapsuleStabilizer != null)
-            //        {
-            //            try
-            //            {
-            //                i.IgnoreColliderCollision(slideCapsuleStabilizer);
-            //                foreach (ColliderGroup CG in this.item.colliderGroups)
-            //                {
-            //                    foreach (Collider C in CG.colliders)
-            //                    {
-            //                        Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
-            //                    }
-            //                }
-            //                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
-            //                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
-            //            }
-            //            catch { }
-            //        }
-
-            //        IgnoreProjectile(this.item, i, true);
-
-            //        Projectiles.BasicProjectile projectileController = i.gameObject.GetComponent<Projectiles.BasicProjectile>();
-            //        if (projectileController != null) projectileController.SetShooterItem(this.item);
-
-            //        i.transform.position = shootLocation; //muzzlePoint.position;
-            //        i.transform.rotation = shooterAngles; //Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
-            //        i.rb.velocity = shootVelocity; //item.rb.velocity;
-            //        i.rb.AddForce(i.rb.transform.forward * 1000.0f * module.bulletForce);
-
-            //        if (!String.IsNullOrEmpty(imbueSpell))
-            //        {
-            //            //  Set imbue charge on projectile using ItemProjectileSimple subclass
-            //            if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
-            //        }
-            //        ApplyRecoil(item.rb, module.recoilForces, module.throwMult, mainHandleHeldLeft, mainHandleHeldRight, module.hapticForce, module.recoilTorques);
-            //        SetProjectileSpawningState(false);
-            //    }
-            //    catch
-            //    {
-            //        Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SPAWNING ");
-            //    }
-            //},
-            //shootLocation,
-            //Quaternion.Euler(Vector3.zero),
-            //null,
-            //false);
-
-            if (shellParticle != null) {
-                GameObject newShell = GameObject.Instantiate(shellParticle.gameObject, null);
-                newShell.transform.position = shellParticle.transform.position;
-                newShell.transform.rotation = shellParticle.transform.rotation;
-                newShell.transform.parent = null;
-                ParticleSystem newShellParticle = newShell.GetComponent<ParticleSystem>();
-                if (newShellParticle != null) {
-                    var main = newShellParticle.main;
-                    main.stopAction = ParticleSystemStopAction.Destroy;
-                    newShellParticle.Play();
-                }
-            }
-        }
-
-        protected bool TrackedFire()
-        {
-            if (slideController != null)
-            {
-                if (slideController.IsLocked()) return false;
-            }
-            if (!roundChambered) return false;
-            // Round cycle sequence
-            roundChambered = false;
-            slideController.ChamberRoundVisible(roundChambered);
-            Fire();
-            if (ConsumeOneFromMagazine())
-            {
-                roundChambered = true;
-                slideController.ChamberRoundVisible(roundChambered);
-                slideController.BlowBack();
-            }
-            else
-            {
-                isRacked = false;
-                isPulledBack = true;
-                chamberRoundOnNext = true;
-                // playSoundOnNext = true;
-                slideController.LastShot();
-            }
-            UpdateAmmoCounter();
-            return true;
         }
 
     }

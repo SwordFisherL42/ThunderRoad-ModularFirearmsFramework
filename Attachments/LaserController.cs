@@ -18,9 +18,6 @@ namespace ModularFirearms.Attachments
 
         private Handle attachmentHandle;
 
-        private Weapons.BaseFirearmGenerator parentFirearm;
-        private Shared.FirearmModule parentModule;
-
         /// General Mechanics ///
         public float lastSpellMenuPress;
         public bool isLongPress = false;

@@ -44,7 +44,6 @@ namespace ModularFirearms.Attachments
                 {
                     if (pivotTransform != null)
                     {
-                        //Debug.Log("[ModularFirearms] Setting Swtich Position selectionIndex: " + selectionIndex);
                         pivotTransform.position = switchPositions[selectionIndex].position;
                         pivotTransform.rotation = Quaternion.Euler(switchPositions[selectionIndex].rotation.eulerAngles);
                     }
@@ -69,32 +68,27 @@ namespace ModularFirearms.Attachments
             item.OnHeldActionEvent += this.OnHeldAction;
             switchPositions = new List<Transform>();
             switchModes = new List<FireMode>();
-            //Debug.Log("Got Items refs");
             // Get reference to attached weapon (current firemode selection)
             parentFirearm = this.GetComponent<Weapons.BaseFirearmGenerator>();
 
             if (!String.IsNullOrEmpty(module.attachmentHandleRef)) attachmentHandle = item.GetCustomReference(module.attachmentHandleRef).GetComponent<Handle>();
 
             if (!String.IsNullOrEmpty(module.activationSoundRef)) activationSound = item.GetCustomReference(module.activationSoundRef).GetComponent<AudioSource>();
-            //Debug.Log("Got Modules refs");
             // Gameobject that which will move to match the reference positions
             if (!String.IsNullOrEmpty(module.swtichRef)) pivotTransform = item.GetCustomReference(module.swtichRef);
 
             // Swtich Positions are passed as custom references. pivotTransform is then matched to these transforms
             foreach (string switchPositionRef in module.switchPositionRefs)
             {
-                //Debug.Log("Getting ref for  " + switchPositionRef + " " + switchPositions.Count);
                 Transform switchPosition = item.GetCustomReference(switchPositionRef);
                 switchPositions.Add(switchPosition);
             }
-            //Debug.Log("Got switchPositions refs: " + switchPositions.Count + " " + switchPositions.ToString());
             // allowed fire modes are matched to swtich positions based on list index
             foreach (string allowedFireMode in module.allowedFireModes)
             {
                 FrameworkCore.FireMode switchMode = (FrameworkCore.FireMode)Enum.Parse(typeof(FrameworkCore.FireMode), allowedFireMode);
                 switchModes.Add(switchMode);
             }
-            //Debug.Log("Got switchModes refs");
             // If we are using a moving swtich, check that our lists have mappable indicies
             if (pivotTransform != null)
             { 
@@ -103,8 +97,6 @@ namespace ModularFirearms.Attachments
                     Debug.LogWarning("WARNING, FireModeSwtich switchPositions and switchModes have different lengths!!!");
                 }
             }
-            //Debug.Log("done");
-
         }
 
         void Start() { }
@@ -164,6 +156,5 @@ namespace ModularFirearms.Attachments
                 }
             }
         }
-
     }
 }

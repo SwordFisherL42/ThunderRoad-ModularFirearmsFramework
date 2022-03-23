@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using ThunderRoad;
-using System;
+using static ModularFirearms.FrameworkCore;
 
 namespace ModularFirearms.Items
 {
@@ -18,10 +19,9 @@ namespace ModularFirearms.Items
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.AmmoModule>();
-
+            DisableCulling(item);
             holder = item.GetComponentInChildren<Holder>();
             holder.Snapped += new Holder.HolderDelegate(this.OnAmmoItemInserted);
-
             magazineHandle = item.GetCustomReference(module.handleRef).GetComponent<Handle>();
             bulletMesh = item.GetCustomReference(module.bulletMeshRef).gameObject;
             RefillAll();
@@ -61,32 +61,24 @@ namespace ModularFirearms.Items
             return;
         }
 
-        public void Insert()
-        {
-            insertedIntoObject = true;
-            //magazineHandle.data.disableTouch = true;
-        }
+        public void Insert() { insertedIntoObject = true; }
 
         public void Remove() { insertedIntoObject = false; }
-        //private void OnCollisionStay(Collision hit) { Debug.Log(gameObject.name + " is hitting " + hit.gameObject.name); }
-        //public void Eject(ColliderGroup[] ignoredColliders = null)
+
+        public void SetBulletVisibility(bool visible = true) { bulletMesh.SetActive(visible); }
+
+        public int GetAmmoCount() { return ammoCount; }
+
+        public string GetMagazineID() { return item.data.id; }
+
+        public bool IsInserted() { return insertedIntoObject; }
+        
         public void Eject(Item shooterItem = null)
         {
             insertedIntoObject = false;
-            //if (ignoredColliders != null)
-            //{
-            //    foreach (ColliderGroup CG in ignoredColliders)
-            //    {
-            //        foreach(Collider C in CG.colliders)
-            //        {
-            //            Physics.IgnoreCollision(item.colliderGroups[0].colliders[0], C, true);
-            //        }
-            //    }
-            //}
             if (shooterItem != null) { item.IgnoreObjectCollision(shooterItem); }
             item.IgnoreRagdollCollision(Player.local.creature.ragdoll);
             item.rb.AddRelativeForce(new Vector3(module.ejectionForceVector[0], module.ejectionForceVector[1], module.ejectionForceVector[2]), ForceMode.Impulse);
-            //magazineHandle.data.disableTouch = false;
         }
 
         public void ConsumeOne()
@@ -123,24 +115,5 @@ namespace ModularFirearms.Items
             return;
         }
 
-        public void SetBulletVisibility(bool visible = true)
-        {
-            bulletMesh.SetActive(visible);
-        }
-
-        public int GetAmmoCount()
-        {
-            return ammoCount;
-        }
-
-        public string GetMagazineID()
-        {
-            return item.data.id;
-        }
-
-        public bool IsInserted()
-        {
-            return insertedIntoObject;
-        }
     }
 }

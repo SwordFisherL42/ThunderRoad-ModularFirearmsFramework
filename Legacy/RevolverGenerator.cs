@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using ThunderRoad;
-using System.Collections;
-using System.Linq;
-
+﻿
 // Modular revolver base class, handling all extended interactions with other classes.
 
 /* Description: Modular revolver base class, handling all extended interactions with other classes.

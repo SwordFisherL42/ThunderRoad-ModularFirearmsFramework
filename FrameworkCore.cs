@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace ModularFirearms
 {
@@ -66,7 +67,8 @@ namespace ModularFirearms
             HighYield = 6,
             Energy = 7,
             TestWeapon = 8,
-            SemiAutoLegacy = 9
+            SemiAutoLegacy = 9,
+            SimpleFirearm = 10
         }
 
         public enum AmmoType
@@ -140,11 +142,54 @@ namespace ModularFirearms
         /// A static array useful for accessing FireMode enums by index
         /// </summary>
         public static Array fireModeEnums = Enum.GetValues(typeof(FireMode));
-
         /// <summary>
         /// A static array useful for accessing ForceMode enums by index
         /// </summary>
         public static Array forceModeEnums = Enum.GetValues(typeof(ForceMode));
+
+        public static void DisableCulling(Item item, bool cullingEnabled = false)
+        {
+            FieldInfo f = item.GetType().GetField("cullingDetectionEnabled", BindingFlags.Instance | BindingFlags.NonPublic);
+            // (bool)f.GetValue(item) // Gets the field value
+            f.SetValue(item, cullingEnabled); // Sets the field value
+        }
+
+        public static void InitializeConfigurableJoint(ref Item thisItem, ref GameObject slideObject, ref GameObject slideCenterPosition, ref ConstantForce slideForce, ref ConfigurableJoint connectedJoint, ref Rigidbody slideRB, ref SphereCollider slideCapsuleStabilizer, float stabilizerRadius, float slideTravelDistance, float slideMassOffset)
+        {
+            slideRB = slideObject.GetComponent<Rigidbody>();
+            if (slideRB == null) slideRB = slideObject.AddComponent<Rigidbody>();
+            slideRB.mass = 1.0f;
+            slideRB.drag = 0.0f;
+            slideRB.angularDrag = 0.05f;
+            slideRB.useGravity = true;
+            slideRB.isKinematic = false;
+            slideRB.interpolation = RigidbodyInterpolation.None;
+            slideRB.collisionDetectionMode = CollisionDetectionMode.Discrete;
+            slideCapsuleStabilizer = slideCenterPosition.AddComponent<SphereCollider>();
+            slideCapsuleStabilizer.radius = stabilizerRadius;
+            slideCapsuleStabilizer.gameObject.layer = 21;
+            Physics.IgnoreLayerCollision(21, 12);
+            Physics.IgnoreLayerCollision(21, 15);
+            Physics.IgnoreLayerCollision(21, 22);
+            Physics.IgnoreLayerCollision(21, 23);
+            slideForce = slideObject.AddComponent<ConstantForce>();
+            connectedJoint = thisItem.gameObject.AddComponent<ConfigurableJoint>();
+            connectedJoint.connectedBody = slideRB;
+            connectedJoint.anchor = new Vector3(0, 0, -0.5f * slideTravelDistance);
+            connectedJoint.axis = Vector3.right;
+            connectedJoint.autoConfigureConnectedAnchor = false;
+            connectedJoint.connectedAnchor = Vector3.zero;//new Vector3(0.04f, -0.1f, -0.22f);
+            connectedJoint.secondaryAxis = Vector3.up;
+            connectedJoint.xMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.yMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.zMotion = ConfigurableJointMotion.Limited;
+            connectedJoint.angularXMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.angularYMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.angularZMotion = ConfigurableJointMotion.Locked;
+            connectedJoint.linearLimit = new SoftJointLimit { limit = 0.5f * slideTravelDistance, bounciness = 0.0f, contactDistance = 0.0f };
+            connectedJoint.massScale = 1.0f;
+            connectedJoint.connectedMassScale = slideMassOffset;
+        }
 
         /// <summary>
         /// Take a given FireMode and return an increment/loop to the next enum value
@@ -291,69 +336,29 @@ namespace ModularFirearms
             }
             catch { Debug.LogError("[FL42-FirearmFunctions][SetSwitchAnimation] Exception in setting Animator floats 'x' and 'y'"); }
         }
+        public static bool IsAnimationPlaying(Animator animator, string animationName)
+        {
+            if ((animator == null) || String.IsNullOrEmpty(animationName)) return false;
 
-        //public static void RayCastShoot(Item sourceItem, Transform rayCastPoint, float maxDistance, float force)
-        //{
-        //    Ray laserRay = new Ray(rayCastPoint.position, rayCastPoint.forward);
+            try
+            {
+                if (animator.GetCurrentAnimatorClipInfo(0)[0].clip.name.Contains(animationName)) return true;
+                else return false;
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Fisher-Firearms] Could not check animation: " + e.StackTrace);
+                return false;
+            }
 
-        //    if (Physics.Raycast(laserRay, out RaycastHit hit, maxDistance))
-        //    {
-        //        Creature hitCreature = hit.collider.transform.root.GetComponent<Creature>();
-        //        if (hitCreature != null)
-        //        {
-        //            Debug.Log("Hit Creature: " + hitCreature.name);
+        }
 
-        //            RagdollPart hitPart = hit.transform.GetComponentInChildren<RagdollPart>();
-
-        //            if (hitPart != null)
-        //            {
-        //                Debug.Log("Hit Part: " + hitPart.name);
-        //                hitCreature.locomotion.rb.AddForce(rayCastPoint.forward * force, ForceMode.Impulse);
-        //                hitPart.rb.AddForce(rayCastPoint.forward * force, ForceMode.Impulse);
-                        
-
-        //                CollisionInstance thisCollision = new CollisionInstance(new DamageStruct(DamageType.Pierce, 99999f), (MaterialData) null, (MaterialData)null)
-        //                {
-        //                    contactPoint = hit.collider.transform.position
-        //                };
-
-        //                EffectInstance thisEffect = new EffectInstance();
-        //                EffectData hitEffect = Catalog.GetData<EffectData>("HitBladeDecalFlesh", true);
-        //                thisEffect.AddEffect(hitEffect, hit.point, Quaternion.Euler(0f, 0f, 0f), hit.collider.transform, thisCollision, false);
-
-        //                hitEffect = Catalog.GetData<EffectData>("HitMaterialFlesh", true); 
-        //                thisEffect.AddEffect(hitEffect, hit.point, Quaternion.Euler(0f, 0f, 0f), hit.collider.transform, thisCollision, false);
-
-        //                hitEffect = Catalog.GetData<EffectData>("HitProjectileOnFlesh", true); 
-        //                thisEffect.AddEffect(hitEffect, hit.point, Quaternion.Euler(0f, 0f, 0f), hit.collider.transform, thisCollision, false);
-
-
-        //                hitEffect = Catalog.GetData<EffectData>("DropBlood", true);
-        //                thisEffect.AddEffect(hitEffect, hit.point, Quaternion.Euler(0f, 0f, 0f), hit.collider.transform, thisCollision, false);
-        //                thisEffect.Play();
-
-        //                hitCreature.Damage(thisCollision);
-
-        //                if ((hitPart.name.Contains("Arm") || hitPart.name.Contains("Hand") || hitPart.name.Contains("Leg") || hitPart.name.Contains("Head"))) hitPart.Slice();
-
-        //                hitCreature.TestKill();
-
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-
-        //    }
-        //}
-
-
-       /// <summary>
-       /// Dynamically sets Unity Collision Handling to ignore collisions between firearms and projectiles
-       /// </summary>
-       /// <param name="shooter"></param>
-       /// <param name="i"></param>
-       /// <param name="ignore"></param>
+        /// <summary>
+        /// Dynamically sets Unity Collision Handling to ignore collisions between firearms and projectiles
+        /// </summary>
+        /// <param name="shooter"></param>
+        /// <param name="i"></param>
+        /// <param name="ignore"></param>
         public static void IgnoreProjectile(Item shooter, Item i, bool ignore = true)
         {
             foreach (ColliderGroup colliderGroup in shooter.colliderGroups)
@@ -453,7 +458,6 @@ namespace ModularFirearms
                 if (hitCreature != null)
                 {
                     if (hitCreature == Player.currentCreature) return;
-                    //Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit creature!");
                     hitCreature.locomotion.rb.AddExplosionForce(force, hit.point, 1.0f, 1.0f, ForceMode.VelocityChange);
                     //hitCreature.ragdoll.SetState(Creature.State.Destabilized);
                     foreach (RagdollPart part in hitCreature.ragdoll.parts)
@@ -466,7 +470,6 @@ namespace ModularFirearms
                 {
                     try
                     {
-                        //Debug.Log("[FL42 - FirearmFunctions][hitCreature] Hit item");
                         hit.collider.attachedRigidbody.AddExplosionForce(force, hit.point, 0.5f, 1.0f, ForceMode.VelocityChange);
                         hit.collider.attachedRigidbody.AddForce(spawnPoint.forward * force, ForceMode.Impulse);
                     }
@@ -508,8 +511,6 @@ namespace ModularFirearms
                                         Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
                                     }
                                 }
-                                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
-                                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
                             }
                             catch { }
                         }
@@ -519,20 +520,8 @@ namespace ModularFirearms
                         {
                             projectileController.SetShooterItem(shooterItem);
                         }
-
-                        //-- Optional Switches --//
-                        //i.rb.useGravity = false;
-                        //i.Throw(throwMult, Item.FlyDetection.CheckAngle);
-                        //i.SetColliderAndMeshLayer(GameManager.GetLayer(LayerName.Default));
-                        //i.SetColliderLayer(GameManager.GetLayer(LayerName.None));
-                        //i.ignoredItem = shooterItem;
-                        //shooterItem.IgnoreObjectCollision(i);
-                        //Physics.IgnoreLayerCollision(GameManager.GetLayer(LayerName.None), GameManager.GetLayer(LayerName.Default));
-
                         if (!String.IsNullOrEmpty(imbueSpell))
                         {
-                            // Set imbue charge on projectile using ItemProjectileSimple subclass
-                            //Projectiles.SimpleProjectile projectileController = i.gameObject.GetComponent<Projectiles.SimpleProjectile>();
                             if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
                         }
 
@@ -718,34 +707,23 @@ namespace ModularFirearms
             {
                 if (triggerCreature.currentHealth > 0)
                 {
-                    //Debug.Log("[F-L42-RayCast] Damaging enemy: " + triggerCreature.name);
-                    //Debug.Log("[F-L42-RayCast] Setting MaterialData... ");
                     MaterialData sourceMaterial = Catalog.GetData<MaterialData>("Metal", true); 
                     MaterialData targetMaterial = Catalog.GetData<MaterialData>("Flesh", true);
-
                     DamageStruct damageStruct = new DamageStruct(DamageType.Pierce, damageApplied);
-
-                    //Debug.Log("[F-L42-RayCast] Defining CollisionStruct... ");
                     CollisionInstance collisionStruct = new CollisionInstance(damageStruct, (MaterialData)sourceMaterial, (MaterialData)targetMaterial)
                     {
                         contactPoint = hitPoint
                     };
-                    //Debug.Log("[F-L42-RayCast] Applying Damage to creature... ");
                     triggerCreature.Damage(collisionStruct);
-                    //Debug.Log("[F-L42-RayCastFire] Damage Applied: " + damageApplied);
-
-                    //Debug.Log("[F-L42-RayCast] SpawnEffect... ");
                     if (collisionStruct.SpawnEffect(sourceMaterial, targetMaterial, false, out EffectInstance effectInstance))
                     {
                         effectInstance.Play();
                     }
-                    //Debug.Log("[F-L42-RayCastFire] Damage Applied: " + damageApplied);
-
                 }
             }
             catch
             {
-                //Debug.Log("[F-L42-RayCast][ERROR] Unable to damage enemy!");
+                Debug.Log("[F-L42-RayCast][ERROR] Unable to damage enemy!");
             }
         }
 
@@ -754,6 +732,5 @@ namespace ModularFirearms
             Debug.LogWarning("[Modular-Firearms][RB-DUMP] " + rb.name + ": " + rb.ToString());
             Debug.LogWarning("[Modular-Firearms][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
         }
-
     }
 }

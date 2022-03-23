@@ -41,24 +41,19 @@ namespace ModularFirearms.Items
                 waitingForSpawn = true;
                 spawnedItemData.SpawnAsync(thisSpawnedItem =>
                 {
-                    //Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Spawning weapon: " + thisSpawnedItem.name);
+
                     try
                     {
                         if (holder.HasSlotFree())
                         {
                             holder.Snap(thisSpawnedItem);
                             thisSpawnedItem.SetMeshLayer(GameManager.GetLayer(LayerName.FPVHide));
-                            //Debug.Log("[ModularFirearmsFramework] Time: " + Time.time + " Snapped weapon: " + thisSpawnedItem.name);
-                        }
-                        else
-                        {
-                            //Debug.Log("[ModularFirearmsFramework] EXCEPTION Time: " + Time.time + " NO FREE SLOT FOR: " + thisSpawnedItem.name);
+
                         }
                         waitingForSpawn = false;
                     }
                     catch (Exception e) { Debug.Log("[ModularFirearmsFramework] EXCEPTION IN SNAPPING: " + e.ToString()); }
                 });
-                //Debug.Log("[Fisher-HoldingBags] Time: " + Time.time + " Activating SpawnAndSnap: " + spawnedItemID);
                 return;
             }
         }
@@ -75,7 +70,6 @@ namespace ModularFirearms.Items
             }
             else
             {
-                // Debug.Log("[Fisher-HoldingBags] Time: " + Time.time + " Activating OnWeaponItemRemoved: " + interactiveObject.data.id);
                 SpawnAndSnap(module.magazineID, holder);
                 usesRemaining -= 1;
                 return;
