@@ -10,17 +10,14 @@ namespace ModularFirearms.Attachments
     {
         protected Item item;
         protected Shared.AttachmentModule module;
-
         /// Parent Class Controller ///
         private Weapons.BaseFirearmGenerator parentFirearm;
-
         /// Module Based References ///
         private Handle attachmentHandle;
         private AudioSource activationSound;
         private Transform pivotTransform;
         private List<Transform> switchPositions;
         private List<FireMode> switchModes;
-
         /// General Mechanics ///
         public float lastSpellMenuPress;
         public bool isLongPress = false;
@@ -36,9 +33,7 @@ namespace ModularFirearms.Attachments
                 selectionIndex++;
                 if ((selectionIndex == -1) ||(selectionIndex >= switchModes.Count)) selectionIndex = 0;
                 parentFirearm.SetNextFireMode(switchModes[selectionIndex]);
-
                 if (activationSound != null) activationSound.Play();
-                
                 //Finally, if we have a "physical switch", set that GameObject position
                 try
                 {
@@ -52,15 +47,12 @@ namespace ModularFirearms.Attachments
                 {
                     Debug.LogError(String.Format("[ModularFirearms][Exception] NextFireMode(): {0} \n {1}", e.Message, e.StackTrace));
                 }
-
             }
             else
             {
                 Debug.LogError("[ModularFirearms][ERROR] NextFireMode(): no parent firearm was found");
             }
-
         }
-
         void Awake()
         {
             item = this.GetComponent<Item>();
@@ -70,13 +62,10 @@ namespace ModularFirearms.Attachments
             switchModes = new List<FireMode>();
             // Get reference to attached weapon (current firemode selection)
             parentFirearm = this.GetComponent<Weapons.BaseFirearmGenerator>();
-
             if (!String.IsNullOrEmpty(module.attachmentHandleRef)) attachmentHandle = item.GetCustomReference(module.attachmentHandleRef).GetComponent<Handle>();
-
             if (!String.IsNullOrEmpty(module.activationSoundRef)) activationSound = item.GetCustomReference(module.activationSoundRef).GetComponent<AudioSource>();
             // Gameobject that which will move to match the reference positions
             if (!String.IsNullOrEmpty(module.swtichRef)) pivotTransform = item.GetCustomReference(module.swtichRef);
-
             // Swtich Positions are passed as custom references. pivotTransform is then matched to these transforms
             foreach (string switchPositionRef in module.switchPositionRefs)
             {
@@ -98,20 +87,15 @@ namespace ModularFirearms.Attachments
                 }
             }
         }
-
-        void Start() { }
-
         protected void StartLongPress()
         {
             checkForLongPress = true;
             lastSpellMenuPress = Time.time;
         }
-
         public void CancelLongPress()
         {
             checkForLongPress = false;
         }
-
         public void LateUpdate()
         {
             if (checkForLongPress)
@@ -125,7 +109,6 @@ namespace ModularFirearms.Attachments
                         if (module.longPressToActivate) NextFireMode();
                         CancelLongPress();
                     }
-
                 }
                 else
                 {
@@ -135,9 +118,7 @@ namespace ModularFirearms.Attachments
                     if (!module.longPressToActivate) NextFireMode();
                 }
             }
-
         }
-
         public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
             if (handle.Equals(attachmentHandle))
@@ -147,13 +128,8 @@ namespace ModularFirearms.Attachments
                 {
                     spellMenuPressed = true;
                     StartLongPress();
-
                 }
-
-                if (action == Interactable.Action.AlternateUseStop)
-                {
-                    spellMenuPressed = false;
-                }
+                else if (action == Interactable.Action.AlternateUseStop) spellMenuPressed = false;
             }
         }
     }

@@ -15,7 +15,6 @@ namespace ModularFirearms.Attachments
         private Handle attachmentHandle;
         //private MeshRenderer ignoredMesh;
         private int lightCullingMask;
-
         /// General Mechanics ///
         public float lastSpellMenuPress;
         public bool isLongPress = false;
@@ -38,17 +37,12 @@ namespace ModularFirearms.Attachments
             }
             if (!String.IsNullOrEmpty(module.flashlightActivationSoundRef)) activationSound = item.GetCustomReference(module.flashlightActivationSoundRef).GetComponent<AudioSource>();
             if (module.flashlightHandleRef != null) attachmentHandle = item.GetCustomReference(module.flashlightHandleRef).GetComponent<Handle>();
-            //if (module.ignoredMeshRef != null) ignoredMesh = item.GetCustomReference(module.attachmentRef).GetComponent<MeshRenderer>();
             lightCullingMask = 1 << 20;
             lightCullingMask = ~lightCullingMask;
         }
 
         protected void Start()
         {
-            //if (ignoredMesh != null)
-            //{
-            //    ignoredMesh.gameObject.layer = 20; //Set to layer "None"
-            //}
             if (attachedLight != null)
             {
                 attachedLight.cullingMask = lightCullingMask;
@@ -110,8 +104,6 @@ namespace ModularFirearms.Attachments
                 }
             }
         }
-
-
         private void ToggleLight()
         {
             if (activationSound != null) activationSound.Play();
@@ -126,6 +118,5 @@ namespace ModularFirearms.Attachments
                 }
             }
         }
-
     }
 }

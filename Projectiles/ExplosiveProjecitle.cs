@@ -46,7 +46,6 @@ namespace ModularFirearms.Projectiles
                 explosiveSound.transform.parent = null;
                 explosiveSound.Play();
             }
-
             if (meshObject != null) meshObject.SetActive(false);
             if (explosiveEffect != null)
             {
@@ -54,13 +53,14 @@ namespace ModularFirearms.Projectiles
                 HitscanExplosion(explosiveEffect.transform.position, module.explosiveForce, module.blastRadius, module.liftMult, (ForceMode)Enum.Parse(typeof(ForceMode), module.forceMode));
                 explosiveEffect.Play();
             }
-            
         }
 
         private void OnCollisionEnter(Collision hit)
         {
             if (!item.rb.useGravity) { item.rb.useGravity = true; isFlying = false; }
-            //Debug.Log("[ModularFirearmsFramework] COLLISON WITH " + hit.transform.name);
+            #if DEBUG
+            Debug.Log("[ModularFirearmsFramework] COLLISON WITH " + hit.transform.name);
+            #endif
             Explode();
             item.Despawn();
         }

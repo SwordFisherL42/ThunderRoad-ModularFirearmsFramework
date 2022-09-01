@@ -47,6 +47,9 @@
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -98,16 +101,12 @@
     <Compile Include="Items\InteractiveAmmo.cs" />
     <Compile Include="Shared\ProjectileModule.cs" />
     <Compile Include="FrameworkCore.cs" />
-    <Compile Include="Legacy\AutomagGenerator.cs" />
     <Compile Include="Weapons\BaseFirearmGenerator.cs" />
     <Compile Include="Weapons\GrenadeGenerator.cs" />
-    <Compile Include="Legacy\SemiAutoFirearmGenerator.cs" />
     <Compile Include="Legacy\RevolverGenerator.cs" />
-    <Compile Include="Legacy\ItemModuleFirearmRevolver.cs" />
     <Compile Include="Legacy\ItemModuleFirearmSimple.cs" />
     <Compile Include="Attachments\SecondaryFire.cs" />
     <Compile Include="Projectiles\ExplosiveProjecitle.cs" />
-    <Compile Include="Projectiles\ForcedProjectile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Weapons\ShotgunGenerator.cs" />
     <Compile Include="TextureProcessor.cs" />

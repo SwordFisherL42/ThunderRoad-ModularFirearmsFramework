@@ -8,14 +8,12 @@ namespace ModularFirearms.Attachments
     {
         protected Item item;
         protected Shared.AttachmentModule module;
-
         /// Ammo Display Controller ///
         private TextureProcessor ammoCounter;
         private MeshRenderer ammoCounterMesh;
         private Texture2D digitsGridTexture;
         private int lastAmmoCount = 0;
         private int newAmmoCount = 0;
-
         /// Parent Class Controller ///
         private Weapons.BaseFirearmGenerator parentFirearm;
 
@@ -23,27 +21,18 @@ namespace ModularFirearms.Attachments
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.AttachmentModule>();
-            
-            //item.OnHeldActionEvent += this.OnHeldAction;
-
             parentFirearm = this.GetComponent<Weapons.BaseFirearmGenerator>();
-
             if (!String.IsNullOrEmpty(module.ammoCounterRef))
             {
                 ammoCounterMesh = item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>();
                 digitsGridTexture = (Texture2D)item.GetCustomReference(module.ammoCounterRef).GetComponent<MeshRenderer>().material.mainTexture;
             }
-
-            //if (digitsGridTexture == null) Debug.LogError("[Fisher-ModularFirearms] COULD NOT GET GRID TEXTURE");
-            //if (ammoCounterMesh == null) Debug.LogError("[Fisher-ModularFirearms] COULD NOT GET MESH RENDERER");
-
             if ((digitsGridTexture != null) && (ammoCounterMesh != null))
             {
                 ammoCounter = new TextureProcessor();
                 ammoCounter.SetGridTexture(digitsGridTexture);
                 ammoCounter.SetTargetRenderer(ammoCounterMesh);
             }
-
             if (ammoCounter != null) ammoCounter.DisplayUpdate(newAmmoCount);
         }
 
@@ -56,16 +45,5 @@ namespace ModularFirearms.Attachments
                 lastAmmoCount = newAmmoCount;
             }
         }
-
-        //protected void Start()
-        //{
-
-        //}
-
-
-        //public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
-        //{
-
-        //}
     }
 }

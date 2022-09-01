@@ -54,6 +54,5 @@ namespace ModularFirearms.Attachments
             ShootProjectile(item, module.projectileID, muzzlePoint, null, module.forceMult, module.throwMult);
             //TODO: Apply recoil
         }
-
     }
 }

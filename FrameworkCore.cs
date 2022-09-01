@@ -8,7 +8,6 @@ using System.Reflection;
 
 namespace ModularFirearms
 {
-
     /// <summary>
     /// Represents a function that:
     /// 1) Attempts to shoot a projectile and play particle/haptic effects
@@ -215,7 +214,6 @@ namespace ModularFirearms
                 if (selectionIndex < fireModeEnums.Length) return (FireMode)fireModeEnums.GetValue(selectionIndex);
                 else return (FireMode)fireModeEnums.GetValue(0);
             }
-
         }
 
         /// <summary>
@@ -263,11 +261,11 @@ namespace ModularFirearms
         /// <param name="creature"></param>
         public static void FullSlice(Creature creature)
         {
-            creature.ragdoll.headPart.Slice();
-            creature.ragdoll.GetPart(RagdollPart.Type.LeftArm).Slice();
-            creature.ragdoll.GetPart(RagdollPart.Type.RightArm).Slice();
-            creature.ragdoll.GetPart(RagdollPart.Type.LeftLeg).Slice();
-            creature.ragdoll.GetPart(RagdollPart.Type.RightLeg).Slice();
+            creature.ragdoll.headPart.TrySlice();
+            creature.ragdoll.GetPart(RagdollPart.Type.LeftLeg).TrySlice();
+            creature.ragdoll.GetPart(RagdollPart.Type.RightLeg).TrySlice();
+            creature.ragdoll.GetPart(RagdollPart.Type.RightArm).TrySlice();
+            creature.ragdoll.GetPart(RagdollPart.Type.LeftArm).TrySlice();
             return;
         }
 
@@ -339,7 +337,6 @@ namespace ModularFirearms
         public static bool IsAnimationPlaying(Animator animator, string animationName)
         {
             if ((animator == null) || String.IsNullOrEmpty(animationName)) return false;
-
             try
             {
                 if (animator.GetCurrentAnimatorClipInfo(0)[0].clip.name.Contains(animationName)) return true;
@@ -350,7 +347,6 @@ namespace ModularFirearms
                 Debug.Log("[Fisher-Firearms] Could not check animation: " + e.StackTrace);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -474,9 +470,7 @@ namespace ModularFirearms
                         hit.collider.attachedRigidbody.AddForce(spawnPoint.forward * force, ForceMode.Impulse);
                     }
                     catch { }
-
                 }
-
             }
 
             var projectileData = Catalog.GetData<ItemData>(projectileID, true);
@@ -535,9 +529,7 @@ namespace ModularFirearms
                 Quaternion.Euler(spawnPoint.rotation.eulerAngles),
                 null,
                 false);
-
             }
-
         }
 
         /// <summary>
@@ -558,7 +550,6 @@ namespace ModularFirearms
                 }
                 return null;
             }
-
             catch { return null; }
         }
 
@@ -587,7 +578,8 @@ namespace ModularFirearms
         public static Vector3 NpcAimingAngle(BrainModuleBow NPCBrain, Vector3 initial, float npcDistanceToFire = 10.0f)
         {
             if (NPCBrain == null) return initial;
-            var inaccuracyMult = 0.2f * (NPCBrain.aimSpreadAngle / npcDistanceToFire);
+            float aimSpread = UnityEngine.Random.Range(NPCBrain.minMaxTimeToAttackFromAim.x, NPCBrain.minMaxTimeToAttackFromAim.y);
+            var inaccuracyMult = 0.2f * (aimSpread / npcDistanceToFire);
             return new Vector3(
                         initial.x + (UnityEngine.Random.Range(-inaccuracyMult, inaccuracyMult)),
                         initial.y + (UnityEngine.Random.Range(-inaccuracyMult, inaccuracyMult)),
@@ -729,8 +721,10 @@ namespace ModularFirearms
 
         public static void DumpRigidbodyToLog(Rigidbody rb)
         {
-            Debug.LogWarning("[Modular-Firearms][RB-DUMP] " + rb.name + ": " + rb.ToString());
-            Debug.LogWarning("[Modular-Firearms][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
+            #if DEBUG
+            Debug.Log("[Modular-Firearms][RB-DUMP] " + rb.name + ": " + rb.ToString());
+            Debug.Log("[Modular-Firearms][RB-DUMP] Name: " + rb.name + "| Mass: " + rb.mass + "| Kinematic: " + rb.isKinematic.ToString() + "| Gravity: " + rb.useGravity.ToString() + "| Interpolation: " + rb.interpolation.ToString() + "| Detection: " + rb.collisionDetectionMode.ToString());
+            #endif
         }
     }
 }

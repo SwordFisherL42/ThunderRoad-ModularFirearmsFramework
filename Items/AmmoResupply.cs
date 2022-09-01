@@ -9,11 +9,9 @@ namespace ModularFirearms.Items
         protected Item item;
         protected Shared.AmmoModule module;
         protected Holder holder;
-
         private bool infiniteUses = false;
         private int usesRemaining = 0;
         private bool waitingForSpawn = false;
-
         protected void Awake()
         {
             item = this.GetComponent<Item>();
@@ -24,13 +22,12 @@ namespace ModularFirearms.Items
             else { infiniteUses = true; }
             return;
         }
-
         protected void Start()
         {
             // Spawn initial random item in the holder
             SpawnAndSnap(module.magazineID, holder);
         }
-
+        
         protected void SpawnAndSnap(string spawnedItemID, Holder holder)
         {
             if (waitingForSpawn) return;

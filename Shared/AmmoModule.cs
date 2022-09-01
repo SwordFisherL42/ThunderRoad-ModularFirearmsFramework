@@ -2,7 +2,6 @@
 using ThunderRoad;
 using static ModularFirearms.FrameworkCore;
 
-
 namespace ModularFirearms.Shared
 {
     public class AmmoModule : ItemModule
@@ -32,6 +31,5 @@ namespace ModularFirearms.Shared
             else if (selectedType.Equals(AmmoType.Magazine)) item.gameObject.AddComponent<Items.InteractiveMagazine>();
             else if (selectedType.Equals(AmmoType.Pouch)) item.gameObject.AddComponent<Items.AmmoResupply>();
         }
-
     }
 }
