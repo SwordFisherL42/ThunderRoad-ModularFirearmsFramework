@@ -114,6 +114,5 @@ namespace ModularFirearms.Items
             SetBulletVisibility(true);
             return;
         }
-
     }
 }

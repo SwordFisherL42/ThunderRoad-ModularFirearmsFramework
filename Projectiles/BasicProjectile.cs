@@ -48,9 +48,10 @@ namespace ModularFirearms.Projectiles
 
         private void OnCollisionEnter(Collision hit)
         {
-            //Debug.Log("[ModularFirearmsFramework][PROJECTILE] Hit object " + hit.gameObject.name);
+            #if DEBUG
+            Debug.Log("[ModularFirearmsFramework][PROJECTILE] Hit object " + hit.gameObject.name);
+            #endif
             if (hit.gameObject.name.Contains(shooterItemString)) return;
-            //Debug.Log("[ModularFirearmsFramework][PROJECTILE] Stop Flying for object " + hit.gameObject.name);
             if (item.rb.useGravity) return;
             else { item.rb.useGravity = true; isFlying = false; }
         }
@@ -70,6 +71,5 @@ namespace ModularFirearms.Projectiles
                 catch { }
             }
         }
-
     }
 }

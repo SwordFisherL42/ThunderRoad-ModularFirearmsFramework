@@ -9,13 +9,10 @@ namespace ModularFirearms
         public GameObject thisSlideObject;
         public Rigidbody rb;
         public bool initialCheck = false;
-
         protected Item parentItem;
         protected Shared.FirearmModule parentModule;
-        
         private readonly float slideForwardForce;
         private readonly float slideBlowbackForce;
-
         private readonly float lockedAnchorOffset;
         private readonly float lockedBackAnchorOffset;
 
@@ -33,18 +30,14 @@ namespace ModularFirearms
         private ConstantForce slideForce;
         private ConfigurableJoint connectedJoint;
         private GameObject chamberBullet;
-
         // State Machine Parameters
         private Vector3 currentAnchor;
         private Vector3 originalAnchor;
         private Vector3 lockedBackAnchor;
         private Vector3 lockedNeutralAnchor;
-
         private bool isHeld;
         private float directionModifer = 1.0f;
         private bool isLockedBack;
-
-
         // BS/Unity Core Functions //
         public void InitializeSlide(GameObject slideObject)
         {
@@ -218,33 +211,23 @@ namespace ModularFirearms
         public void FixCustomComponents()
         {
             if (connectedJoint.anchor.z != currentAnchor.z)
-            {
                 connectedJoint.anchor = new Vector3(0, 0, currentAnchor.z);
-            }
-
-            //if (rb.isKinematic)
-            //{
-            //    rb.mass = 1.0f;
-            //    rb.drag = 0.0f;
-            //    rb.angularDrag = 0.05f;
-            //    rb.useGravity = true;
-            //    rb.isKinematic = false;
-            //    rb.interpolation = RigidbodyInterpolation.None;
-            //    rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
-            //}
         }
 
         public void DumpJoint()
         {
+            #if DEBUG
             Debug.Log("connectedJoint.connectedBody " + connectedJoint.connectedBody.ToString());
             Debug.Log("connectedJoint.anchor " + connectedJoint.anchor.ToString());
             Debug.Log("connectedJoint.connectedAnchor " + connectedJoint.connectedAnchor.ToString());
             Debug.Log("connectedJoint.linearLimit.limit " + connectedJoint.linearLimit.limit.ToString());
             Debug.Log("connectedJoint.autoConfigureConnectedAnchor " + connectedJoint.autoConfigureConnectedAnchor.ToString());
+            #endif
         }
 
         public void DumpRB()
         {
+            #if DEBUG
             Debug.Log("rb.mass " + rb.mass.ToString());
             Debug.Log("rb.drag " + rb.drag.ToString());
             Debug.Log("rb.angularDrag " + rb.angularDrag.ToString());
@@ -252,6 +235,7 @@ namespace ModularFirearms
             Debug.Log("rb.useGravity " + rb.useGravity.ToString());
             Debug.Log("rb.detectCollisions " + rb.detectCollisions.ToString());
             Debug.Log("rb.collisionDetectionMode " + rb.collisionDetectionMode.ToString());
+            #endif
         }
 
         public GameObject GetConnectedObj()

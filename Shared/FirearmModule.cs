@@ -157,19 +157,12 @@ namespace ModularFirearms.Shared
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
-
             selectedType = (WeaponType)Enum.Parse(typeof(WeaponType), firearmType);
-
             if (selectedType.Equals(WeaponType.SemiAuto)) item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>();
             else if (selectedType.Equals(WeaponType.Shotgun)) item.gameObject.AddComponent<Weapons.ShotgunGenerator>();
-
             else if (selectedType.Equals(WeaponType.TestWeapon)) item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>();
-
-            else if (selectedType.Equals(WeaponType.SemiAutoLegacy)) item.gameObject.AddComponent<Legacy.SemiAutoFirearmGenerator>();
-            else if (selectedType.Equals(WeaponType.AutoMag)) item.gameObject.AddComponent<Legacy.AutomagGenerator>();
             else if (selectedType.Equals(WeaponType.SimpleFirearm)) item.gameObject.AddComponent<Weapons.SimpleFirearm>();
             else { item.gameObject.AddComponent<Weapons.BaseFirearmGenerator>(); }
-
         }
     }
 }

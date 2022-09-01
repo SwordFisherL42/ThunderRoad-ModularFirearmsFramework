@@ -320,7 +320,6 @@ namespace ModularFirearms.Weapons
         {
             soundCounter = 0;
             maxSoundCounter = 0;
-
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.FirearmModule>();
             DisableCulling(item);
@@ -330,47 +329,34 @@ namespace ModularFirearms.Weapons
             if (!String.IsNullOrEmpty(module.shellEjectionRef)) shellEjectionPoint = item.GetCustomReference(module.shellEjectionRef);
             if (!String.IsNullOrEmpty(module.animationRef)) animations = item.GetCustomReference(module.animationRef).GetComponent<Animator>();
             if (!String.IsNullOrEmpty(module.fireSoundRef)) fireSound = item.GetCustomReference(module.fireSoundRef).GetComponent<AudioSource>();
-
             if (!String.IsNullOrEmpty(module.fireSound1Ref)) { fireSound1 = item.GetCustomReference(module.fireSound1Ref).GetComponent<AudioSource>(); maxSoundCounter++; soundCounter = 1; }
             if (!String.IsNullOrEmpty(module.fireSound2Ref)) { fireSound2 = item.GetCustomReference(module.fireSound2Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
             if (!String.IsNullOrEmpty(module.fireSound3Ref)) { fireSound3 = item.GetCustomReference(module.fireSound3Ref).GetComponent<AudioSource>(); maxSoundCounter++; }
-
             if (!String.IsNullOrEmpty(module.emptySoundRef)) emptySound = item.GetCustomReference(module.emptySoundRef).GetComponent<AudioSource>();
             if (!String.IsNullOrEmpty(module.pullSoundRef)) pullbackSound = item.GetCustomReference(module.pullSoundRef).GetComponent<AudioSource>();
             if (!String.IsNullOrEmpty(module.rackSoundRef)) rackforwardSound = item.GetCustomReference(module.rackSoundRef).GetComponent<AudioSource>();
-
             if (!String.IsNullOrEmpty(module.flashRef)) muzzleFlash = item.GetCustomReference(module.flashRef).GetComponent<ParticleSystem>();
             if (!String.IsNullOrEmpty(module.smokeRef)) muzzleSmoke = item.GetCustomReference(module.smokeRef).GetComponent<ParticleSystem>();
             if (!String.IsNullOrEmpty(module.shellParticleRef)) shellParticle = item.GetCustomReference(module.shellParticleRef).GetComponent<ParticleSystem>();
-
             if (!String.IsNullOrEmpty(module.mainHandleRef)) mainHandle = item.GetCustomReference(module.mainHandleRef).GetComponent<Handle>();
-
             else Debug.LogError("[Fisher-ModularFirearms][ERROR] No Reference to Main Handle (\"mainHandleRef\") in JSON! Weapon will not work as intended !!!");
             if (!String.IsNullOrEmpty(module.slideHandleRef)) slideObject = item.GetCustomReference(module.slideHandleRef).gameObject;
             else Debug.LogError("[Fisher-ModularFirearms][ERROR] No Reference to Slide Handle (\"slideHandleRef\") in JSON! Weapon will not work as intended !!!");
             if (!String.IsNullOrEmpty(module.slideCenterRef)) slideCenterPosition = item.GetCustomReference(module.slideCenterRef).gameObject;
             else Debug.LogError("[Fisher-ModularFirearms][ERROR] No Reference to Slide Center Position(\"slideCenterRef\") in JSON! Weapon will not work as intended...");
             if (slideObject != null) slideHandle = slideObject.GetComponent<Handle>();
-
             lastSpellMenuPress = 0.0f;
-
             RACK_THRESHOLD = -0.1f * module.slideTravelDistance;
             PULL_THRESHOLD = -0.5f * module.slideTravelDistance;
-
             fireModeSelection = (FireMode)Enum.Parse(typeof(FireMode), module.fireMode);
-
             validMagazineIDs = new List<string>(module.acceptedMagazineIDs);
-
             /// Item Events ///
             item.OnHeldActionEvent += OnHeldAction;
-
             item.OnGrabEvent += OnAnyHandleGrabbed;
             item.OnUngrabEvent += OnAnyHandleUngrabbed;
-
             magazineHolder = item.GetComponentInChildren<Holder>();
             magazineHolder.Snapped += new Holder.HolderDelegate(this.OnMagazineInserted);
             magazineHolder.UnSnapped += new Holder.HolderDelegate(this.OnMagazineRemoved);
-            
         }
 
         void Start()
@@ -385,13 +371,10 @@ namespace ModularFirearms.Weapons
             /// 4) Spawn and Snap in the inital magazine
             /// 5) (optional) Set the firemode selection switch to the correct position
             InitializeConfigurableJoint(module.slideStabilizerRadius);
-
             slideController = new ChildRigidbodyController(item, module);
             slideController.InitializeSlide(slideObject);
-
             if (slideController == null) Debug.LogError("[Fisher-ModularFirearms] ERROR! CHILD SLIDE CONTROLLER WAS NULL");
             else slideController.SetupSlide();
-
             var magazineData = Catalog.GetData<ItemData>(module.acceptedMagazineIDs[0], true);
             if (magazineData == null)
             {
@@ -417,7 +400,6 @@ namespace ModularFirearms.Weapons
                 null,
                 false);
             }
-
         }
 
         protected void LateUpdate()
@@ -442,7 +424,6 @@ namespace ModularFirearms.Weapons
                     if (!module.longPressToEject) MagazineRelease();
                 }  
             }
-
             if (!mainHandleHeldLeft && !mainHandleHeldRight)
             {
                 triggerPressed = false;
@@ -473,7 +454,6 @@ namespace ModularFirearms.Weapons
                         slideController.ChamberRoundVisible(false);
                     }
                 }
-
             }
             if ((slideObject.transform.localPosition.z > (PULL_THRESHOLD - RACK_THRESHOLD)) && isPulledBack)
             {
@@ -502,7 +482,6 @@ namespace ModularFirearms.Weapons
                 }
                 UpdateAmmoCounter();
             }
-
             if (slideController != null) slideController.FixCustomComponents();
             else return; // TODO: Remove this return, so we initialize even if we don't fix custom components
             if (slideController.initialCheck) return;
@@ -519,7 +498,6 @@ namespace ModularFirearms.Weapons
 
         public void OnHeldAction(RagdollHand interactor, Handle handle, Interactable.Action action)
         {
-
             if (handle.Equals(mainHandle))
             {
                 // Trigger Action
@@ -534,24 +512,18 @@ namespace ModularFirearms.Weapons
                     // End Firing
                     triggerPressed = false;
                 }
-
                 // "Spell-Menu" Action
                 if (action == Interactable.Action.AlternateUseStart)
                 {
                     spellMenuPressed = true;
                     if (SlideToggleLock()) { return; }
-
                     StartLongPress();
-
-
                 }
                 if (action == Interactable.Action.AlternateUseStop)
                 {
                     spellMenuPressed = false;
                 }
-
             }
-
             if (action == Interactable.Action.Grab)
             {
                 if (handle.Equals(mainHandle))
@@ -569,17 +541,13 @@ namespace ModularFirearms.Weapons
                     if (slideController != null) slideController.SetHeld(true);
                     slideController.ForwardState();
                 }
-
             }
-
             if (action == Interactable.Action.Ungrab)
             {
-
                 if (handle.Equals(mainHandle))
                 {
                     if (interactor.playerHand == Player.local.handRight) mainHandleHeldRight = false;
                     if (interactor.playerHand == Player.local.handLeft) mainHandleHeldLeft = false;
-
                     if (!mainHandleHeldRight && !mainHandleHeldLeft)
                     {
                         if (interactor.playerHand == Player.local.handRight) slideHandleHeldRight = false;
@@ -588,15 +556,11 @@ namespace ModularFirearms.Weapons
                         ForceDrop();
                     }
                 }
-
                 if (handle.Equals(slideHandle))
                 {
                     if (slideController != null) slideController.SetHeld(false);
                 }
-
             }
-
-
         }
 
         protected void OnMagazineInserted(Item interactiveObject)
@@ -638,7 +602,6 @@ namespace ModularFirearms.Weapons
                     insertedMagazine = null;
                 }
             }
-
             catch (Exception e)
             {
                 Debug.LogError("[Fisher-ModularFirearms][ERROR] Exception in Adding magazine: " + e.ToString());
@@ -660,7 +623,6 @@ namespace ModularFirearms.Weapons
                 }
             }
             catch { Debug.LogWarning("[Fisher-ModularFirearms] Unable to Eject the Magazine!"); }
-
             magazineHolder.data.disableTouch = false;
             UpdateAmmoCounter();
         }
@@ -682,8 +644,6 @@ namespace ModularFirearms.Weapons
                 slideController.SetHeld(true);
                 slideController.ForwardState();
             }
-
-
         }
 
         public void OnAnyHandleUngrabbed(Handle handle, RagdollHand interactor, bool throwing)
@@ -698,7 +658,6 @@ namespace ModularFirearms.Weapons
                     if (((slideController != null))) { slideController.LockSlide(); }
                     ForceDrop();
                 }
-
             }
             if (handle.Equals(slideHandle))
             {
@@ -708,6 +667,5 @@ namespace ModularFirearms.Weapons
                 slideController.SetHeld(false);
             }
         }
-
     }
 }

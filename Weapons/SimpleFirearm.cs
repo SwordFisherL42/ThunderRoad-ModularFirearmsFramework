@@ -40,26 +40,8 @@ namespace ModularFirearms.Weapons
         BrainData thisNPCBrain;
         BrainModuleBow BrainBow;
         BrainModuleMelee BrainMelee;
-        BrainModuleParry BrainParry;
+        BrainModuleDefense BrainParry;
         float npcShootDelay;
-
-        public void IgnoreProjectile(Item i, bool ignore = true)
-        {
-            foreach (ColliderGroup colliderGroup in this.item.colliderGroups)
-            {
-                foreach (Collider collider in colliderGroup.colliders)
-                {
-                    foreach (ColliderGroup colliderGroupProjectile in i.colliderGroups)
-                    {
-                        foreach (Collider colliderProjectile in colliderGroupProjectile.colliders)
-                        {
-                            Physics.IgnoreCollision(collider, colliderProjectile, ignore);
-                        }
-                    }
-                }
-            }
-        }
-
         public void Awake()
         {
             item = this.GetComponent<Item>();
@@ -176,9 +158,9 @@ namespace ModularFirearms.Weapons
                 thisNPCBrain = thisNPC.brain.instance;
                 BrainBow = thisNPCBrain.GetModule<BrainModuleBow>();
                 BrainMelee = thisNPCBrain.GetModule<BrainModuleMelee>();
-                BrainParry = thisNPCBrain.GetModule<BrainModuleParry>();
+                BrainParry = thisNPCBrain.GetModule<BrainModuleDefense>();
                 thisNPC.brain.currentTarget = Player.local.creature;
-                thisNPC.brain.isParrying = true;
+                thisNPC.brain.isDefending = true;
 
                 BrainMelee.meleeEnabled = module.npcMeleeEnableOverride;
             }
@@ -212,11 +194,10 @@ namespace ModularFirearms.Weapons
             }
             if (BrainParry != null)
             {
-                //BrainParry.StartParry(Player.currentCreature); 
-                //if (thisNPC.brain.currentTarget == null && thisNPC.factionId != Player.currentCreature.factionId) thisNPC.brain.currentTarget = Player.currentCreature;
                 if (thisNPC.brain.currentTarget != null)
                 {
-                    BrainParry.StartParry(thisNPC.brain.currentTarget);
+                    //BrainParry.StartParry(thisNPC.brain.currentTarget);
+                    BrainParry.StartDefense();
                     if (!module.npcMeleeEnableOverride)
                     {
                         BrainMelee.meleeEnabled = Vector3.Distance(item.rb.position, thisNPC.brain.currentTarget.transform.position) <= module.npcMeleeEnableDistance;
@@ -224,7 +205,7 @@ namespace ModularFirearms.Weapons
                 }
             }
             if (npcShootDelay > 0) npcShootDelay -= Time.deltaTime;
-            if (npcShootDelay <= 0) { NPCshoot(); }
+            if (npcShootDelay <= 0) { NPCFire(); }
         }
 
         private void ReloadWeapon()
@@ -244,7 +225,7 @@ namespace ModularFirearms.Weapons
             isFiring = status;
         }
 
-        private void NPCshoot()
+        void NPCFire()
         {
             if (thisNPC != null && thisNPCBrain != null && thisNPC.brain.currentTarget != null)
             {
@@ -253,17 +234,16 @@ namespace ModularFirearms.Weapons
                 {
                     Creature target = null;
                     if (hit.collider.transform.root.name.Contains("Player") || hit.collider.transform.root.name.Contains("Pool_Human"))
-                    {
                         target = hit.collider.transform.root.GetComponentInChildren<Creature>();
-                    }
-
                     if (target != null && thisNPC != target
-                        && thisNPC.faction.attackBehaviour != GameData.Faction.AttackBehaviour.Ignored && thisNPC.faction.attackBehaviour != GameData.Faction.AttackBehaviour.Passive
-                        && target.faction.attackBehaviour != GameData.Faction.AttackBehaviour.Ignored && (thisNPC.faction.attackBehaviour == GameData.Faction.AttackBehaviour.Agressive || thisNPC.factionId != target.factionId))
+                        && thisNPC.faction.attackBehaviour != GameData.Faction.AttackBehaviour.Ignored
+                        && thisNPC.faction.attackBehaviour != GameData.Faction.AttackBehaviour.Passive
+                        && target.faction.attackBehaviour != GameData.Faction.AttackBehaviour.Ignored
+                        && (thisNPC.faction.attackBehaviour == GameData.Faction.AttackBehaviour.Agressive || thisNPC.factionId != target.factionId))
                     {
                         Fire(true);
-                        FrameworkCore.DamageCreatureCustom(target, module.npcDamageToPlayer, hit.point);
-                        npcShootDelay = UnityEngine.Random.Range(BrainBow.bowAimMinMaxDelay.x, BrainBow.bowAimMinMaxDelay.y);
+                        DamageCreatureCustom(target, module.npcDamageToPlayer, hit.point);
+                        npcShootDelay = UnityEngine.Random.Range(BrainBow.minMaxTimeBetweenAttack.x, BrainBow.minMaxTimeBetweenAttack.y);
                     }
                 }
             }

@@ -11,25 +11,20 @@ namespace ModularFirearms.Shared
         //public string attachmentType;
         public string[] attachmentTypes;
         public AttachmentType GetSelectedType(string attachmentType) { return (AttachmentType)Enum.Parse(typeof(AttachmentType), attachmentType); }
-
         // General References
         public string attachmentRef;
         public string attachmentHandleRef;
         public string activationSoundRef;
         public string ignoredMeshRef;
         public string rayCastPointRef;
-
         public bool longPressToActivate = true;
         public float longPressTime = 0.25f;
-
         // FireMode Switch Attachment
         public string swtichRef;
         public string switchActivationSoundRef;
         public string swtichHandleRef;
-
         public string[] allowedFireModes = { };
         public string[] switchPositionRefs = { };
-
         // Laser Pointer Attachment 
         public string laserRef;
         public string laserStartRef;
@@ -39,19 +34,15 @@ namespace ModularFirearms.Shared
         public string laserRayCastPointRef;
         public string laserActivationSoundRef;
         public bool laserStartActivated = true;
-
         // Ammo Counter Attachment
         public string ammoCounterRef;
-
         // Compass Attachment
         public string compassRef;
-
         // Flashlight Attachment
         public string flashlightRef;
         public string flashlightHandleRef;
         public string flashlightActivationSoundRef;
         public string flashlightMeshRef;
-
         // Secondary Fire Attachment
         public float fireDelay = 1.0f;
         public float forceMult = 100.0f;
@@ -62,11 +53,10 @@ namespace ModularFirearms.Shared
         public string muzzleFlashRef;
         public string fireAnim;
         public string mainGripID;
-
         // Old Integer Enum Parsing Method
         //public int attachmentType = 0;
         //public AttachmentType GetSelectedType() { return (AttachmentType)FirearmFunctions.attachmentTypeEnums.GetValue(attachmentType); }
-
+        
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
@@ -81,7 +71,6 @@ namespace ModularFirearms.Shared
                 else if (selectedType.Equals(AttachmentType.GrenadeLauncher)) item.gameObject.AddComponent<Attachments.GrenadeLauncherController>();
                 else if (selectedType.Equals(AttachmentType.SecondaryFire)) item.gameObject.AddComponent<Attachments.SecondaryFire>();
             }
-
         }
     }
 }

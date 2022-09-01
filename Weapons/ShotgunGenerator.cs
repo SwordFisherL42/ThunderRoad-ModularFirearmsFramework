@@ -13,12 +13,10 @@ namespace ModularFirearms.Weapons
         protected Holder shellReceiver;
         //protected ItemMagazine insertedMagazine;
         private Light attachedLight;
-
         /// Trigger-Zone parameters ///
         private float PULL_THRESHOLD;
         private float RACK_THRESHOLD;
         private SphereCollider slideCapsuleStabilizer;
-
         /// Slide Interaction ///
         protected Handle slideHandle;
         //private SemiAutoSlide slideController;
@@ -28,7 +26,6 @@ namespace ModularFirearms.Weapons
         private ConstantForce slideForce;
         private Rigidbody slideRB;
         private bool holdingSlideTrigger = false;
-
         /// Unity Object References ///
         public ConfigurableJoint connectedJoint;
         protected Handle gunGrip;
@@ -44,7 +41,6 @@ namespace ModularFirearms.Weapons
         protected AudioSource rackforwardSound;
         private AudioSource shellInsertSound;
         protected Animator Animations;
-
         /// General Mechanics ///
         public bool gunGripHeldLeft;
         public bool gunGripHeldRight;
@@ -61,7 +57,6 @@ namespace ModularFirearms.Weapons
         /// FireMode Selection and Ammo Tracking //
         private int currentReceiverAmmo;
         //private bool currentSlideState = false;
-
         private float num1;
         private float num2;
         private float num3;
@@ -71,7 +66,6 @@ namespace ModularFirearms.Weapons
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.FirearmModule>();
-
             /// Set all Object References ///
             if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
             if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.GetCustomReference(module.muzzlePositionRef);
@@ -91,28 +85,21 @@ namespace ModularFirearms.Weapons
             if (!String.IsNullOrEmpty(module.slideCenterRef)) slideCenterPosition = item.GetCustomReference(module.slideCenterRef).gameObject;
             else Debug.LogError("[ModularFirearmsFramework][ERROR] No Reference to Slide Center Position(\"slideCenterRef\") in JSON! Weapon will not work as intended...");
             if (slideObject != null) slideHandle = slideObject.GetComponent<Handle>();
-
             if (!String.IsNullOrEmpty(module.flashlightRef)) attachedLight = item.GetCustomReference(module.flashlightRef).GetComponent<Light>();
-
             RACK_THRESHOLD = -0.1f * module.slideTravelDistance; //module.slideRackThreshold;
             PULL_THRESHOLD = -0.5f * module.slideTravelDistance;
-
             currentReceiverAmmo = module.maxReceiverAmmo;
-
             /// Item Events ///
             item.OnHeldActionEvent += OnHeldAction;
             item.OnGrabEvent += OnAnyHandleGrabbed;
             item.OnUngrabEvent += OnAnyHandleUngrabbed;
             //item.OnTouchActionEvent += TouchActionEvent;
-
             //item.OnSnapEvent += OnFirearmSnapped;
             //item.OnUnSnapEvent += OnFirearmUnSnapped;
-
             //shellReceiver = item.GetComponentInChildren<Holder>();
             shellReceiver = item.GetCustomReference(module.shellReceiverDef).GetComponentInChildren<Holder>();
             shellReceiver.Snapped += new Holder.HolderDelegate(this.OnShellInserted);
             shellReceiver.UnSnapped += new Holder.HolderDelegate(this.OnShellRemoved);
-
         }
 
         //private void IgnoreMovingLayer()
@@ -129,28 +116,22 @@ namespace ModularFirearms.Weapons
         protected void Start()
         {
             //IgnoreMovingLayer();
-
             /// 1) Create and Initialize configurable joint between the base and slide
             /// 2) Create and Initialize the slide controller object
             /// 3) Setup the slide controller into the default state
             /// 4) Spawn and Snap in the inital magazine
             /// 5) (optional) Set the firemode selection switch to the correct position
-
             num1 = slideHandle.data.positionDamperMultiplier;
             num2 = slideHandle.data.positionSpringMultiplier;
             num3 = slideHandle.data.rotationDamperMultiplier;
             num4 = slideHandle.data.rotationSpringMultiplier;
             InitializeConfigurableJoint(module.slideStabilizerRadius);
-
             slideController = new ChildRigidbodyController(item, module);
             slideController.InitializeSlide(slideObject);
-
             if (slideController == null) Debug.LogError("[ModularFirearmsFramework] ERROR! CHILD SLIDE CONTROLLER WAS NULL");
             else slideController.SetupSlide();
-
             shellReceiver.data.disableTouch = true;
             //LimitSlideInteraction(currentSlideState);
-
             return;
         }
 
@@ -162,7 +143,6 @@ namespace ModularFirearms.Weapons
                 // NOTE: RB Needs to be assigned at Runtime (doesn't work when added to prefab in Editor)
                 slideRB = slideObject.AddComponent<Rigidbody>();
             }
-
             slideRB.mass = 1.0f;
             slideRB.drag = 0.0f;
             slideRB.angularDrag = 0.05f;
@@ -170,7 +150,6 @@ namespace ModularFirearms.Weapons
             slideRB.isKinematic = false;
             slideRB.interpolation = RigidbodyInterpolation.None;
             slideRB.collisionDetectionMode = CollisionDetectionMode.Discrete;
-
             slideCapsuleStabilizer = slideCenterPosition.AddComponent<SphereCollider>();
             slideCapsuleStabilizer.radius = stabilizerRadius;
             // Place the Stabilizer on an empty layer and then ignore collision with all player/body locomotion layers
@@ -179,9 +158,7 @@ namespace ModularFirearms.Weapons
             Physics.IgnoreLayerCollision(21, 15);
             Physics.IgnoreLayerCollision(21, 22);
             Physics.IgnoreLayerCollision(21, 23);
-
             slideForce = slideObject.AddComponent<ConstantForce>();
-
             connectedJoint = item.gameObject.AddComponent<ConfigurableJoint>();
             connectedJoint.connectedBody = slideRB;
             connectedJoint.anchor = new Vector3(0, 0, -0.5f * module.slideTravelDistance);
@@ -241,7 +218,6 @@ namespace ModularFirearms.Weapons
                     if (emptySound != null) emptySound.Play();
                 }
             }
-
             // Trigger Action
             if (handle.name.Equals(slideHandle.name))
             {
@@ -251,14 +227,12 @@ namespace ModularFirearms.Weapons
                     slideController.LockSlide(false);
                     if (emptySound != null) emptySound.Play();
                 }
-
                 if (((action == Interactable.Action.UseStop)|| (action == Interactable.Action.AlternateUseStop)) && (holdingSlideTrigger))
                 {
                     holdingSlideTrigger = false;
                     slideController.UnlockSlide(false);
                     // if (emptySound != null) emptySound.Play();
                 }
-
                 if (action == Interactable.Action.Ungrab)
                 {
                     if (holdingSlideTrigger) { holdingSlideTrigger = false; slideController.UnlockSlide(); }
@@ -275,7 +249,6 @@ namespace ModularFirearms.Weapons
                     //DumpRigidbodyToLog(slideController.rb);
                 }
             }
-
             if (handle.Equals(gunGrip))
             {
                 if (action == Interactable.Action.Grab)
@@ -302,7 +275,6 @@ namespace ModularFirearms.Weapons
                             emptySound.Play();
                         }
                     }
-
                     //if (!isFiring) StartCoroutine(FirearmFunctions.GeneralFire(TrackedFire, TriggerIsPressed, fireModeSelection, module.fireRate, module.burstNumber, emptySound, SetFiringFlag));
                 }
                 if (action == Interactable.Action.UseStop)
@@ -314,7 +286,6 @@ namespace ModularFirearms.Weapons
                 //"Spell-Menu" Action
                 //if (action == Interactable.Action.AlternateUseStart)
                 //{
-
                 //}
             }
         }
@@ -340,7 +311,6 @@ namespace ModularFirearms.Weapons
                 if (interactor.playerHand == Player.local.handLeft) slideGripHeldLeft = true;
                 slideController.SetHeld(true);
             }
-
         }
 
         public void OnAnyHandleUngrabbed(Handle handle, RagdollHand interactor, bool throwing)
@@ -380,12 +350,10 @@ namespace ModularFirearms.Weapons
                         if (shellInsertSound != null) shellInsertSound.Play();
                         chamberRoundOnNext = true;
                         currentReceiverAmmo += 1;
-                        
                         //if (currentReceiverAmmo >= module.maxReceiverAmmo) { shellReceiver.data.locked = true; }
                     }
                 }
             }
-
             catch (Exception e)
             {
                 Debug.LogError("[ModularFirearmsFramework][ERROR] Exception in Adding magazine: " + e.ToString());
@@ -403,7 +371,6 @@ namespace ModularFirearms.Weapons
                     {
                         interactiveObject.Despawn();
                     }
-                    
                 }
             }
             catch (Exception e)
@@ -447,7 +414,6 @@ namespace ModularFirearms.Weapons
                         //this.item.IgnoreObjectCollision(i);
                         //i.IgnoreObjectCollision(this.item);
                         //i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
-
                         i.Throw(1f, Item.FlyDetection.Forced);
                         item.IgnoreObjectCollision(i);
                         i.IgnoreObjectCollision(item);
@@ -457,7 +423,6 @@ namespace ModularFirearms.Weapons
                         i.transform.rotation = Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
                         i.rb.velocity = item.rb.velocity;
                         i.rb.AddForce(i.rb.transform.forward * 1000.0f * module.bulletForce);
-
                         if (slideCapsuleStabilizer != null)
                         {
                             try
@@ -475,13 +440,11 @@ namespace ModularFirearms.Weapons
                             }
                             catch { }
                         }
-
                         Projectiles.BasicProjectile projectileController = i.gameObject.GetComponent<Projectiles.BasicProjectile>();
                         if (projectileController != null)
                         {
                             projectileController.SetShooterItem(this.item);
                         }
-
                         //-- Optional Switches --//
                         //i.rb.useGravity = false;
                         //i.Throw(throwMult, Item.FlyDetection.CheckAngle);
@@ -490,14 +453,12 @@ namespace ModularFirearms.Weapons
                         //i.ignoredItem = shooterItem;
                         //shooterItem.IgnoreObjectCollision(i);
                         //Physics.IgnoreLayerCollision(GameManager.GetLayer(LayerName.None), GameManager.GetLayer(LayerName.Default));
-
                         if (!String.IsNullOrEmpty(imbueSpell))
                         {
                             // Set imbue charge on projectile using ItemProjectileSimple subclass
                             //Projectiles.SimpleProjectile projectileController = i.gameObject.GetComponent<Projectiles.SimpleProjectile>();
                             if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
                         }
-
                     }
                     catch (Exception ex)
                     {
@@ -509,7 +470,6 @@ namespace ModularFirearms.Weapons
                 null,
                 false);
             }
-
             //FirearmFunctions.ShootProjectile(item, module.projectileID, rayCastPoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, 1.0f, false, slideCapsuleStabilizer, true);
             //FirearmFunctions.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce);
             FrameworkCore.ApplyRecoil(item.rb, module.recoilForces, 1.0f, gunGripHeldLeft || slideGripHeldLeft, gunGripHeldRight || slideGripHeldRight, module.hapticForce);
@@ -583,10 +543,8 @@ namespace ModularFirearms.Weapons
                         {
                             chamberRoundOnNext = true;
                         }
-
                     }
                 }
-
             }
             if ((slideObject.transform.localPosition.z > (PULL_THRESHOLD - RACK_THRESHOLD)) && isPulledBack)
             {
@@ -605,7 +563,6 @@ namespace ModularFirearms.Weapons
                     if (rackforwardSound != null) rackforwardSound.Play();
                     playSoundOnNext = false;
                 }
-
                 if (chamberRoundOnNext)
                 {
                     if (!ConsumeOneFromReceiver()) return;
@@ -615,7 +572,6 @@ namespace ModularFirearms.Weapons
                     roundSpent = false;
                 }
             }
-
             if (slideController != null) slideController.FixCustomComponents();
             else return;
             if (slideController.initialCheck) return;
