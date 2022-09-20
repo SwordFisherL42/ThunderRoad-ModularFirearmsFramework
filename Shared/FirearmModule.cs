@@ -10,6 +10,9 @@ namespace ModularFirearms.Shared
         public int firearmCategory = 0;
         public string firearmType = "SemiAuto";
 
+        public bool useHitscan = false;
+        public float hitscanMaxDistance = 1f;
+
         public string mainHandleRef;
         public string slideHandleRef;
         public string slideCenterRef;

@@ -99,6 +99,7 @@
     <Compile Include="Attachments\FlashlightController.cs" />
     <Compile Include="Items\MagazineGenerator.cs" />
     <Compile Include="Items\InteractiveAmmo.cs" />
+    <Compile Include="Shared\FrameworkSettings.cs" />
     <Compile Include="Shared\ProjectileModule.cs" />
     <Compile Include="FrameworkCore.cs" />
     <Compile Include="Weapons\BaseFirearmGenerator.cs" />

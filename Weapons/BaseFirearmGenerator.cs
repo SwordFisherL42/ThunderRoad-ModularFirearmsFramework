@@ -15,6 +15,8 @@ namespace ModularFirearms.Weapons
         public float lastSpellMenuPress;
         public bool isLongPress = false;
         public bool checkForLongPress = false;
+        bool useRaycast;
+        float rayCastMaxDist;
         /// Magazine Parameters///
         protected Holder magazineHolder;
         protected Items.InteractiveMagazine insertedMagazine;
@@ -288,7 +290,9 @@ namespace ModularFirearms.Weapons
         {
             if (playEffects) PreFireEffects();
             if (firedByNPC) return;
-            ShootProjectile(
+            if (!useRaycast || !ShootRaycastDamage(muzzlePoint, module.bulletForce, rayCastMaxDist))
+            {
+                ShootProjectile(
                 item,
                 module.projectileID,
                 muzzlePoint,
@@ -299,6 +303,7 @@ namespace ModularFirearms.Weapons
                 slideCapsuleStabilizer,
                 SetProjectileSpawningState
                 );
+            }
             ApplyRecoil(item.rb, module.recoilForces, module.throwMult, mainHandleHeldLeft, mainHandleHeldRight, module.hapticForce, module.recoilTorques);
             if (shellParticle != null)
             {
@@ -322,6 +327,10 @@ namespace ModularFirearms.Weapons
             maxSoundCounter = 0;
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.FirearmModule>();
+            // Prioritize local settings, then fetch global settings //
+            useRaycast = module.useHitscan ? true : Shared.FrameworkSettings.local.useHitscan;
+            rayCastMaxDist = module.useHitscan ? module.hitscanMaxDistance : Shared.FrameworkSettings.local.hitscanMaxDistance;
+            if (rayCastMaxDist <= 0f) rayCastMaxDist = Mathf.Infinity;
             DisableCulling(item);
             /// Set all Object References ///
             if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.GetCustomReference(module.rayCastPointRef);
