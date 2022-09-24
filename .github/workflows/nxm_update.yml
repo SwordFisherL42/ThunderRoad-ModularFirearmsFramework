@@ -1,0 +1,25 @@
+name: NXM-Update
+on:
+  push:
+    branches: [ "main", "actions-runner" ]
+  workflow_dispatch:
+env:
+  MOD_NAME: Modular Firearms Framework (U11)
+  MOD_ID: 2555
+
+jobs:
+  update-mod-page:
+    runs-on: ubuntu-latest
+    environment:
+      name: nexus-mod-page
+      url: https://www.nexusmods.com/bladeandsorcery/mods/${{ env.MOD_ID }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update Mod Page and Community Posts
+        run: |
+          python $GITHUB_WORKSPACE/.github/workflows/nxm_update.py \
+            --cookie='${{ secrets.NXM_COOKIE }}' \
+            --mod=${{ env.MOD_ID }} \
+            --name='${{ env.MOD_NAME }}' \
+            --assembly_info=$GITHUB_WORKSPACE/Properties/AssemblyInfo.cs
+            --db_file=$GITHUB_WORKSPACE/.nxm/nxm.db

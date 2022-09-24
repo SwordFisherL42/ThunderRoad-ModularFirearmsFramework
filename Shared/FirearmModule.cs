@@ -10,6 +10,9 @@ namespace ModularFirearms.Shared
         public int firearmCategory = 0;
         public string firearmType = "SemiAuto";
 
+        public bool useHitscan = false;
+        public float hitscanMaxDistance = 1f;
+
         public string mainHandleRef;
         public string slideHandleRef;
         public string slideCenterRef;
@@ -98,6 +101,8 @@ namespace ModularFirearms.Shared
         public string shellReceiverDef;
 
         // Gameplay/Physics/Recoil params
+        public float hitscanForceMult = 4f;
+        public float shotgunForceMult = 2f;
         public float bulletForce = 10.0f;
         public float shellEjectionForce = 0.5f;
         public float hapticForce = 5.0f;

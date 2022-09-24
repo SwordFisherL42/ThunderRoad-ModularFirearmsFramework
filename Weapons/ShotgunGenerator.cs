@@ -54,6 +54,9 @@ namespace ModularFirearms.Weapons
         private bool roundChambered = false;
         private bool roundSpent = false;
         private bool playSoundOnNext = false;
+        bool useRaycast;
+        float rayCastMaxDist;
+        float raycastForce;
         /// FireMode Selection and Ammo Tracking //
         private int currentReceiverAmmo;
         //private bool currentSlideState = false;
@@ -66,6 +69,11 @@ namespace ModularFirearms.Weapons
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.FirearmModule>();
+            // Prioritize local settings, then fetch global settings //
+            useRaycast = module.useHitscan ? true : Shared.FrameworkSettings.local.useHitscan;
+            rayCastMaxDist = module.useHitscan ? module.hitscanMaxDistance : Shared.FrameworkSettings.local.hitscanMaxDistance;
+            if (rayCastMaxDist <= 0f) rayCastMaxDist = Mathf.Infinity;
+            raycastForce = module.bulletForce * module.hitscanForceMult * module.shotgunForceMult;
             /// Set all Object References ///
             if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
             if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.GetCustomReference(module.muzzlePositionRef);
@@ -389,11 +397,9 @@ namespace ModularFirearms.Weapons
         public bool Fire()
         {
             PreFireEffects();
-            //FirearmFunctions.ShotgunBlast(item, module.projectileID, rayCastPoint, module.blastRange, module.blastForce, module.bulletForce, FirearmFunctions.GetItemSpellChargeID(item), module.throwMult, false, slideCapsuleStabilizer);
-            //FirearmFunctions.ProjectileBurst(item, module.projectileID, muzzlePoint,  FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, module.throwMult, false, slideCapsuleStabilizer);
+            if (useRaycast) ShootRaycastDamage(muzzlePoint, raycastForce, rayCastMaxDist);
             ItemData spawnedItemData = Catalog.GetData<ItemData>(module.projectileID, true);
             String imbueSpell = GetItemSpellChargeID(item);
-
             var projectileData = Catalog.GetData<ItemData>(module.projectileID, true);
             if ((muzzlePoint == null) || (String.IsNullOrEmpty(module.projectileID))) return false;
             if (projectileData == null)
@@ -407,13 +413,6 @@ namespace ModularFirearms.Weapons
                 {
                     try
                     {
-                        //i.transform.position = muzzlePoint.position + offsetVec;
-                        //i.transform.rotation = Quaternion.Euler(muzzlePoint.rotation.eulerAngles);
-                        //i.rb.velocity = this.item.rb.velocity;
-                        //i.rb.AddForce(i.rb.transform.forward * 1000.0f * module.bulletForce);
-                        //this.item.IgnoreObjectCollision(i);
-                        //i.IgnoreObjectCollision(this.item);
-                        //i.IgnoreRagdollCollision(Player.local.creature.ragdoll);
                         i.Throw(1f, Item.FlyDetection.Forced);
                         item.IgnoreObjectCollision(i);
                         i.IgnoreObjectCollision(item);
@@ -435,8 +434,6 @@ namespace ModularFirearms.Weapons
                                         Physics.IgnoreCollision(i.colliderGroups[0].colliders[0], C);
                                     }
                                 }
-                                // i.IgnoreColliderCollision(shooterItem.colliderGroups[0].colliders[0]);
-                                //Physics.IgnoreCollision(IgnoreArg1, projectile.definition.GetCustomReference(projectileColliderReference).GetComponent<Collider>());
                             }
                             catch { }
                         }
@@ -456,7 +453,6 @@ namespace ModularFirearms.Weapons
                         if (!String.IsNullOrEmpty(imbueSpell))
                         {
                             // Set imbue charge on projectile using ItemProjectileSimple subclass
-                            //Projectiles.SimpleProjectile projectileController = i.gameObject.GetComponent<Projectiles.SimpleProjectile>();
                             if (projectileController != null) projectileController.AddChargeToQueue(imbueSpell);
                         }
                     }
@@ -470,8 +466,6 @@ namespace ModularFirearms.Weapons
                 null,
                 false);
             }
-            //FirearmFunctions.ShootProjectile(item, module.projectileID, rayCastPoint, FirearmFunctions.GetItemSpellChargeID(item), module.bulletForce, 1.0f, false, slideCapsuleStabilizer, true);
-            //FirearmFunctions.ShootProjectile(item, module.shellID, shellEjectionPoint, null, module.shellEjectionForce);
             FrameworkCore.ApplyRecoil(item.rb, module.recoilForces, 1.0f, gunGripHeldLeft || slideGripHeldLeft, gunGripHeldRight || slideGripHeldRight, module.hapticForce);
             return true;
         }

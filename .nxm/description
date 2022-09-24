@@ -1,0 +1,90 @@
+[size=6][center][color=#f39c12][b]!!! This is only the Base Framework !!![/b][/color]
+
+[color=#e74c3c][b]You will need to download [color=#f39c12][i]Weapon Add-On Packs[/i][/color] in addition to this mod.[/b][/color][/center][/size][b][color=#f4f4f4][size=6]
+[center]About this Framework[/center][/size][/color][/b]This is an all-in-one Gun Framework for [i]Blade & Sorcery[/i] which supports manual reloading for pistols, shotguns, SMGs and Rifles. 
+
+With on-going development for secondary fire attachments, explosives, and NPC waves, this framework is constantly under development and will evolve as [i]Blade & Sorcery[/i] receives updates.
+
+
+[center][b][color=#2ed573][size=6][u]Install Instructions[/u]
+[/size][/color][/b]
+[size=5][i][color=#ffe599]Extract the downloaded zip file and copy this folder:[/color][/i]
+
+[color=#2ed573][code]ModularFirearmsFramework
+[/code][/color]
+[i][color=#ffe599]into this directory (your BAS Mods folder):[/color][/i]
+
+[color=#2ed573][code] \Blade & Sorcery\BladeAndSorcery_Data\StreamingAssets\Mods\ 
+[/code][/color][/size][/center]
+
+[size=5][b]To Download Weapons[/b], you can either check the "Requirements" section of this mod to find other mods requiring this framework, or you can choose from this list:
+[/size]
+
+[size=6][color=#f39c12][b][center]Modular Addon Packs Available ($GLOB_GAME_VERSION)[/center][/b][/color][/size][quote]
+[list]
+[*] [size=5]Modular Pistols Pack ($GLOB_GAME_VERSION)[/size]
+[url=https://www.nexusmods.com/bladeandsorcery/mods/3066]
+    [img]https://i.imgur.com/2vOF8H7.png[/img]
+[/url][*] [size=5]Modular Shotguns Pack ($GLOB_GAME_VERSION)[/size]
+[url=https://www.nexusmods.com/bladeandsorcery/mods/3067]
+    [img]https://i.imgur.com/Tajb6a2.png[/img]
+[/url][*] [size=5]Modular SMGs Pack ($GLOB_GAME_VERSION)[/size]
+[url=https://www.nexusmods.com/bladeandsorcery/mods/2557]
+    [img]https://i.imgur.com/mEBUDaI.png[/img]
+[/url][/list][/quote]
+
+$GLOB_PATREON
+
+[size=6]===================================[/size]
+[b][size=6][url=https://docs.google.com/document/d/1kIeNT2u3zPtcdFlYNIJIpR3vvXcpwDXe57mbQuay2rM/]Tutorial For Modders: How to Make Modular Weapon Packs [/url][/size][/b]
+[size=6]===================================[/size]
+
+
+[u][b][size=6][color=#f39c12]!!! Important !!! - Compatibility [/color][/size][/b][/u]
+
+[size=4][color=#2ecc71]If you are using mod version [color=#f39c12]$GLOB_FRAMEWORK_VERSION[/color] or higher, make sure your game is updated to [b]$GLOB_GAME_VERSION[/b]
+
+Make sure you have "ModularFirearmsFramework" in your "Mods" folder. Then, you can download an addon pack (above) and install it the same way. For example, copying "ModularPistolsPack" into "Mods". [/color]
+[/size]
+
+[size=4][u][b][center]Mod Requirements:[/center][/b][/u][list]
+[*] Blade & Sorcery game version [b]$GLOB_GAME_VERSION[/b]
+[*] Your have copied the mod folder(s) into [code]\Blade & Sorcery\BladeAndSorcery_Data\StreamingAssets\Mods\[/code]
+[/list][/size]
+
+[size=3][b][u][center]Additional Troubleshooting Tips:[/center][/u][/b]
+If you have checked the above list, and you still have issues such as "?" or infinite loading screens:
+[/size][list]
+[*][size=3] Delete your Save Game data from:[/size]
+[code]%USERPROFILE%\Documents\My Games\BladeAndSorcery\Saves[/code][*][size=3] Remove all mods, then launch the game to see if the mods were the culprit. Then keep adding the mods back in one by one until you find the problematic mod.[/size]
+[/list]
+
+[size=3][b][u][center]Still not working?[/center][/u][/b][/size]
+Load the game, try to use the mod, then exit the game. Upload your player.log from this location provide it attached to a bug report:
+[code]%USERPROFILE%\AppData\LocalLow\WarpFrog\BladeAndSorcery\Player.log[/code]
+
+
+[size=4][center]HitScan/RayCast System[/center][/size]
+
+To configure or toggle the HitScan system for close-range shots, edit the following values in 'Levels/Level_Master.json':
+
+[code]
+  "useHitscan": true,
+  "hitscanMaxDistance": 1.0
+[/code]
+
+'useHitscan' can be either true or false, and 'hitscanMaxDistance' is how close (in meters) you must be for the system to activate.
+
+You can also control the HitScan system for individual items by adding these fields to the module of those firearms.
+
+
+Good luck and happy adventures!
+
+[size=6]===================================
+[/size]
+
+
+[size=3][b][i][u]Note for Modders:[/u][/i][/b]  If you want to make your own mod using this framework, keep in mind that the setup for these weapons is a little more complex than my other framework, and it is recommended for intermediate to advanced modders. You can find a complete guide here:
+
+[url=https://docs.google.com/document/d/1kIeNT2u3zPtcdFlYNIJIpR3vvXcpwDXe57mbQuay2rM/]Modular Firearms Framework v4 Modder Guide[/url][/size]
+

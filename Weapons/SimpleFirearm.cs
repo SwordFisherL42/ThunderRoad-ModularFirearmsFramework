@@ -35,6 +35,8 @@ namespace ModularFirearms.Weapons
         private bool gunGripHeldRight;
         public bool isFiring;
         public bool currentlySpawningProjectile;
+        bool useRaycast;
+        float rayCastMaxDist;
         //  NPC control logic
         Creature thisNPC;
         BrainData thisNPCBrain;
@@ -46,6 +48,10 @@ namespace ModularFirearms.Weapons
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.FirearmModule>();
+            // Prioritize local settings, then fetch global settings //
+            useRaycast = module.useHitscan ? true : Shared.FrameworkSettings.local.useHitscan;
+            rayCastMaxDist = module.useHitscan ? module.hitscanMaxDistance : Shared.FrameworkSettings.local.hitscanMaxDistance;
+            if (rayCastMaxDist <= 0f) rayCastMaxDist = Mathf.Infinity;
             try
             {
                 if (!string.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);
@@ -273,7 +279,10 @@ namespace ModularFirearms.Weapons
         {
             if (playEffects) PreFireEffects();
             if (firedByNPC) return;
-            ShootProjectile(this.item, module.projectileID, muzzlePoint, GetItemSpellChargeID(item), module.bulletForce, module.throwMult);
+            if (!useRaycast || !ShootRaycastDamage(muzzlePoint, module.bulletForce, rayCastMaxDist))
+            {
+                ShootProjectile(this.item, module.projectileID, muzzlePoint, GetItemSpellChargeID(item), module.bulletForce, module.throwMult);
+            }
             ApplyRecoil(item.rb, module.recoilForces, module.throwMult, gunGripHeldLeft, gunGripHeldRight, module.hapticForce);
         }
 
