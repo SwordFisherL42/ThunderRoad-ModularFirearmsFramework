@@ -21,5 +21,5 @@ jobs:
             --cookie='${{ secrets.NXM_COOKIE }}' \
             --mod=${{ env.MOD_ID }} \
             --name='${{ env.MOD_NAME }}' \
-            --assembly_info=$GITHUB_WORKSPACE/Properties/AssemblyInfo.cs
+            --assembly_info=$GITHUB_WORKSPACE/Properties/AssemblyInfo.cs \
             --db_file=$GITHUB_WORKSPACE/.nxm/nxm.db
