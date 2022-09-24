@@ -1,8 +1,21 @@
-[size=6][color=#ffff00][center]Updated for Game Version $GLOB_GAME_VERSION[/center]
-!! Update to [url=https://www.nexusmods.com/bladeandsorcery/mods/2555]Modular Firearms Framework[/url] [/color][color=#00ff00]$GLOB_FRAMEWORK_VERSION[/color][color=#ffff00] for this mod to work correctly![/color][/size]
+[size=6][color=#00b894][center]Updated for Game Version $GLOB_GAME_VERSION[/center][/color]
+[color=#fdcb6e]Upgrate to [url=https://www.nexusmods.com/bladeandsorcery/mods/2555]Modular Firearms Framework[/url][/color][color=#d63031]$GLOB_FRAMEWORK_VERSION[/color][color=#fdcb6e] for this mod to work correctly![/color][/size]
 
 $STICKY_3067
 [size=6]Latest Framework Update: $GLOB_LATEST_UPDATE[\size]
+
+[size=4][center]HitScan/RayCast System[/center][/size]
+
+To configure or toggle the HitScan system for close-range shots, edit the following values in 'Levels/Level_Master.json':
+
+[code]
+  "useHitscan": true,
+  "hitscanMaxDistance": 1.0
+[/code]
+
+'useHitscan' can be either true or false, and 'hitscanMaxDistance' is how close (in meters) you must be for the system to activate.
+
+You can also control the HitScan system for individual items by adding these fields to the module of those firearms.
 
 [size=6][color=#feca57][b][center]If the mod is not working for you, review this checklist:[/center][/b][/color][/size]
 [size=4][u][b][center]Minimum Requirements:[/center][/b][/u][list]

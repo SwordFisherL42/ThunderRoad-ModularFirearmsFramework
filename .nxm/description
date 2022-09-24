@@ -63,6 +63,21 @@ If you have checked the above list, and you still have issues such as "?" or inf
 Load the game, try to use the mod, then exit the game. Upload your player.log from this location provide it attached to a bug report:
 [code]%USERPROFILE%\AppData\LocalLow\WarpFrog\BladeAndSorcery\Player.log[/code]
 
+
+[size=4][center]HitScan/RayCast System[/center][/size]
+
+To configure or toggle the HitScan system for close-range shots, edit the following values in 'Levels/Level_Master.json':
+
+[code]
+  "useHitscan": true,
+  "hitscanMaxDistance": 1.0
+[/code]
+
+'useHitscan' can be either true or false, and 'hitscanMaxDistance' is how close (in meters) you must be for the system to activate.
+
+You can also control the HitScan system for individual items by adding these fields to the module of those firearms.
+
+
 Good luck and happy adventures!
 
 [size=6]===================================
