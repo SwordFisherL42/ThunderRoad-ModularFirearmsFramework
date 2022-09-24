@@ -1,0 +1,31 @@
+[size=6][color=#ffff00][center]Updated for Game Version $GLOB_GAME_VERSION[/center]
+!! Update to [url=https://www.nexusmods.com/bladeandsorcery/mods/2555]Modular Firearms Framework[/url] [/color][color=#00ff00]$GLOB_FRAMEWORK_VERSION[/color][color=#ffff00] for this mod to work correctly![/color][/size]
+
+$STICKY_3067
+[size=6]Latest Framework Update: $GLOB_LATEST_UPDATE[\size]
+
+[size=6][color=#feca57][b][center]If the mod is not working for you, review this checklist:[/center][/b][/color][/size]
+[size=4][u][b][center]Minimum Requirements:[/center][/b][/u][list]
+[*] You are on Blade & Sorcery [b]U11[/b]
+[*] You have installed the framework mod: [url=https://www.nexusmods.com/bladeandsorcery/mods/2555]Modular Firearms Framework[/url]
+[*] You have copied the mod folder(s) into [code]\Blade & Sorcery\BladeAndSorcery_Data\StreamingAssets\Mods\[/code]
+[/list][/size]
+
+[size=3][b][u][center]Additional Troubleshooting Tips:[/center][/u][/b]
+If you have checked the above list, and you still have issues such as "?" or infinite loading screens:
+[/size][list]
+[*][size=3] Delete your Save Game data from:[/size]
+[code]%USERPROFILE%/Documents/My Games/BladeAndSorcery/Saves
+[/code][*][size=3] Remove all mods, then launch the game to see if the mods were the culprit. Then keep adding the mods back in one-by-one until you find the problematic mod.[/size]
+[/list]
+
+[size=3][b][u][center]Still not working?[/center][/u][/b][/size]
+Load the game, try to use the mod, then exit the game. Upload your player.log from this location provide it attached to a bug report:
+[code]%USERPROFILE%\AppData\LocalLow\WarpFrog\BladeAndSorcery\Player.log[/code]
+
+Good luck and happy adventures! $2555_ADDON_TEXT
+
+Cheers!
+- Fisher
+
+$GLOB_TAG - $GLOB_TIME

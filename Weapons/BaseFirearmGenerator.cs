@@ -17,6 +17,7 @@ namespace ModularFirearms.Weapons
         public bool checkForLongPress = false;
         bool useRaycast;
         float rayCastMaxDist;
+        float raycastForce;
         /// Magazine Parameters///
         protected Holder magazineHolder;
         protected Items.InteractiveMagazine insertedMagazine;
@@ -290,7 +291,7 @@ namespace ModularFirearms.Weapons
         {
             if (playEffects) PreFireEffects();
             if (firedByNPC) return;
-            if (!useRaycast || !ShootRaycastDamage(muzzlePoint, module.bulletForce, rayCastMaxDist))
+            if (!useRaycast || !ShootRaycastDamage(muzzlePoint, raycastForce, rayCastMaxDist))
             {
                 ShootProjectile(
                 item,
@@ -331,6 +332,7 @@ namespace ModularFirearms.Weapons
             useRaycast = module.useHitscan ? true : Shared.FrameworkSettings.local.useHitscan;
             rayCastMaxDist = module.useHitscan ? module.hitscanMaxDistance : Shared.FrameworkSettings.local.hitscanMaxDistance;
             if (rayCastMaxDist <= 0f) rayCastMaxDist = Mathf.Infinity;
+            raycastForce = module.bulletForce * module.hitscanForceMult;
             DisableCulling(item);
             /// Set all Object References ///
             if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.GetCustomReference(module.rayCastPointRef);

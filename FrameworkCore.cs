@@ -129,10 +129,10 @@ namespace ModularFirearms
             { RagdollPart.Type.RightArm, 10f},
             { RagdollPart.Type.LeftLeg, 10f},
             { RagdollPart.Type.RightLeg, 10f},
-            { RagdollPart.Type.LeftFoot, 5},
-            { RagdollPart.Type.RightFoot, 5},
-            { RagdollPart.Type.LeftHand, 5},
-            { RagdollPart.Type.RightHand, 5},
+            { RagdollPart.Type.LeftFoot, 5f},
+            { RagdollPart.Type.RightFoot, 5f},
+            { RagdollPart.Type.LeftHand, 5f},
+            { RagdollPart.Type.RightHand, 5f},
         };
 
 
@@ -456,7 +456,7 @@ namespace ModularFirearms
                         ragdollColliderGroup,
                         true
                     ).Play();
-                hitRDP.rb.AddRelativeForce(spawnPoint.forward * bulletForce * 10f, ForceMode.Impulse);
+                hitRDP.rb.AddRelativeForce(spawnPoint.forward * bulletForce, ForceMode.Impulse);
                 target.Damage(newCollsionInstance);
                 return true;
             }
