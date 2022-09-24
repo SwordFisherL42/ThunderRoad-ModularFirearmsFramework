@@ -38,9 +38,10 @@ def run(options):
         "$GLOB_FRAMEWORK_VERSION": version,
         "$GLOB_GAME_VERSION": "U11",
         "$GLOB_PATREON": patreon,
-        "$GLOB_LATEST_UPDATE": f"{version} - The \"Execution Update\" (close-range shots)",
+        "$GLOB_LATEST_UPDATE": f"{version} - The \"Execution Update\"",
         "$GLOB_TIME": f"""{dt.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}(UTC)""",
         "$GLOB_TAG": options.post_tag,
+        "$GLOB_PSYDUCK": ":psyduck:",
         "$STICKY_3067": special_comment_3067,
         "$2555_ADDON_TEXT": "Thanks for supporting Modular Firearms framework!"
     }
@@ -115,7 +116,7 @@ def mod_details(client, body, summary, version, options):
 
 
 def sticky_comment(client, post_id, body):
-    request_body = {"comment_id": post_id, "post": body, "use_emo": 0}
+    request_body = {"comment_id": post_id, "post": body, "use_emo": 1}
     response = client.post(NxmURI.forum, NxmParams.edit, data=request_body)
     if response.status_code != 200:
         log.debug(response.content)
