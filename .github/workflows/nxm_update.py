@@ -41,6 +41,7 @@ def run(options):
         "$GLOB_LATEST_UPDATE": f"{version} - The \"Execution Update\"",
         "$GLOB_TIME": f"""{dt.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}(UTC)""",
         "$GLOB_TAG": options.post_tag,
+        "$GLOB_PSYDUCK": ":psyduck:",
         "$STICKY_3067": special_comment_3067,
         "$2555_ADDON_TEXT": "Thanks for supporting Modular Firearms framework!"
     }
