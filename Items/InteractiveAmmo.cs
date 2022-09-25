@@ -19,7 +19,7 @@ namespace ModularFirearms.Items
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.AmmoModule>();
-            DisableCulling(item);
+            if (module.disableCulling) DisableCulling(item);
             thisAmmoType = module.GetSelectedType();
             capacity = module.ammoCapacity;
             if (module.handleRef != null) ammoHandle = item.GetCustomReference(module.handleRef).GetComponent<Handle>();

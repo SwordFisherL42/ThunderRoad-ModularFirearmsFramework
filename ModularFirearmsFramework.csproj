@@ -94,14 +94,14 @@
     <Compile Include="Projectiles\BasicProjectile.cs" />
     <Compile Include="Shared\AmmoModule.cs" />
     <Compile Include="Shared\AttachmentModule.cs" />
-    <Compile Include="ChildRigidbodyController.cs" />
+    <Compile Include="Framework\ChildRigidbodyController.cs" />
     <Compile Include="Shared\FirearmModule.cs" />
     <Compile Include="Attachments\FlashlightController.cs" />
     <Compile Include="Items\MagazineGenerator.cs" />
     <Compile Include="Items\InteractiveAmmo.cs" />
     <Compile Include="Shared\FrameworkSettings.cs" />
     <Compile Include="Shared\ProjectileModule.cs" />
-    <Compile Include="FrameworkCore.cs" />
+    <Compile Include="Framework\FrameworkCore.cs" />
     <Compile Include="Weapons\BaseFirearmGenerator.cs" />
     <Compile Include="Weapons\GrenadeGenerator.cs" />
     <Compile Include="Legacy\RevolverGenerator.cs" />
@@ -110,9 +110,10 @@
     <Compile Include="Projectiles\ExplosiveProjecitle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Weapons\ShotgunGenerator.cs" />
-    <Compile Include="TextureProcessor.cs" />
+    <Compile Include="Framework\TextureProcessor.cs" />
     <Compile Include="Weapons\SimpleFirearm.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <!-- <PostBuildEvent>cd "C:\git\ThunderRoad-ModularFirearmsFramework" &amp;&amp;  xcopy "$(OutDir)$(TargetName).dll" "D:\BAS\BasSDK\BuildStaging\Catalog\ModularFirearmsFramework\$(TargetName).dll" /y &amp;&amp;  xcopy "$(OutDir)$(TargetName).dll" "C:\Program Files (x86)\Steam\steamapps\common\Blade &amp; Sorcery\BladeAndSorcery_Data\StreamingAssets\Mods\ModularFirearmsFramework\$(TargetName).dll" /y</PostBuildEvent> -->

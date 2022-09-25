@@ -19,7 +19,7 @@ namespace ModularFirearms.Items
         {
             item = this.GetComponent<Item>();
             module = item.data.GetModule<Shared.AmmoModule>();
-            DisableCulling(item);
+            if (module.disableCulling) DisableCulling(item);
             holder = item.GetComponentInChildren<Holder>();
             holder.Snapped += new Holder.HolderDelegate(this.OnAmmoItemInserted);
             magazineHandle = item.GetCustomReference(module.handleRef).GetComponent<Handle>();
