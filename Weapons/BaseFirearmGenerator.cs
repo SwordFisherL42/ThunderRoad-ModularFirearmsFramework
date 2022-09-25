@@ -333,7 +333,7 @@ namespace ModularFirearms.Weapons
             rayCastMaxDist = module.useHitscan ? module.hitscanMaxDistance : Shared.FrameworkSettings.local.hitscanMaxDistance;
             if (rayCastMaxDist <= 0f) rayCastMaxDist = Mathf.Infinity;
             raycastForce = module.bulletForce * module.hitscanForceMult;
-            DisableCulling(item);
+            if (module.disableCulling) DisableCulling(item);
             /// Set all Object References ///
             if (!String.IsNullOrEmpty(module.rayCastPointRef)) rayCastPoint = item.GetCustomReference(module.rayCastPointRef);
             if (!String.IsNullOrEmpty(module.muzzlePositionRef)) muzzlePoint = item.GetCustomReference(module.muzzlePositionRef);

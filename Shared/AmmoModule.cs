@@ -16,6 +16,7 @@ namespace ModularFirearms.Shared
 
         public string magazineID = "MagazineBasicPistol";
         public bool despawnBagOnEmpty = false;
+        public bool disableCulling = false;
 
         public bool enableBulletHolder = false;
 

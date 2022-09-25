@@ -10,6 +10,7 @@ namespace ModularFirearms.Shared
         public int firearmCategory = 0;
         public string firearmType = "SemiAuto";
 
+        public bool disableCulling = false;
         public bool useHitscan = false;
         public float hitscanMaxDistance = 1f;
 
